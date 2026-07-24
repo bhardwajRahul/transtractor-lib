@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import date as Date
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @dataclass
@@ -33,7 +33,9 @@ class Transaction:
         """
         if isinstance(date, int):
             # Convert milliseconds since epoch to date
-            self.date = datetime.fromtimestamp(date / 1000.0).date()
+            # Timestamps from the Rust core are midnight UTC; convert in UTC
+            # so the calendar date is identical in every local timezone.
+            self.date = datetime.fromtimestamp(date / 1000.0, tz=timezone.utc).date()
         else:
             self.date = date
         self.date_index = date_index
