@@ -13,7 +13,6 @@ pub fn get_config() -> StatementConfig {
             "Low Rate Mastercard".to_string(),
             "Low Fee Mastercard".to_string(),
         ],
-        fix_text_order: vec![5.0, 0.0],
 
         account_number_terms: vec!["Account".to_string()],
         account_number_patterns: vec![Regex::new(r"\b\d{4}\s\d{4}\s\d{4}\s\d{4}\b").unwrap()],
