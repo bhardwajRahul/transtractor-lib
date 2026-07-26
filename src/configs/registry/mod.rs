@@ -1,6 +1,5 @@
 use crate::structs::StatementConfig;
 use std::collections::HashMap;
-
 pub mod au;
 
 type RegionConfigFactory = fn() -> Vec<StatementConfig>;
@@ -17,4 +16,27 @@ pub fn get_config_map() -> HashMap<String, StatementConfig> {
     }
 
     config_map
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::configs::validate::validate_config;
+
+    #[test]
+    fn test_get_config_map() {
+        let config_map = get_config_map();
+        assert!(!config_map.is_empty());
+    }
+
+    #[test]
+    fn test_validate_all_configs() {
+        let config_map = get_config_map();
+        for (key, cfg) in config_map {
+            match validate_config(&cfg) {
+                Ok(_) => (),
+                Err(e) => panic!("Validation failed for config {}: {}", key, e),
+            }
+        }
+    }
 }
