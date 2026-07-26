@@ -10,7 +10,6 @@ pub fn get_config() -> StatementConfig {
         account_type: "Loan".to_string(),
         account_terms: vec!["CommBank".to_string(), "Account number".to_string()],
         account_examples: vec!["Complete Home Loan".to_string()],
-        fix_text_order: vec![0.0, 0.0],
 
         account_number_terms: vec!["Account number".to_string()],
         account_number_patterns: vec![Regex::new(r"\b\d+\b").unwrap()],
@@ -44,7 +43,7 @@ pub fn get_config() -> StatementConfig {
         ]],
         transaction_new_line_tol: 5,
         transaction_start_date_required: true,
-        transaction_alignment_tol: 10,
+        transaction_alignment_tol: 20,
 
         transaction_date_formats: vec!["format1".to_string()],
         transaction_date_headers: vec!["Date".to_string()],
@@ -64,7 +63,7 @@ pub fn get_config() -> StatementConfig {
         transaction_amount_invert_alignment: "x2".to_string(),
         transaction_amount_invert: false,
 
-        transaction_balance_formats: vec!["format3".to_string()],
+        transaction_balance_formats: vec!["format2".to_string(), "format3".to_string()],
         transaction_balance_headers: vec!["Balance".to_string()],
         transaction_balance_alignment: "x2".to_string(),
         transaction_balance_invert: false,

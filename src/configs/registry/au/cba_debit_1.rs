@@ -15,7 +15,6 @@ pub fn get_config() -> StatementConfig {
             "GoalSaver".to_string(),
             "Everyday Offset".to_string(),
         ],
-        fix_text_order: vec![0.0, 0.0],
 
         account_number_terms: vec!["Account Number".to_string()],
         account_number_patterns: vec![Regex::new(r"\b\d+\s\d+\s\d+\b").unwrap()],
@@ -52,7 +51,7 @@ pub fn get_config() -> StatementConfig {
         ]],
         transaction_new_line_tol: 5,
         transaction_start_date_required: true,
-        transaction_alignment_tol: 10,
+        transaction_alignment_tol: 20,
 
         transaction_date_formats: vec!["format1".to_string()],
         transaction_date_headers: vec!["Date".to_string()],
@@ -72,7 +71,7 @@ pub fn get_config() -> StatementConfig {
         transaction_amount_invert_alignment: "x2".to_string(),
         transaction_amount_invert: false,
 
-        transaction_balance_formats: vec!["format3".to_string()],
+        transaction_balance_formats: vec!["format2".to_string(), "format3".to_string()],
         transaction_balance_headers: vec!["Balance".to_string()],
         transaction_balance_alignment: "x2".to_string(),
         transaction_balance_invert: false,
