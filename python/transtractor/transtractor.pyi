@@ -34,15 +34,11 @@ class LibParser:
         :raises NoErrorFreeStatementData: If no error-free statement data could be found
         """
 
-    def py_pdf_path_to_layout_py_str(
-        self, py_pdf_path: str, x_gap: float, y_bin: float
-    ) -> str:
+    def py_pdf_path_to_layout_py_str(self, py_pdf_path: str) -> str:
         """
         Process a PDF file into layout text str.
 
         :param py_pdf_path: Path to the PDF file
-        :param y_bin: Y coordinate bin size for sorting/merging text items
-        :param x_gap: X coordinate gap size for merging text items
         """
 
     def py_pdf_path_to_debug_py_str(self, py_pdf_path: str) -> str:
