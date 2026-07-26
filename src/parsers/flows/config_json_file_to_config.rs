@@ -25,7 +25,6 @@ struct StatementConfigPartial {
     account_type: Option<String>,
     account_terms: Option<Vec<String>>,
     account_examples: Option<Vec<String>>,
-    fix_text_order: Option<Vec<f32>>,
 
     account_number_terms: Option<Vec<String>>,
     account_number_patterns: Option<Vec<String>>,
@@ -103,7 +102,6 @@ pub fn from_json_str(src: &str) -> Result<StatementConfig, String> {
     overlay!(account_type);
     overlay!(account_terms);
     overlay!(account_examples);
-    overlay!(fix_text_order);
 
     overlay!(account_number_terms);
     if let Some(patterns) = partial.account_number_patterns {
