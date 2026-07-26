@@ -81,12 +81,7 @@ impl LibParser {
         )))
     }
 
-    pub fn py_pdf_path_to_layout_py_str(
-        &self,
-        py_pdf_path: &Bound<'_, PyAny>,
-        y_bin: f32,
-        x_gap: f32,
-    ) -> PyResult<String> {
+    pub fn py_pdf_path_to_layout_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
         let rust_pdf_path = py_pdf_path.extract::<String>()?;
         let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
             pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
@@ -97,7 +92,7 @@ impl LibParser {
                 e
             ))
         })?;
-        match text_items_to_layout(&text_items, y_bin, x_gap) {
+        match text_items_to_layout(&text_items) {
             Ok(layout_str) => Ok(layout_str),
             Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
         }
