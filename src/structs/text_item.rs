@@ -3,16 +3,18 @@
 pub struct TextItem {
     /// The text content of the item
     pub text: String,
-    /// Starting x-coordinate of the text item
+    /// Left-most x-coordinate of the text item
     pub x1: i32,
-    /// Starting y-coordinate of the text item
+    /// Bottom y-coordinate of the text item
     pub y1: i32,
     /// Ending x-coordinate of the text item
     pub x2: i32,
-    /// Ending y-coordinate of the text item
+    /// Top y-coordinate of the text item
     pub y2: i32,
     /// The page number where the text item is located (i32 for downstream interoperability)
     pub page: i32,
+    /// Binned y1 coordinate for layout purposes
+    pub y1_bin: i32,
 }
 
 impl TextItem {
@@ -25,6 +27,7 @@ impl TextItem {
             x2,
             y2,
             page,
+            y1_bin: y1,
         }
     }
 }
@@ -39,6 +42,7 @@ impl Default for TextItem {
             x2: 0,
             y2: 0,
             page: 0,
+            y1_bin: 0,
         }
     }
 }
@@ -51,6 +55,7 @@ impl TextItem {
             && self.x2 == other.x2
             && self.y2 == other.y2
             && self.page == other.page
+            && self.y1_bin == other.y1_bin
     }
 
     /// Merge the text of this TextItem with another TextItem
@@ -59,20 +64,9 @@ impl TextItem {
         // take the smallest x1 and y1 from self and other
         self.x1 = self.x1.min(other.x1);
         self.x2 = self.x2.max(other.x2);
-
-        // If y-axis is inverted (0 at top), take largest y1 and smallest y2
-        if (self.y1 > self.y2) && (other.y1 > other.y2) {
-            self.y1 = self.y1.max(other.y1);
-            self.y2 = self.y2.min(other.y2);
-            return;
-        }
-        if (self.y1 < self.y2) && (other.y1 < other.y2) {
-            self.y1 = self.y1.min(other.y1);
-            self.y2 = self.y2.max(other.y2);
-            return;
-        }
-        // Mixed y-axis orientation, raise panic
-        panic!("Inconsistent y-axis orientation when merging TextItems");
+        self.y1 = self.y1.max(other.y1);
+        self.y2 = self.y2.min(other.y2);
+        self.y1_bin = self.y1_bin.min(other.y1_bin);
     }
 
     /// Create merged TextItem from a slice of TextItems
@@ -93,7 +87,8 @@ impl TextItem {
             y1: last.y1,
             x2: last.x2,
             y2: first.y2,
-            page: first.page, // Just take the page of the first item
+            page: first.page,
+            y1_bin: first.y1_bin,
         })
     }
 

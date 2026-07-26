@@ -15,6 +15,7 @@ pub fn tokenise_items(items: &Vec<TextItem>) -> Vec<TextItem> {
                 x2: item.x2,
                 y2: item.y2,
                 page: item.page,
+                y1_bin: item.y1_bin,
             };
             tokenised_items.push(token_item);
         }
