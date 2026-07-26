@@ -11,7 +11,7 @@ class Parser:
     """A PDF bank statement parser.
 
     This parser will be initialised with a set of default bank statement
-    extraction configuration database. When parsing a PDF, it will attempt to identify
+    extraction configurations. When parsing a PDF, it will attempt to identify
     applicable configurations based on keywords extracted from the PDF. You
     can also load custom configurations from JSON files for additional statement
     formats.
@@ -75,21 +75,13 @@ class Parser:
             fh.write(result)
         return result
 
-    def layout(self, pdf_file_path: str, output_file: str, y_bin=0.0, x_gap=0.0) -> str:
+    def layout(self, pdf_file_path: str, output_file: str) -> str:
         """Extract, write and return a text layout representation of the PDF page.
 
         :param pdf_file_path: Path to the PDF file to be processed
-        :param y_bin: Y coordinate bin size for sorting/merging text items
-        :param x_gap: X coordinate gap size in number of characters for merging text
-            items
         :return: A string representing the text layout of the page
-
-        Note: The values of y_bin and x_gap are same same as those used for the
-        "fix_text_order" parameter in the configuration JSON files.
         """
-        layout_str: str = self._inner.py_pdf_path_to_layout_py_str(
-            pdf_file_path, y_bin, x_gap
-        )
+        layout_str: str = self._inner.py_pdf_path_to_layout_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(layout_str)
         return layout_str
