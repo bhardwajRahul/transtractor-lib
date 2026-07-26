@@ -49,7 +49,6 @@ example file included in the source code is:
         "account_type": "Savings",
         "account_terms": ["Gravy Toast", "Fake"],
         "account_examples": ["Fake Account Product", "Similar Product"],
-        "fix_text_order": [0.0, 0.0],
 
         "account_number_terms": ["Account number:"],
         "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
@@ -293,27 +292,6 @@ List of example account product names that this configuration file is intended t
 Many banks will often have multiple account products with similar statement formats. For example,
 the Commonwealth Bank of Australia's "Smart Access", "Streamline" and "Everyday Offset" accounts 
 use the same statement format.
-
-*fix_text_order*
-************************
-List of two float values *y_bin* and *x_gap* used to adjust the text ordering when extracting
-text from the PDF file. The *y_bin* value (typically half the character height)
-groups text items with *y1* positions within *y_bin* of each other into the same line, then 
-orders them by their *x1* positions. Items with *x2* and *x1* positions within *x_gap* will 
-be grouped together. *x_gap* is a multiplier of the average character width based on the 
-preceding text item.
-
-*y_bin*-based reordering is helpful where text items are not ordered as would be expected
-based on their visual appearance in the statement. Some cases of this can make the statement
-un-parsable without this adjustment.
-
-*x_gap*-based merging is useful for filtering out header and footer text that sometimes 
-find their way into transaction descriptions as individually they may satisfy the horizontal
-alignment requirements, but when merged with adjacent text items they will not.
-
-Set *y_bin* to 0.0 to disable reordering and merging. Or just set *x_gap* to 0.0 to disable merging,
-but still enable reordering. Only use this parameter if absolutely necessary as it may reduce
-parsing performance and add complexity to the parsing process.
 
 
 Account Number Parameters
@@ -620,7 +598,7 @@ and how to resolve them.
 
 Zero-Balances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Somtimes statements will show zero balances as "nil", "zero", or similar text.
+Sometimes statements will show zero balances as "nil", "zero", or similar text.
 Ensure you include *format5* in the relevant *_formats* fields to handle these cases.
 This is a common case for you first statement of a new account.
 
@@ -631,14 +609,6 @@ are extracted by the parser. These hidden characters can interfere with pattern 
 To identify hidden characters, extract the layout text using the `layout` method
 (as described above) and inspect the text around the problematic areas. You may need
 to adjust your regex patterns to account for these hidden characters.
-
-Unexpected Text Order
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If the parser is not finding expected terms or fields, the text order extracted
-from the PDF may not match the visual order. Use the *fix_text_order* parameter
-to adjust the text ordering based on *y_bin* and *x_gap* values. Experiment
-with different values to achieve the correct ordering. inspect the layout text
-to understand how the text items are ordered.
 
 Missing Date or Amount Formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
