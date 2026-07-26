@@ -12,7 +12,6 @@ pub mod closing_balance_alignment;
 pub mod closing_balance_alignment_tol;
 pub mod closing_balance_formats;
 pub mod closing_balance_terms;
-pub mod fix_text_order;
 pub mod key;
 pub mod opening_balance_alignment;
 pub mod opening_balance_alignment_tol;
@@ -49,7 +48,6 @@ pub fn validate_config(config: &StatementConfig) -> Result<(), String> {
     account_type::account_type(&config.account_type)?;
     account_terms::account_terms(&config.account_terms)?;
     account_examples::account_examples(&config.account_examples)?;
-    fix_text_order::fix_text_order(&config.fix_text_order)?;
     account_number_terms::account_number_terms(&config.account_number_terms)?;
     account_number_patterns::account_number_patterns(&config.account_number_patterns)?;
     account_number_alignment::account_number_alignment(&config.account_number_alignment)?;
