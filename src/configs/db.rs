@@ -2,6 +2,7 @@ use crate::configs::registry::get_config_map;
 use crate::configs::typer::StatementTyper;
 use crate::parsers::flows::config_json_file_to_config::from_json_file;
 use crate::parsers::flows::config_json_file_to_config::from_json_str;
+use crate::parsers::flows::config_json_file_to_config::from_json_str_with_deprecations;
 use crate::structs::StatementConfig;
 use crate::structs::TextItem;
 use std::collections::HashMap;
@@ -34,6 +35,20 @@ impl Default for ConfigDB {
 }
 
 impl ConfigDB {
+    /// Add config directly from a JSON string, overwriting any existing config with the
+    /// same key. Returns deprecation warnings if any.
+    pub fn register_from_str_with_warnings(
+        &mut self,
+        json_str: &str,
+    ) -> Result<Vec<String>, String> {
+        let result = from_json_str_with_deprecations(json_str)?;
+        self.configs
+            .insert(result.config.key.clone(), result.config.clone());
+        self.typer
+            .add_account_terms(&result.config.key, &result.config.account_terms);
+        Ok(result.deprecated_fields)
+    }
+
     /// Add config directly from a JSON string, overwriting any existing config with the
     /// same key.
     pub fn register_from_str(&mut self, json_str: &str) -> Result<(), String> {

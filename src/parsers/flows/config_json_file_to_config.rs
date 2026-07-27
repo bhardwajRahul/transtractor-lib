@@ -16,6 +16,13 @@ fn compile_regex_vec(patterns: Vec<String>) -> Result<Vec<Regex>, String> {
     Ok(result)
 }
 
+/// Result type containing both configuration and any deprecated fields found
+#[derive(Debug)]
+pub struct ConfigParseResult {
+    pub config: StatementConfig,
+    pub deprecated_fields: Vec<String>,
+}
+
 /// Raw struct used only for deserialization (all fields optional so we can overlay defaults)
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -74,6 +81,9 @@ struct StatementConfigPartial {
     transaction_balance_headers: Option<Vec<String>>,
     transaction_balance_alignment: Option<String>,
     transaction_balance_invert: Option<bool>,
+
+    // Deprecated fields (kept for v0.10.0 compatibility)
+    fix_text_order: Option<serde_json::Value>,
 }
 
 pub fn from_json_file<P: AsRef<Path>>(path: P) -> Result<StatementConfig, String> {
@@ -84,10 +94,12 @@ pub fn from_json_file<P: AsRef<Path>>(path: P) -> Result<StatementConfig, String
     Ok(cfg)
 }
 
-pub fn from_json_str(src: &str) -> Result<StatementConfig, String> {
+/// Internal function that returns both config and deprecated fields
+pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, String> {
     let partial: StatementConfigPartial =
         serde_json::from_str(src).map_err(|e| format!("JSON parse error: {}", e))?;
     let mut cfg = StatementConfig::default();
+    let mut deprecated_fields = Vec::new();
 
     macro_rules! overlay {
         ($field:ident) => {
@@ -95,6 +107,11 @@ pub fn from_json_str(src: &str) -> Result<StatementConfig, String> {
                 cfg.$field = v;
             }
         };
+    }
+
+    // Check for deprecated fields
+    if partial.fix_text_order.is_some() {
+        deprecated_fields.push("fix_text_order (deprecated since v0.10.0)".to_string());
     }
 
     overlay!(key);
@@ -158,5 +175,13 @@ pub fn from_json_str(src: &str) -> Result<StatementConfig, String> {
     overlay!(transaction_balance_invert);
 
     validate_config(&cfg).map_err(|e| format!("Config validation error: {}", e))?;
-    Ok(cfg)
+    Ok(ConfigParseResult {
+        config: cfg,
+        deprecated_fields,
+    })
+}
+
+pub fn from_json_str(src: &str) -> Result<StatementConfig, String> {
+    let result = from_json_str_with_deprecations(src)?;
+    Ok(result.config)
 }

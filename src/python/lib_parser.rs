@@ -13,6 +13,8 @@ use pyo3::prelude::*;
 #[derive(Default)]
 pub struct LibParser {
     db: ConfigDB,
+    /// Last deprecation warnings from config loading
+    last_deprecation_warnings: Vec<String>,
 }
 
 #[pymethods]
@@ -22,15 +24,28 @@ impl LibParser {
     pub fn new() -> Self {
         Self {
             db: ConfigDB::new(),
+            last_deprecation_warnings: Vec::new(),
         }
     }
 
     /// Register JSON configuration string into the parser database
     pub fn register_config_from_json_str(&mut self, py_json_str: &str) -> PyResult<()> {
-        match self.db.register_from_str(py_json_str) {
-            Ok(_) => Ok(()),
+        // Clear previous warnings
+        self.last_deprecation_warnings.clear();
+
+        // Register and get deprecation warnings
+        match self.db.register_from_str_with_warnings(py_json_str) {
+            Ok(warnings) => {
+                self.last_deprecation_warnings = warnings;
+                Ok(())
+            }
             Err(e) => Err(ConfigLoadError::new_err(e)),
         }
+    }
+
+    /// Get deprecation warnings from the last loaded configuration
+    pub fn get_deprecation_warnings(&self) -> Vec<String> {
+        self.last_deprecation_warnings.clone()
     }
 
     /// Import JSON configuration file into the parser database and update the StatementTyper.

@@ -1,5 +1,7 @@
 """Python wrapper for the Transtractor PDF bank statement parser."""
 
+import warnings
+from pathlib import Path
 from typing import cast
 
 from .structs.statement_data import StatementData
@@ -100,7 +102,22 @@ class Parser:
         See the docs for detailed instructions for creating custom
         configuration JSON files.
         """
-        self._inner.register_config_from_file(json_file_path)
+        # Read the JSON file
+        file_path = Path(json_file_path)
+        json_content = file_path.read_text(encoding="utf-8")
+
+        # Register the configuration via string to capture deprecation warnings
+        self._inner.register_config_from_json_str(json_content)
+
+        # Check for and emit any deprecation warnings
+        deprecation_warnings = self._inner.get_deprecation_warnings()
+        for warning_msg in deprecation_warnings:
+            warnings.warn(
+                f"Configuration from {json_file_path} uses deprecated field: "
+                f"{warning_msg}",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"

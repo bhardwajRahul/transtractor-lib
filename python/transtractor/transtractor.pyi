@@ -24,6 +24,13 @@ class LibParser:
         :raises ConfigLoadError: If the configuration file cannot be loaded
         """
 
+    def get_deprecation_warnings(self) -> list[str]:
+        """
+        Get deprecation warnings from the last loaded configuration.
+
+        :return: List of deprecation warnings
+        """
+
     def py_pdf_path_to_py_statement_data(self, py_pdf_path: str) -> StatementData:
         """
         Process a PDF file path from Python caller and return a Python StatementData
