@@ -4,7 +4,6 @@
     "account_type": "Savings",
     "account_terms": ["Gravy Toast", "Fake"],
     "account_examples": ["Fake Account Product", "Similar Product"],
-    "fix_text_order": [0.0, 0.0],
 
     "account_number_terms": ["Account number:"],
     "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
@@ -48,7 +47,7 @@
     "transaction_description_alignment": "x1",
     "transaction_description_exclude": [
         " Annoying text",
-        " text to filter out"
+        " to filter out"
     ],
 
     "transaction_amount_formats": ["format1", "format2"],
