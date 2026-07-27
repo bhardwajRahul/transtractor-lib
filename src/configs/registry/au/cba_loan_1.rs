@@ -41,7 +41,6 @@ pub fn get_config() -> StatementConfig {
             "amount".to_string(),
             "balance".to_string(),
         ]],
-        transaction_new_line_tol: 5,
         transaction_start_date_required: true,
         transaction_alignment_tol: 20,
 

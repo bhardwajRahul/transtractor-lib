@@ -28,8 +28,7 @@ pub struct TransactionParser {
     new_line_fields: Vec<String>,
     end_line_fields: Vec<String>,
     next_fields: HashMap<String, Vec<String>>,
-    current_line_y1: i32,
-    new_line_tol: i32,
+    current_line_y1_bin: i32,
     description_x_bounds_adjusted: bool,
     description_exclude_patterns: Vec<Regex>,
 }
@@ -71,8 +70,7 @@ impl TransactionParser {
             new_line_fields,
             end_line_fields,
             next_fields,
-            current_line_y1: -100000,
-            new_line_tol: config.transaction_new_line_tol,
+            current_line_y1_bin: 0,
             description_x_bounds_adjusted: false,
             description_exclude_patterns: config.transaction_description_exclude.clone(),
         }
@@ -101,7 +99,7 @@ impl TransactionParser {
 
         // Handle new line, if one
         let is_new_line = self.is_new_line(items);
-        self.current_line_y1 = items[0].y1;
+        self.current_line_y1_bin = items[0].y1_bin;
         if is_new_line {
             let consumed = self.handle_new_line(items, data);
             if consumed > 0 {
@@ -212,9 +210,7 @@ impl TransactionParser {
         if items.is_empty() {
             return false;
         }
-        let first_item_y1 = items[0].y1;
-        let y1_diff = (first_item_y1 - self.current_line_y1).abs();
-        y1_diff > self.new_line_tol
+        items[0].y1_bin != self.current_line_y1_bin
     }
 
     /// Prime all specified parsers

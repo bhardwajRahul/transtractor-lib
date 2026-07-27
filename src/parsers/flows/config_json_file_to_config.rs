@@ -58,7 +58,6 @@ struct StatementConfigPartial {
     transaction_terms: Option<Vec<String>>,
     transaction_terms_stop: Option<Vec<String>>,
     transaction_formats: Option<Vec<Vec<String>>>,
-    transaction_new_line_tol: Option<i32>,
     transaction_start_date_required: Option<bool>,
     transaction_alignment_tol: Option<i32>,
 
@@ -84,6 +83,7 @@ struct StatementConfigPartial {
 
     // Deprecated fields (kept for v0.10.0 compatibility)
     fix_text_order: Option<serde_json::Value>,
+    transaction_new_line_tol: Option<serde_json::Value>,
 }
 
 pub fn from_json_file<P: AsRef<Path>>(path: P) -> Result<StatementConfig, String> {
@@ -112,6 +112,9 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     // Check for deprecated fields
     if partial.fix_text_order.is_some() {
         deprecated_fields.push("fix_text_order (deprecated since v0.10.0)".to_string());
+    }
+    if partial.transaction_new_line_tol.is_some() {
+        deprecated_fields.push("transaction_new_line_tol (deprecated since v0.10.0)".to_string());
     }
 
     overlay!(key);
@@ -147,7 +150,6 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     overlay!(transaction_terms);
     overlay!(transaction_terms_stop);
     overlay!(transaction_formats);
-    overlay!(transaction_new_line_tol);
     overlay!(transaction_start_date_required);
     overlay!(transaction_alignment_tol);
 

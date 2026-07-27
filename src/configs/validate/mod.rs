@@ -36,7 +36,6 @@ pub mod transaction_date_headers;
 pub mod transaction_description_alignment;
 pub mod transaction_description_headers;
 pub mod transaction_formats;
-pub mod transaction_new_line_tol;
 pub mod transaction_terms;
 pub mod transaction_terms_stop;
 pub mod utils;
@@ -75,7 +74,6 @@ pub fn validate_config(config: &StatementConfig) -> Result<(), String> {
     transaction_terms::transaction_terms(&config.transaction_terms)?;
     transaction_terms_stop::transaction_terms_stop(&config.transaction_terms_stop)?;
     transaction_formats::transaction_formats(&config.transaction_formats)?;
-    transaction_new_line_tol::transaction_new_line_tol(config.transaction_new_line_tol)?;
     // transaction_start_date_required is a bool, no validation needed
     transaction_alignment_tol::transaction_alignment_tol(config.transaction_alignment_tol)?;
     transaction_date_formats::transaction_date_formats(&config.transaction_date_formats)?;

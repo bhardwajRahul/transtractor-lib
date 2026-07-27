@@ -22,20 +22,27 @@ def test_load_raises_config_load_error_with_invalid_config():
 
 
 def test_load_emits_deprecation_warning_for_deprecated_fields():
-    """Test that loading a config with deprecated fields emits a DeprecationWarning."""
+    """Test that loading a config with deprecated fields emits DeprecationWarnings."""
     parser = Parser()
 
     # Load config with deprecated fields
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
-    deprecated_config = fixtures_dir / "test1_config_deprecated_fields.json"
+    deprecated_config = fixtures_dir / "test1_config_deprecated.json"
 
-    # Should emit a DeprecationWarning for fix_text_order field
+    # Should emit DeprecationWarnings for deprecated fields
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         parser.load(str(deprecated_config))
 
-        # Verify that a DeprecationWarning was issued
-        assert len(w) == 1
+        # Verify that DeprecationWarnings were issued
+        assert len(w) == 2, f"Expected 2 warnings, got {len(w)}"
+
+        # Check for fix_text_order warning
         assert issubclass(w[0].category, DeprecationWarning)
         assert "fix_text_order" in str(w[0].message)
         assert "deprecated since v0.10.0" in str(w[0].message)
+
+        # Check for transaction_new_line_tol warning
+        assert issubclass(w[1].category, DeprecationWarning)
+        assert "transaction_new_line_tol" in str(w[1].message)
+        assert "deprecated since v0.10.0" in str(w[1].message)

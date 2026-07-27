@@ -57,7 +57,6 @@ pub fn get_config() -> StatementConfig {
             ],
             vec!["description".to_string(), "amount".to_string()],
         ],
-        transaction_new_line_tol: 5,
         transaction_start_date_required: false,
         transaction_alignment_tol: 40, // Very relaxed to handle messy alignment
 

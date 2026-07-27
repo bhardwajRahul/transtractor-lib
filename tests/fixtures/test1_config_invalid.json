@@ -35,7 +35,6 @@
         ["description", "amount", "balance"],
         ["description", "amount"]
     ],
-    "transaction_new_line_tol": 5,
     "transaction_start_date_required": true,
     "transaction_alignment_tol": 10,
 

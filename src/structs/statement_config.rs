@@ -71,8 +71,6 @@ pub struct StatementConfig {
     /// Is a common format for credit card statements where the date is only specified
     /// on the first transaction of each day.
     pub transaction_formats: Vec<Vec<String>>,
-    /// Y-coordinate tolerance to identify a new line in the transaction list
-    pub transaction_new_line_tol: i32,
     /// Parsing transaction requires the start date value to have been read
     /// so that the year can be inferred for each transaction date.
     pub transaction_start_date_required: bool,
@@ -155,7 +153,6 @@ impl Default for StatementConfig {
             transaction_terms: vec![],
             transaction_terms_stop: vec![],
             transaction_formats: vec![],
-            transaction_new_line_tol: 5,
             transaction_start_date_required: false,
             transaction_alignment_tol: 10,
 

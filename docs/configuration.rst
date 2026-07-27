@@ -80,7 +80,6 @@ example file included in the source code is:
             ["description", "amount", "balance"],
             ["description", "amount"]
         ],
-        "transaction_new_line_tol": 5,
         "transaction_start_date_required": true,
         "transaction_alignment_tol": 10,
 
@@ -459,11 +458,6 @@ List of expected transaction field arrangements. Each arrangement is a list of f
 from the set: "date", "description", "amount", "balance". This allows the parser to know when
 to start and stop reading fields for each transaction, and recognised when a transaction is 
 complete.
-
-*transaction_new_line_tol*
-******************************************
-Integer value specifying the tolerance (in points) for detecting new lines in the transaction
-descriptions. Aim for approx. 50% of the average character height in the transaction table.
 
 *transaction_start_date_required*
 ******************************************
