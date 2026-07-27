@@ -600,7 +600,12 @@ Zero-Balances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sometimes statements will show zero balances as "nil", "zero", or similar text.
 Ensure you include *format5* in the relevant *_formats* fields to handle these cases.
-This is a common case for you first statement of a new account.
+This is a common case for you first statement of a new account. 
+
+It is also recommended that amount formats *format3* and *format4* are specified 
+alongside *format1* and *format2*, respectively, to handle zero amounts/balances without a 
+trailing "CR" or "DR". The *transaction_alignment_tol* may need to be relaxed since 
+these balances may be offset from the *transaction_balance/amount_headers*.
 
 Hidden Characters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
