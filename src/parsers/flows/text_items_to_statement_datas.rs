@@ -4,7 +4,6 @@ use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement
 use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItem;
-use crate::structs::text_items::sort_items;
 use crate::structs::text_items::tokenise_items;
 
 /// Parse non-tokenised text items into list of statement data results,
@@ -16,9 +15,8 @@ pub fn text_items_to_statement_datas(
     let mut results = Vec::new();
     for cfg in configs {
         // Sort will just return a clone if y_bin is 0.0
-        let sorted_items = sort_items(items, cfg.fix_text_order[1], cfg.fix_text_order[0]);
-        let tokenised_sorted_items = tokenise_items(&sorted_items);
-        let mut data = text_items_to_statement_data(cfg, &tokenised_sorted_items);
+        let tokenised_items = tokenise_items(items);
+        let mut data = text_items_to_statement_data(cfg, &tokenised_items);
         data.set_key(cfg.key.clone());
 
         // Apply fixers to clean up the data

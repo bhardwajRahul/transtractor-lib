@@ -12,7 +12,6 @@ pub mod closing_balance_alignment;
 pub mod closing_balance_alignment_tol;
 pub mod closing_balance_formats;
 pub mod closing_balance_terms;
-pub mod fix_text_order;
 pub mod key;
 pub mod opening_balance_alignment;
 pub mod opening_balance_alignment_tol;
@@ -37,7 +36,6 @@ pub mod transaction_date_headers;
 pub mod transaction_description_alignment;
 pub mod transaction_description_headers;
 pub mod transaction_formats;
-pub mod transaction_new_line_tol;
 pub mod transaction_terms;
 pub mod transaction_terms_stop;
 pub mod utils;
@@ -49,7 +47,6 @@ pub fn validate_config(config: &StatementConfig) -> Result<(), String> {
     account_type::account_type(&config.account_type)?;
     account_terms::account_terms(&config.account_terms)?;
     account_examples::account_examples(&config.account_examples)?;
-    fix_text_order::fix_text_order(&config.fix_text_order)?;
     account_number_terms::account_number_terms(&config.account_number_terms)?;
     account_number_patterns::account_number_patterns(&config.account_number_patterns)?;
     account_number_alignment::account_number_alignment(&config.account_number_alignment)?;
@@ -77,7 +74,6 @@ pub fn validate_config(config: &StatementConfig) -> Result<(), String> {
     transaction_terms::transaction_terms(&config.transaction_terms)?;
     transaction_terms_stop::transaction_terms_stop(&config.transaction_terms_stop)?;
     transaction_formats::transaction_formats(&config.transaction_formats)?;
-    transaction_new_line_tol::transaction_new_line_tol(config.transaction_new_line_tol)?;
     // transaction_start_date_required is a bool, no validation needed
     transaction_alignment_tol::transaction_alignment_tol(config.transaction_alignment_tol)?;
     transaction_date_formats::transaction_date_formats(&config.transaction_date_formats)?;

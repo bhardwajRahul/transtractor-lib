@@ -1,21 +1,20 @@
 """Python wrapper for the Transtractor PDF bank statement parser."""
 
+import warnings
+from pathlib import Path
 from typing import cast
 
-from .exceptions import StatementNotSupported
 from .structs.statement_data import StatementData
 from .transtractor import LibParser
-from .utils.default_configs import get_base_config_db
-from .utils.extract import pdf_to_text_items
 from .utils.testing import run_test_protocol
 
 
 class Parser:
     """A PDF bank statement parser.
 
-    This parser will be initialized with a set of default bank statement
+    This parser will be initialised with a set of default bank statement
     extraction configurations. When parsing a PDF, it will attempt to identify
-    applicable configurations based on the text items extracted from the PDF. You
+    applicable configurations based on keywords extracted from the PDF. You
     can also load custom configurations from JSON files for additional statement
     formats.
 
@@ -28,27 +27,8 @@ class Parser:
     """
 
     def __init__(self):
-        """Initialise the Parser with default configurations."""
+        """Initialise the Parser with default database."""
         self._inner = LibParser()
-        for key in get_base_config_db().get_all_config_keys():
-            account_terms = get_base_config_db().get_account_terms(key)
-            self._inner.add_account_terms(key, account_terms)
-
-    def _identify(self, py_text_items: list[dict]) -> list[str]:
-        """Identify keys applicable to the given text items. Update the
-        internal config DB with any uncached configs from the base config DB.
-        """
-        applicable_keys = self._inner.get_applicable_config_keys(py_text_items)
-        if not applicable_keys:
-            raise StatementNotSupported(
-                "No applicable statement extraction configuration found. Create and "
-                "load a custom config then try again."
-            )
-        uncached_keys = self._inner.get_unregistered_config_keys(applicable_keys)
-        for key in uncached_keys:
-            json_str = get_base_config_db().get_config_json_str(key)
-            self._inner.register_config_from_json_str(json_str)
-        return applicable_keys
 
     def parse(self, pdf_file_path: str) -> StatementData:
         """Parse the bank statement PDF and return a StatementData object.
@@ -60,13 +40,8 @@ class Parser:
         :raises StatementNotSupported: Statement format is unsupported or not properly
             identified
         """
-        py_text_items = pdf_to_text_items(pdf_file_path)
-        applicable_keys = self._identify(py_text_items)
         sd: StatementData = cast(
-            StatementData,
-            self._inner.py_text_items_to_py_statement_data(
-                py_text_items, applicable_keys
-            ),
+            StatementData, self._inner.py_pdf_path_to_py_statement_data(pdf_file_path)
         )
         sd.set_filename(pdf_file_path)
         return sd
@@ -82,13 +57,8 @@ class Parser:
             identified
         """
         py_layout_str = open(layout_file_path, encoding="utf-8").read()
-        py_text_items = self._inner.py_layout_py_str_to_py_text_items(py_layout_str)
-        applicable_keys = self._identify(py_text_items)
         sd: StatementData = cast(
-            StatementData,
-            self._inner.py_text_items_to_py_statement_data(
-                py_text_items, applicable_keys
-            ),
+            StatementData, self._inner.layout_py_str_py_statement_data(py_layout_str)
         )
         return sd
 
@@ -102,31 +72,18 @@ class Parser:
         :raises StatementNotSupported: Statement format is unsupported or not properly
             identified
         """
-        py_text_items = pdf_to_text_items(pdf_file_path)
-        applicable_keys = self._identify(py_text_items)
-        result = self._inner.py_text_items_to_debug_py_str(
-            py_text_items, applicable_keys
-        )
+        result = self._inner.py_pdf_path_to_debug_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(result)
         return result
 
-    def layout(self, pdf_file_path: str, output_file: str, y_bin=0.0, x_gap=0.0) -> str:
+    def layout(self, pdf_file_path: str, output_file: str) -> str:
         """Extract, write and return a text layout representation of the PDF page.
 
         :param pdf_file_path: Path to the PDF file to be processed
-        :param y_bin: Y coordinate bin size for sorting/merging text items
-        :param x_gap: X coordinate gap size in number of characters for merging text
-            items
         :return: A string representing the text layout of the page
-
-        Note: The values of y_bin and x_gap are same same as those used for the
-        "fix_text_order" parameter in the configuration JSON files.
         """
-        py_text_items = pdf_to_text_items(pdf_file_path)
-        layout_str: str = self._inner.py_text_items_to_layout_py_str(
-            py_text_items, y_bin, x_gap
-        )
+        layout_str: str = self._inner.py_pdf_path_to_layout_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(layout_str)
         return layout_str
@@ -135,8 +92,8 @@ class Parser:
         """Load a custom parsing configuration from a JSON file.
 
         Configurations loaded via this method will be registered in the
-        internal configuration database and will overwrite any existing
-        configuration with the same key.
+        internal database and will overwrite any existing configuration with the same
+        key.
 
         :param json_file_path: Path to the JSON configuration file
         :return: None
@@ -145,7 +102,22 @@ class Parser:
         See the docs for detailed instructions for creating custom
         configuration JSON files.
         """
-        self._inner.import_config_from_file(json_file_path)
+        # Read the JSON file
+        file_path = Path(json_file_path)
+        json_content = file_path.read_text(encoding="utf-8")
+
+        # Register the configuration via string to capture deprecation warnings
+        self._inner.register_config_from_json_str(json_content)
+
+        # Check for and emit any deprecation warnings
+        deprecation_warnings = self._inner.get_deprecation_warnings()
+        for warning_msg in deprecation_warnings:
+            warnings.warn(
+                f"Configuration from {json_file_path} uses deprecated field: "
+                f"{warning_msg}",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"

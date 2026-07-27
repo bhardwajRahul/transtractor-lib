@@ -49,7 +49,6 @@ example file included in the source code is:
         "account_type": "Savings",
         "account_terms": ["Gravy Toast", "Fake"],
         "account_examples": ["Fake Account Product", "Similar Product"],
-        "fix_text_order": [0.0, 0.0],
 
         "account_number_terms": ["Account number:"],
         "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
@@ -81,7 +80,6 @@ example file included in the source code is:
             ["description", "amount", "balance"],
             ["description", "amount"]
         ],
-        "transaction_new_line_tol": 5,
         "transaction_start_date_required": true,
         "transaction_alignment_tol": 10,
 
@@ -93,7 +91,7 @@ example file included in the source code is:
         "transaction_description_alignment": "x1",
         "transaction_description_exclude": [
             " Annoying text",
-            " text to filter out"
+            " to filter out"
         ],
 
         "transaction_amount_formats": ["format1", "format2"],
@@ -132,19 +130,19 @@ The first few lines of the resulting `test1_layout.txt` file will look like:
 .. code-block:: text
 
     [Page 0]
-    ["Gravy",72,101,49,37]["Toast",104,131,49,37]["Bank",133,159,49,37]
-    ["Fake",77,109,88,74]["Monthly",113,166,88,74]["Statement",170,238,88,74]
-    ["Statement",77,131,119,107]["Period:",135,173,119,107]["1",268,275,119,107]["Jan",278,298,119,107]["2025",301,328,119,107]["to",331,341,119,107]["31",344,358,119,107]["Jan",361,380,119,107]["2025",383,410,119,107]
-    ["Opening",77,122,134,122]["balance:",125,171,134,122]["$50,000.00",268,328,134,122]["CR",332,349,134,122]
-    ["Closing",77,117,149,137]["balance:",120,165,149,137]["$11,663.82",268,328,149,137]["CR",332,349,149,137]
-    ["Account",77,120,164,152]["number:",123,167,164,152]["1234",268,295,164,152]["5678",298,325,164,152]["9123",328,355,164,152]["4567",358,385,164,152]
-    ["Transaction",77,156,200,186]["Details",160,206,200,186]
-    ["Date",77,103,221,209]["Description",149,215,221,209]["Debit",298,328,221,209]["Credit",365,399,221,209]["Balance",456,502,221,209]
-    ["01",77,90,239,227]["Jan",94,113,239,227]["Transaction",149,211,239,227]["1",215,222,239,227]["50,000.00",346,399,239,227]
-    ["Transaction",149,211,256,244]["2",215,222,256,244]["1,000.00",281,328,256,244]
-    ["Transaction",149,211,273,261]["3",215,222,273,261]["10,000.00",275,328,273,261]
-    ["Transaction",149,211,289,277]["4",215,222,289,277]["1,350.00",352,399,289,277]["90,350",445,481,289,277]["CR",485,502,289,277]
-    ["03",77,90,306,294]["Jan",94,113,306,294]["Transaction",149,211,306,294]["5",215,222,306,294]["530.99",291,328,306,294]
+    ["Gravy Toast Bank",72,160,49,37]
+    ["Fake Monthly Statement",77,238,89,75]
+    ["Statement Period:",77,173,119,107]["1 Jan 2025 to 31 Jan 2025",269,411,119,107]
+    ["Opening balance:",77,171,134,122]["$50,000.00 CR",269,349,134,122]
+    ["Closing balance:",77,166,149,137]["$11,663.82 CR",269,350,149,137]
+    ["Account number:",77,168,164,152]["1234 5678 9123 4567",269,385,164,152]
+    ["Transaction Details",77,206,201,187]
+    ["Date",77,103,222,210]["Description",149,216,222,210]["Debit",299,329,222,210]["Credit",365,400,222,210]["Balance",457,503,222,210]
+    ["01 Jan",77,113,240,228]["Transaction 1",149,222,240,228]["50,000.00",346,400,240,228]
+    ["Transaction 2",149,222,257,245]["1,000.00",282,329,257,245]
+    ["Transaction 3",149,222,273,261]["10,000.00",275,329,273,261]
+    ["Transaction 4",149,222,290,278]["1,350.00",353,400,290,278]["90,350 CR",445,503,290,278]
+    ["03 Jan",77,113,307,295]["Transaction 5",149,222,307,295]["530.99",292,329,307,295]
 
 Each text element is represented as ["text",x1,x2,y1,y2], where `text` is the extracted text,
 `x1` and `x2` are the horizontal positions of the start and end of the text, and `y1` and `y2` are the
@@ -293,27 +291,6 @@ List of example account product names that this configuration file is intended t
 Many banks will often have multiple account products with similar statement formats. For example,
 the Commonwealth Bank of Australia's "Smart Access", "Streamline" and "Everyday Offset" accounts 
 use the same statement format.
-
-*fix_text_order*
-************************
-List of two float values *y_bin* and *x_gap* used to adjust the text ordering when extracting
-text from the PDF file. The *y_bin* value (typically half the character height)
-groups text items with *y1* positions within *y_bin* of each other into the same line, then 
-orders them by their *x1* positions. Items with *x2* and *x1* positions within *x_gap* will 
-be grouped together. *x_gap* is a multiplier of the average character width based on the 
-preceding text item.
-
-*y_bin*-based reordering is helpful where text items are not ordered as would be expected
-based on their visual appearance in the statement. Some cases of this can make the statement
-un-parsable without this adjustment.
-
-*x_gap*-based merging is useful for filtering out header and footer text that sometimes 
-find their way into transaction descriptions as individually they may satisfy the horizontal
-alignment requirements, but when merged with adjacent text items they will not.
-
-Set *y_bin* to 0.0 to disable reordering and merging. Or just set *x_gap* to 0.0 to disable merging,
-but still enable reordering. Only use this parameter if absolutely necessary as it may reduce
-parsing performance and add complexity to the parsing process.
 
 
 Account Number Parameters
@@ -482,11 +459,6 @@ from the set: "date", "description", "amount", "balance". This allows the parser
 to start and stop reading fields for each transaction, and recognised when a transaction is 
 complete.
 
-*transaction_new_line_tol*
-******************************************
-Integer value specifying the tolerance (in points) for detecting new lines in the transaction
-descriptions. Aim for approx. 50% of the average character height in the transaction table.
-
 *transaction_start_date_required*
 ******************************************
 Boolean value specifying whether the start date is required for parsing transactions. Set as true
@@ -620,9 +592,14 @@ and how to resolve them.
 
 Zero-Balances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Somtimes statements will show zero balances as "nil", "zero", or similar text.
+Sometimes statements will show zero balances as "nil", "zero", or similar text.
 Ensure you include *format5* in the relevant *_formats* fields to handle these cases.
-This is a common case for you first statement of a new account.
+This is a common case for you first statement of a new account. 
+
+It is also recommended that amount formats *format3* and *format4* are specified 
+alongside *format1* and *format2*, respectively, to handle zero amounts/balances without a 
+trailing "CR" or "DR". The *transaction_alignment_tol* may need to be relaxed since 
+these balances may be offset from the *transaction_balance/amount_headers*.
 
 Hidden Characters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -631,14 +608,6 @@ are extracted by the parser. These hidden characters can interfere with pattern 
 To identify hidden characters, extract the layout text using the `layout` method
 (as described above) and inspect the text around the problematic areas. You may need
 to adjust your regex patterns to account for these hidden characters.
-
-Unexpected Text Order
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If the parser is not finding expected terms or fields, the text order extracted
-from the PDF may not match the visual order. Use the *fix_text_order* parameter
-to adjust the text ordering based on *y_bin* and *x_gap* values. Experiment
-with different values to achieve the correct ordering. inspect the layout text
-to understand how the text items are ordered.
 
 Missing Date or Amount Formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -651,8 +620,8 @@ assistance with this process.
 Contributing Your Configuration
 --------------------------------------
 If you have created a well-tested configuration file for a bank or account type that is not
-currently supported, please consider contributing it to the project! You can submit a
+currently supported, please consider contributing it to the project. You can submit a
 pull request on the
-`GitHub repository <https://github.com/transtractor/transtractor-lib>`_, including your configuration
-file in the *python/transtractor/configs* directory. Otherwise, feel free to email it to the project maintainers
-for inclusion (develop@transtractor.net).
+`GitHub repository <https://github.com/transtractor/transtractor-lib>`_, registering your configuration
+as a Rust module under *src/configs/registry*. Otherwise, feel free to email it to the project maintainers
+for inclusion (gravytoast@pm.me).

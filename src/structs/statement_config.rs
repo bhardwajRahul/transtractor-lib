@@ -16,11 +16,6 @@ pub struct StatementConfig {
     pub account_terms: Vec<String>,
     /// Account types that should work with this layout (e.g., "Streamline", "Everyday Offset")
     pub account_examples: Vec<String>,
-    /// Enforce that text extracted is sorted by Y, then X and optionally merged by specifying
-    /// [y_bin, x_gap] values. Word/items will be binned by Y coordinate into bins of size y_bin,
-    /// then sorted by X within each bin, and merged if within x_gap * avg_char_width. Set
-    /// y_bin to 0.0 to disable Y binning (and X sorting by extension). Set x_gap to 0.0 to disable merging.
-    pub fix_text_order: Vec<f32>,
     // ACCOUNT NUMBER READ PARAMS
     /// Array of terms to identify the account number line (e.g., "Account Number", "Acct No")
     pub account_number_terms: Vec<String>,
@@ -76,8 +71,6 @@ pub struct StatementConfig {
     /// Is a common format for credit card statements where the date is only specified
     /// on the first transaction of each day.
     pub transaction_formats: Vec<Vec<String>>,
-    /// Y-coordinate tolerance to identify a new line in the transaction list
-    pub transaction_new_line_tol: i32,
     /// Parsing transaction requires the start date value to have been read
     /// so that the year can be inferred for each transaction date.
     pub transaction_start_date_required: bool,
@@ -134,7 +127,6 @@ impl Default for StatementConfig {
             account_type: "Generic Account".to_string(),
             account_terms: vec![],
             account_examples: vec![],
-            fix_text_order: vec![0.0, 0.0],
 
             account_number_terms: vec![],
             account_number_patterns: vec![],
@@ -161,7 +153,6 @@ impl Default for StatementConfig {
             transaction_terms: vec![],
             transaction_terms_stop: vec![],
             transaction_formats: vec![],
-            transaction_new_line_tol: 5,
             transaction_start_date_required: false,
             transaction_alignment_tol: 10,
 

@@ -75,6 +75,7 @@ mod tests {
             x2: 0,
             y2: 0,
             page: 1,
+            y1_bin: 0,
         }
     }
 

@@ -103,6 +103,7 @@ mod tests {
             x2: x1 + 100,
             y2: y1 + 10,
             page: 1,
+            y1_bin: y1,
         }
     }
 

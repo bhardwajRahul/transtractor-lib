@@ -336,7 +336,7 @@ This project follows **Semantic Versioning (SemVer)**, using the `Major.Minor.Pa
 * **Minor** — Newly supported statement formats or the introduction of new features
 * **Patch** — Bug fixes, refactoring, dependency updates, performance improvements, or documentation changes
 
-While the project remains in beta, both Minor and Patch updates will simply increment the Patch version.
+While the project remains in beta, both Minor and Patch updates will simply increment the Patch version. Major updates with breaking changes will increment the Minor version.
 
 ### Step 5: Merge Changes
 Steps 1–4 should be completed in a pull request originating from a development fork. Once all GitHub Actions checks have passed, merge the pull request into the `main` branch of the parent repository.

@@ -102,7 +102,7 @@ mod tests {
             TextItem::new("Beta".to_string(), 8, 10, 12, 14, 1),
         ];
 
-        let layout = text_items_to_layout(&items, 10.0, 1.0).unwrap();
+        let layout = text_items_to_layout(&items).unwrap();
         let parsed = layout_to_text_items(&layout).unwrap();
 
         assert_eq!(parsed, items);
