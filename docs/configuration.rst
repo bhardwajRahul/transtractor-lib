@@ -130,23 +130,24 @@ The first few lines of the resulting `test1_layout.txt` file will look like:
 .. code-block:: text
 
     [Page 0]
-    ["Gravy Toast Bank",72,160,49,37]
-    ["Fake Monthly Statement",77,238,89,75]
-    ["Statement Period:",77,173,119,107]["1 Jan 2025 to 31 Jan 2025",269,411,119,107]
-    ["Opening balance:",77,171,134,122]["$50,000.00 CR",269,349,134,122]
-    ["Closing balance:",77,166,149,137]["$11,663.82 CR",269,350,149,137]
-    ["Account number:",77,168,164,152]["1234 5678 9123 4567",269,385,164,152]
-    ["Transaction Details",77,206,201,187]
-    ["Date",77,103,222,210]["Description",149,216,222,210]["Debit",299,329,222,210]["Credit",365,400,222,210]["Balance",457,503,222,210]
-    ["01 Jan",77,113,240,228]["Transaction 1",149,222,240,228]["50,000.00",346,400,240,228]
-    ["Transaction 2",149,222,257,245]["1,000.00",282,329,257,245]
-    ["Transaction 3",149,222,273,261]["10,000.00",275,329,273,261]
-    ["Transaction 4",149,222,290,278]["1,350.00",353,400,290,278]["90,350 CR",445,503,290,278]
-    ["03 Jan",77,113,307,295]["Transaction 5",149,222,307,295]["530.99",292,329,307,295]
+    ["Gravy Toast Bank",72,160,49,37,49]
+    ["Fake Monthly Statement",77,238,89,75,89]
+    ["Statement Period:",77,173,119,107,119]["1 Jan 2025 to 31 Jan 2025",269,411,119,107,119]
+    ["Opening balance:",77,171,134,122,134]["$50,000.00 CR",269,349,134,122,134]
+    ["Closing balance:",77,166,149,137,149]["$11,663.82 CR",269,350,149,137,149]
+    ["Account number:",77,168,164,152,164]["1234 5678 9123 4567",269,385,164,152,164]
+    ["Transaction Details",77,206,201,187,201]
+    ["Date",77,103,222,210,222]["Description",149,216,222,210,222]["Debit",299,329,222,210,222]["Credit",365,400,222,210,222]["Balance",457,503,222,210,222]
+    ["01 Jan",77,113,240,228,240]["Transaction 1",149,222,240,228,240]["50,000.00",346,400,240,228,240]
+    ["Transaction 2",149,222,257,245,257]["1,000.00",282,329,257,245,257]
+    ["Transaction 3",149,222,273,261,273]["10,000.00",275,329,273,261,273]
+    ["Transaction 4",149,222,290,278,290]["1,350.00",353,400,290,278,290]["90,350 CR",445,503,290,278,290]
+    ["03 Jan",77,113,307,295,307]["Transaction 5",149,222,307,295,307]["530.99",292,329,307,295,307]
 
-Each text element is represented as ["text",x1,x2,y1,y2], where `text` is the extracted text,
+Each text element is represented as ["text",x1,x2,y1,y2,y1_bin], where `text` is the extracted text,
 `x1` and `x2` are the horizontal positions of the start and end of the text, and `y1` and `y2` are the
-bottom and top vertical positions of the text.
+bottom and top vertical positions of the text. `y1_bin` is the vertical position of line that 
+the text is assigned to.
 
 
 Format Parameters

@@ -33,7 +33,7 @@ fn parse_quoted_text(input: &str) -> Option<(String, usize)> {
     None
 }
 
-fn parse_layout_item(input: &str) -> Option<(String, i32, i32, i32, i32, usize)> {
+fn parse_layout_item(input: &str) -> Option<(String, i32, i32, i32, i32, i32, usize)> {
     let input = input.trim_start();
     let end = input.find(']')?;
     let block = &input[..end + 1];
@@ -51,11 +51,19 @@ fn parse_layout_item(input: &str) -> Option<(String, i32, i32, i32, i32, usize)>
         .collect::<Result<Vec<_>, _>>()
         .ok()?;
 
-    if values.len() != 4 {
+    if values.len() != 5 {
         return None;
     }
 
-    Some((text, values[0], values[2], values[1], values[3], end + 1))
+    Some((
+        text,
+        values[0],
+        values[2],
+        values[1],
+        values[3],
+        values[4],
+        end + 1,
+    ))
 }
 
 /// Converts layout text format to a collection of TextItems
@@ -79,8 +87,10 @@ pub fn layout_to_text_items(layout_text: &str) -> Result<Vec<TextItem>, String> 
             continue;
         }
 
-        if let Some((text, x1, y1, x2, y2, consumed)) = parse_layout_item(trimmed) {
-            text_items.push(TextItem::new(text, x1, y1, x2, y2, current_page));
+        if let Some((text, x1, y1, x2, y2, y1_bin, consumed)) = parse_layout_item(trimmed) {
+            let mut item = TextItem::new(text, x1, y1, x2, y2, current_page);
+            item.y1_bin = y1_bin;
+            text_items.push(item);
             cursor = trimmed_start + consumed;
         } else {
             cursor += 1;
@@ -106,5 +116,23 @@ mod tests {
         let parsed = layout_to_text_items(&layout).unwrap();
 
         assert_eq!(parsed, items);
+    }
+
+    #[test]
+    fn preserves_y1_bin_during_layout_round_trip() {
+        let item = TextItem {
+            text: "Gamma".to_string(),
+            x1: 1,
+            y1: 3,
+            x2: 5,
+            y2: 7,
+            page: 0,
+            y1_bin: 99,
+        };
+
+        let layout = text_items_to_layout(&vec![item.clone()]).unwrap();
+        let parsed = layout_to_text_items(&layout).unwrap();
+
+        assert_eq!(parsed[0], item);
     }
 }
