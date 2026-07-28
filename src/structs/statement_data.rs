@@ -1,8 +1,10 @@
 use crate::structs::ProtoTransaction;
 use chrono::{DateTime, Datelike, TimeZone, Utc};
+use serde::{Deserialize, Serialize};
+use serde_json;
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StatementData {
     pub key: Option<String>,
     pub account_number: Option<String>,
@@ -76,6 +78,14 @@ impl StatementData {
 
     pub fn print(&self) {
         println!("{}", self);
+    }
+
+    pub fn to_json(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string(self)
+    }
+
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
     }
 }
 
@@ -151,5 +161,67 @@ impl fmt::Display for StatementData {
 impl Default for StatementData {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serialises_statement_data_to_json() {
+        let mut data = StatementData::new();
+        data.set_key("statement-1".to_string());
+        data.set_account_number("ACC-123".to_string());
+        data.set_start_date(1_700_000_000_000i64);
+        data.set_opening_balance(100.5);
+        data.set_closing_balance(200.25);
+        data.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.5),
+            balance: Some(104.0),
+        });
+        data.add_error("warning".to_string());
+
+        let json = data.to_json().unwrap();
+
+        assert!(json.contains("\"key\":\"statement-1\""));
+        assert!(json.contains("\"account_number\":\"ACC-123\""));
+        assert!(json.contains("\"description\":\"Coffee\""));
+    }
+
+    #[test]
+    fn deserialises_statement_data_from_json() {
+        let json = r#"{
+            "key": "statement-2",
+            "account_number": "ACC-999",
+            "start_date": 1700000000000,
+            "start_date_year": 2023,
+            "opening_balance": 15.75,
+            "closing_balance": 20.5,
+            "proto_transactions": [
+                {
+                    "date": 1700000000000,
+                    "index": 2,
+                    "description": "Taxi",
+                    "amount": 5.25,
+                    "balance": 20.5
+                }
+            ],
+            "errors": ["review needed"]
+        }"#;
+
+        let data = StatementData::from_json(json).unwrap();
+
+        assert_eq!(data.key.as_deref(), Some("statement-2"));
+        assert_eq!(data.account_number.as_deref(), Some("ACC-999"));
+        assert_eq!(data.start_date, Some(1_700_000_000_000i64));
+        assert_eq!(data.opening_balance, Some(15.75));
+        assert_eq!(data.closing_balance, Some(20.5));
+        assert_eq!(data.proto_transactions.len(), 1);
+        assert_eq!(data.proto_transactions[0].description, "Taxi");
+        assert_eq!(data.errors, vec!["review needed".to_string()]);
     }
 }
