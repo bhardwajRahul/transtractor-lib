@@ -138,6 +138,31 @@ impl LibParser {
         }
     }
 
+    /// Process a layout string from Python caller and return debug information as a string.
+    pub fn layout_py_str_to_debug_py_str(
+        &self,
+        py_layout_str: &Bound<'_, PyAny>,
+    ) -> PyResult<String> {
+        let rust_layout_str = py_layout_str.extract::<String>()?;
+        let text_items = layout_to_text_items(&rust_layout_str).map_err(|e| {
+            pyo3::exceptions::PyRuntimeError::new_err(format!(
+                "Failed to convert layout string to text items: {}",
+                e
+            ))
+        })?;
+        let configs = self.db.identify(&text_items);
+        if configs.is_empty() {
+            return Err(StatementNotSupported::new_err(
+                "No supported statement configuration found for the provided text items.",
+            ));
+        }
+
+        match text_items_to_debug(&text_items, &configs) {
+            Ok(debug_str) => Ok(debug_str),
+            Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
+        }
+    }
+
     /// Process a PDF file path from Python caller and return a Python StatementData object.
     pub fn py_pdf_path_to_py_statement_data(
         &self,

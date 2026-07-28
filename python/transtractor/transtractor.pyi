@@ -65,6 +65,14 @@ class LibParser:
         :raises NoErrorFreeStatementData: If no error-free statement data could be found
         """
 
+    def layout_py_str_to_debug_py_str(self, py_layout_str: str) -> str:
+        """
+        Process a layout string and return debug information as a string.
+
+        :param py_layout_str: Layout string content from text file
+        :raises StatementNotSupported: If no supported statement configuration is found
+        """
+
 class NoErrorFreeStatementData(Exception):
     """Raised when no error-free statement data could be found."""
 

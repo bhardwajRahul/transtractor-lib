@@ -77,6 +77,22 @@ class Parser:
             fh.write(result)
         return result
 
+    def debug_layout(self, layout_file_path: str, output_file: str) -> str:
+        """Write a summary of the statement data and quality checks for
+        each statement extraction configuration applied.
+
+        :param layout_file_path: Path to the layout file to be processed
+        :param output_file: Path to the output debug text file
+        :return: The debug string written to the output file
+        :raises StatementNotSupported: Statement format is unsupported or not properly
+            identified
+        """
+        py_layout_str = open(layout_file_path, encoding="utf-8").read()
+        result = self._inner.layout_py_str_to_debug_py_str(py_layout_str)
+        with open(output_file, "w", encoding="utf-8") as fh:
+            fh.write(result)
+        return result
+
     def layout(self, pdf_file_path: str, output_file: str) -> str:
         """Extract, write and return a text layout representation of the PDF page.
 
