@@ -87,6 +87,17 @@ impl StatementData {
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
     }
+
+    pub fn matches(&self, other: &Self) -> bool {
+        self.key == other.key
+            && self.account_number == other.account_number
+            && self.start_date == other.start_date
+            && self.start_date_year == other.start_date_year
+            && self.opening_balance == other.opening_balance
+            && self.closing_balance == other.closing_balance
+            && self.proto_transactions == other.proto_transactions
+            && self.errors == other.errors
+    }
 }
 
 impl fmt::Display for StatementData {
@@ -223,5 +234,36 @@ mod tests {
         assert_eq!(data.proto_transactions.len(), 1);
         assert_eq!(data.proto_transactions[0].description, "Taxi");
         assert_eq!(data.errors, vec!["review needed".to_string()]);
+    }
+
+    #[test]
+    fn compares_statement_data_objects() {
+        let mut first = StatementData::new();
+        first.set_key("statement-1".to_string());
+        first.set_account_number("ACC-123".to_string());
+        first.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.5),
+            balance: Some(104.0),
+        });
+
+        let mut second = StatementData::new();
+        second.set_key("statement-1".to_string());
+        second.set_account_number("ACC-123".to_string());
+        second.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.5),
+            balance: Some(104.0),
+        });
+
+        let mut third = StatementData::new();
+        third.set_key("statement-2".to_string());
+
+        assert!(first.matches(&second));
+        assert!(!first.matches(&third));
     }
 }

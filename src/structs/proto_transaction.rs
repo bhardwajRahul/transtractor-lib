@@ -3,7 +3,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 /// Represents an incomplete transaction.
 /// Serves as a temporary structure to hold transaction data before it is fully parsed, validated, and filled.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ProtoTransaction {
     /// Date of the transaction as a timestamp (milliseconds since epoch)
     pub date: Option<i64>,
