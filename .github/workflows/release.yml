@@ -376,7 +376,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          cat > release-notes.md <<'EOF'
+          cat > release-notes.md <<EOF
           # Release $TAG
 
           ## Summary
