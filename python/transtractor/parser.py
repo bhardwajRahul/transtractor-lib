@@ -35,10 +35,7 @@ class Parser:
 
         :param pdf_file_path: Path to the PDF file to be processed
         :return: StatementData object representing the parsed bank statement data
-        :raises NoErrorFreeStatementData: Statement format recognised but could be
-            processed without failing quality checks
-        :raises StatementNotSupported: Statement format is unsupported or not properly
-            identified
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         sd: StatementData = cast(
             StatementData, self._inner.py_pdf_path_to_py_statement_data(pdf_file_path)
@@ -51,10 +48,7 @@ class Parser:
 
         :param layout_file_path: Path to the layout file to be processed
         :return: StatementData object representing the parsed bank statement data
-        :raises NoErrorFreeStatementData: Statement format recognised but could be
-            processed without failing quality checks
-        :raises StatementNotSupported: Statement format is unsupported or not properly
-            identified
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         py_layout_str = open(layout_file_path, encoding="utf-8").read()
         sd: StatementData = cast(
@@ -69,8 +63,7 @@ class Parser:
         :param pdf_file_path: Path to the PDF file to be processed
         :param output_file: Path to the output debug text file
         :return: The debug string written to the output file
-        :raises StatementNotSupported: Statement format is unsupported or not properly
-            identified
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         result = self._inner.py_pdf_path_to_debug_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
@@ -84,8 +77,7 @@ class Parser:
         :param layout_file_path: Path to the layout file to be processed
         :param output_file: Path to the output debug text file
         :return: The debug string written to the output file
-        :raises StatementNotSupported: Statement format is unsupported or not properly
-            identified
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         py_layout_str = open(layout_file_path, encoding="utf-8").read()
         result = self._inner.layout_py_str_to_debug_py_str(py_layout_str)
@@ -145,8 +137,7 @@ class Parser:
 
         :param pdf_file_path: Path to the PDF file to be processed
         :param output_file: Path to the output JSON spec file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         spec_str: str = self._inner.py_pdf_path_to_spec_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:

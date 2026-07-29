@@ -4,10 +4,9 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from transtractor import StatementNotSupported
+from transtractor import ParseError
 from transtractor.parser import Parser
 from transtractor.structs.statement_data import StatementData
-from transtractor.transtractor import NoErrorFreeStatementData
 
 
 def test_parse_generates_correct_csv():
@@ -57,21 +56,21 @@ def test_parse_generates_correct_csv():
         Path(tmp_csv_path).unlink(missing_ok=True)
 
 
-def test_parse_raises_statement_not_supported_without_config():
-    """Test that parsing without loading a config raises StatementNotSupported."""
+def test_parse_raises_parser_error_without_config():
+    """Test that parsing without loading a config raises ParseError."""
     parser = Parser()
 
     # Parse the test PDF without loading the config file
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     test_pdf = fixtures_dir / "test1.pdf"
 
-    # Should raise StatementNotSupported since no config is loaded
-    with pytest.raises(StatementNotSupported):
+    # Should raise ParseError since no config is loaded
+    with pytest.raises(ParseError):
         parser.parse(str(test_pdf))
 
 
-def test_parse_raises_no_error_free_statement_data_with_misconfigured_config():
-    """Test that parsing with a misconfigured config raises NoErrorFreeStatementData."""
+def test_parse_raises_parser_error_with_misconfigured_config():
+    """Test that parsing with a misconfigured config raises ParseError."""
     parser = Parser()
 
     # Load the misconfigured config file
@@ -80,6 +79,6 @@ def test_parse_raises_no_error_free_statement_data_with_misconfigured_config():
     misconfigured_config = fixtures_dir / "test1_config_misconfigured.json"
     parser.load(str(misconfigured_config))
 
-    # Should raise NoErrorFreeStatementData since the config is misconfigured
-    with pytest.raises(NoErrorFreeStatementData):
+    # Should raise ParseError since the config is misconfigured
+    with pytest.raises(ParseError):
         parser.parse(str(test_pdf))

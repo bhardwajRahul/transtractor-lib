@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from transtractor import StatementNotSupported
+from transtractor import ParseError
 from transtractor.parser import Parser
 
 
@@ -45,8 +45,8 @@ def test_debug_layout_generates_correct_output():
         Path(tmp_debug_path).unlink(missing_ok=True)
 
 
-def test_debug_raises_statement_not_supported_without_config():
-    """Test that debug without loading a config raises StatementNotSupported."""
+def test_debug_raises_parse_error_without_config():
+    """Test that debug without loading a config raises ParseError."""
     parser = Parser()
 
     # Try to debug the test layout file without loading the config file
@@ -57,8 +57,8 @@ def test_debug_raises_statement_not_supported_without_config():
         tmp_debug_path = tmp_file.name
 
     try:
-        # Should raise StatementNotSupported since no config is loaded
-        with pytest.raises(StatementNotSupported):
+        # Should raise ParseError since no config is loaded
+        with pytest.raises(ParseError):
             parser.debug_layout(str(test_layout), tmp_debug_path)
     finally:
         # Clean up temporary file

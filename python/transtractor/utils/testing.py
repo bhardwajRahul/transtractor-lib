@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from ..structs.statement_data import StatementData
-from ..transtractor import NoErrorFreeStatementData, StatementNotSupported
 
 if TYPE_CHECKING:
     from ..parser import Parser
@@ -80,12 +79,9 @@ class TestData:
             self.config_key = sd.key if sd.key else ""
             self.num_transactions = len(sd.transactions)
             self.status = "PASS"
-        except NoErrorFreeStatementData:
+        except Exception as e:
             self.status = "FAIL"
-            self.reason_failed = "NoErrorFreeStatementData"
-        except StatementNotSupported:
-            self.status = "FAIL"
-            self.reason_failed = "StatementNotSupported"
+            self.reason_failed = str(e)
 
         end_total = time.time()
         self.total_time = int((end_total - start_total) * 1000)

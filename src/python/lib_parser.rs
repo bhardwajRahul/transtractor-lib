@@ -3,8 +3,8 @@ use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
 use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
-use crate::parsers::flows::text_items_to_statement_datas::text_items_to_statement_datas;
-use crate::python::exceptions::{ConfigLoadError, NoErrorFreeStatementData, StatementNotSupported};
+use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
+use crate::python::exceptions::{ConfigLoadError, ParseError};
 use crate::python::utils;
 use crate::structs::Spec;
 use pdfsink_rs::PdfDocument;
@@ -71,30 +71,9 @@ impl LibParser {
                 e
             ))
         })?;
-        let configs = self.db.identify(&text_items);
-        if configs.is_empty() {
-            return Err(StatementNotSupported::new_err(
-                "No supported statement configuration found for the provided text items.",
-            ));
-        }
-
-        let statement_data_results = text_items_to_statement_datas(&text_items, &configs)
-            .map_err(pyo3::exceptions::PyRuntimeError::new_err)?;
-
-        // Return the first error-free StatementData
-        for data in statement_data_results {
-            if data.errors.is_empty() {
-                return utils::rust_statement_data_to_py_statement_data(&data);
-            }
-        }
-
-        // Package error if statement is identified for not parseable
-        let applicable_config_keys: Vec<String> =
-            configs.iter().map(|cfg| cfg.key.clone()).collect();
-        Err(NoErrorFreeStatementData::new_err(format!(
-            "No error-free StatementData found. This indicates an error in one of the configurations: {}. See further details using the \"debug\" method. Please contact a developer if this config is part of the default set provided by the package.",
-            applicable_config_keys.join(", ")
-        )))
+        let data =
+            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
+        utils::rust_statement_data_to_py_statement_data(&data)
     }
 
     pub fn py_pdf_path_to_layout_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
@@ -126,17 +105,8 @@ impl LibParser {
                 e
             ))
         })?;
-        let configs = self.db.identify(&text_items);
-        if configs.is_empty() {
-            return Err(StatementNotSupported::new_err(
-                "No supported statement configuration found for the provided text items.",
-            ));
-        }
-
-        match text_items_to_debug(&text_items, &configs) {
-            Ok(debug_str) => Ok(debug_str),
-            Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
-        }
+        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
+        Ok(debug_str)
     }
 
     /// Process a layout string from Python caller and return debug information as a string.
@@ -151,17 +121,8 @@ impl LibParser {
                 e
             ))
         })?;
-        let configs = self.db.identify(&text_items);
-        if configs.is_empty() {
-            return Err(StatementNotSupported::new_err(
-                "No supported statement configuration found for the provided text items.",
-            ));
-        }
-
-        match text_items_to_debug(&text_items, &configs) {
-            Ok(debug_str) => Ok(debug_str),
-            Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
-        }
+        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
+        Ok(debug_str)
     }
 
     /// Process a PDF file path from Python caller and return a Python StatementData object.
@@ -179,30 +140,9 @@ impl LibParser {
                 e
             ))
         })?;
-        let configs = self.db.identify(&text_items);
-        if configs.is_empty() {
-            return Err(StatementNotSupported::new_err(
-                "No supported statement configuration found for the provided text items.",
-            ));
-        }
-
-        let statement_data_results = text_items_to_statement_datas(&text_items, &configs)
-            .map_err(pyo3::exceptions::PyRuntimeError::new_err)?;
-
-        // Return the first error-free StatementData
-        for data in statement_data_results {
-            if data.errors.is_empty() {
-                return utils::rust_statement_data_to_py_statement_data(&data);
-            }
-        }
-
-        // Package error if statement is identified for not parseable
-        let applicable_config_keys: Vec<String> =
-            configs.iter().map(|cfg| cfg.key.clone()).collect();
-        Err(NoErrorFreeStatementData::new_err(format!(
-            "No error-free StatementData found. This indicates an error in one of the configurations: {}. See further details using the \"debug\" method. Please contact a developer if this config is part of the default set provided by the package.",
-            applicable_config_keys.join(", ")
-        )))
+        let data =
+            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
+        utils::rust_statement_data_to_py_statement_data(&data)
     }
 
     /// Process a PDF file path from Python caller and return a JSON spec string.
@@ -217,32 +157,15 @@ impl LibParser {
                 e
             ))
         })?;
-        let configs = self.db.identify(&text_items);
-        if configs.is_empty() {
-            return Err(StatementNotSupported::new_err(
-                "No supported statement configuration found for the provided text items.",
-            ));
-        }
-
-        let statement_data_results = text_items_to_statement_datas(&text_items, &configs)
-            .map_err(pyo3::exceptions::PyRuntimeError::new_err)?;
-
-        // Return the first error-free StatementData
-        for data in statement_data_results {
-            if data.errors.is_empty() {
-                let spec = Spec::new(data, text_items);
-                return spec
-                    .to_json()
-                    .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()));
-            }
-        }
-
-        // Package error if statement is identified for not parseable
-        let applicable_config_keys: Vec<String> =
-            configs.iter().map(|cfg| cfg.key.clone()).collect();
-        Err(NoErrorFreeStatementData::new_err(format!(
-            "No error-free StatementData found. This indicates an error in one of the configurations: {}. See further details using the \"debug\" method. Please contact a developer if this config is part of the default set provided by the package.",
-            applicable_config_keys.join(", ")
-        )))
+        let spec = Spec::new(
+            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?,
+            text_items,
+        );
+        spec.to_json().map_err(|e| {
+            pyo3::exceptions::PyRuntimeError::new_err(format!(
+                "Failed to convert Spec to JSON string: {}",
+                e
+            ))
+        })
     }
 }

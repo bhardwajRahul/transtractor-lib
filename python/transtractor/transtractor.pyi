@@ -37,8 +37,7 @@ class LibParser:
         object.
 
         :param py_pdf_path: Path to the PDF file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
     def py_pdf_path_to_layout_py_str(self, py_pdf_path: str) -> str:
@@ -61,8 +60,7 @@ class LibParser:
         StatementData.
 
         :param py_layout_str: Layout string content from text file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
     def layout_py_str_to_debug_py_str(self, py_layout_str: str) -> str:
@@ -70,7 +68,7 @@ class LibParser:
         Process a layout string and return debug information as a string.
 
         :param py_layout_str: Layout string content from text file
-        :raises StatementNotSupported: If no supported statement configuration is found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
     def py_pdf_path_to_spec_py_str(self, py_pdf_path: str) -> str:
@@ -78,15 +76,11 @@ class LibParser:
         Process a PDF file path from Python caller and return a JSON spec string.
 
         :param py_pdf_path: Path to the PDF file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
-class NoErrorFreeStatementData(Exception):
-    """Raised when no error-free statement data could be found."""
+class ParseError(Exception):
+    """Raised when the content of a PDF file cannot be parsed correctly."""
 
 class ConfigLoadError(Exception):
     """Raised when a configuration cannot be loaded."""
-
-class StatementNotSupported(Exception):
-    """Raised when no supported statement configuration is found."""
