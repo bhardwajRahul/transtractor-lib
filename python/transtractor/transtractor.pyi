@@ -73,6 +73,15 @@ class LibParser:
         :raises StatementNotSupported: If no supported statement configuration is found
         """
 
+    def py_pdf_path_to_spec_py_str(self, py_pdf_path: str) -> str:
+        """
+        Process a PDF file path from Python caller and return a JSON spec string.
+
+        :param py_pdf_path: Path to the PDF file
+        :raises StatementNotSupported: If no supported statement configuration is found
+        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        """
+
 class NoErrorFreeStatementData(Exception):
     """Raised when no error-free statement data could be found."""
 

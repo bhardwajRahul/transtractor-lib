@@ -135,6 +135,23 @@ class Parser:
                 stacklevel=2,
             )
 
+    def spec(self, pdf_file_path: str, output_file: str) -> None:
+        """Extract and write a JSON I/O spec representation of a PDF file.
+
+        JSON I/O spec files comprise of a text-based representation of the PDF file
+        (text_items) along with the structured statement data extracted from it
+        (statement_data). These files are used as sanity checks to ensure the parser
+        is extracting data consistently and correctly from the PDF files.
+
+        :param pdf_file_path: Path to the PDF file to be processed
+        :param output_file: Path to the output JSON spec file
+        :raises StatementNotSupported: If no supported statement configuration is found
+        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        """
+        spec_str: str = self._inner.py_pdf_path_to_spec_py_str(pdf_file_path)
+        with open(output_file, "w", encoding="utf-8") as fh:
+            fh.write(spec_str)
+
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"
     ) -> None:
