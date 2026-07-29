@@ -6,9 +6,32 @@ use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
 use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
 use crate::python::exceptions::{ConfigLoadError, ParseError};
 use crate::python::utils;
-use crate::structs::Spec;
+use crate::structs::{Spec, TextItem};
 use pdfsink_rs::PdfDocument;
 use pyo3::prelude::*;
+
+fn py_pdf_path_to_text_items(py_pdf_path: &Bound<'_, PyAny>) -> PyResult<Vec<TextItem>> {
+    let rust_pdf_path = py_pdf_path.extract::<String>()?;
+    let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
+        pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
+    })?;
+    pdf_to_text_items(&pdf_document).map_err(|e| {
+        pyo3::exceptions::PyRuntimeError::new_err(format!(
+            "Failed to convert PDF to text items: {}",
+            e
+        ))
+    })
+}
+
+fn py_layout_str_to_text_items(py_layout_str: &Bound<'_, PyAny>) -> PyResult<Vec<TextItem>> {
+    let rust_layout_str = py_layout_str.extract::<String>()?;
+    layout_to_text_items(&rust_layout_str).map_err(|e| {
+        pyo3::exceptions::PyRuntimeError::new_err(format!(
+            "Failed to convert layout string to text items: {}",
+            e
+        ))
+    })
+}
 
 #[pyclass]
 #[derive(Default)]
@@ -64,29 +87,14 @@ impl LibParser {
         &self,
         py_layout_str: &Bound<'_, PyAny>,
     ) -> PyResult<Py<PyAny>> {
-        let rust_layout_str = py_layout_str.extract::<String>()?;
-        let text_items = layout_to_text_items(&rust_layout_str).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert layout string to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_layout_str_to_text_items(py_layout_str)?;
         let data =
             text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
         utils::rust_statement_data_to_py_statement_data(&data)
     }
 
     pub fn py_pdf_path_to_layout_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
-        let rust_pdf_path = py_pdf_path.extract::<String>()?;
-        let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
-        })?;
-        let text_items = pdf_to_text_items(&pdf_document).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert PDF to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         match text_items_to_layout(&text_items) {
             Ok(layout_str) => Ok(layout_str),
             Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
@@ -95,16 +103,7 @@ impl LibParser {
 
     /// Process a PDF file path from Python caller and return debug information as a string.
     pub fn py_pdf_path_to_debug_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
-        let rust_pdf_path = py_pdf_path.extract::<String>()?;
-        let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
-        })?;
-        let text_items = pdf_to_text_items(&pdf_document).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert PDF to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
         Ok(debug_str)
     }
@@ -114,13 +113,7 @@ impl LibParser {
         &self,
         py_layout_str: &Bound<'_, PyAny>,
     ) -> PyResult<String> {
-        let rust_layout_str = py_layout_str.extract::<String>()?;
-        let text_items = layout_to_text_items(&rust_layout_str).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert layout string to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_layout_str_to_text_items(py_layout_str)?;
         let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
         Ok(debug_str)
     }
@@ -130,16 +123,7 @@ impl LibParser {
         &self,
         py_pdf_path: &Bound<'_, PyAny>,
     ) -> PyResult<Py<PyAny>> {
-        let rust_pdf_path = py_pdf_path.extract::<String>()?;
-        let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
-        })?;
-        let text_items = pdf_to_text_items(&pdf_document).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert PDF to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         let data =
             text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
         utils::rust_statement_data_to_py_statement_data(&data)
@@ -147,16 +131,7 @@ impl LibParser {
 
     /// Process a PDF file path from Python caller and return a JSON spec string.
     pub fn py_pdf_path_to_spec_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
-        let rust_pdf_path = py_pdf_path.extract::<String>()?;
-        let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
-        })?;
-        let text_items = pdf_to_text_items(&pdf_document).map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert PDF to text items: {}",
-                e
-            ))
-        })?;
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         let spec = Spec::new(
             text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?,
             text_items,
