@@ -56,45 +56,39 @@ class Parser:
         )
         return sd
 
-    def debug(self, pdf_file_path: str, output_file: str) -> str:
+    def debug(self, pdf_file_path: str, output_file: str):
         """Write a summary of the statement data and quality checks for
         each statement extraction configuration applied.
 
         :param pdf_file_path: Path to the PDF file to be processed
         :param output_file: Path to the output debug text file
-        :return: The debug string written to the output file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         result = self._inner.py_pdf_path_to_debug_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(result)
-        return result
 
-    def debug_layout(self, layout_file_path: str, output_file: str) -> str:
+    def debug_layout(self, layout_file_path: str, output_file: str):
         """Write a summary of the statement data and quality checks for
         each statement extraction configuration applied.
 
         :param layout_file_path: Path to the layout file to be processed
         :param output_file: Path to the output debug text file
-        :return: The debug string written to the output file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         py_layout_str = open(layout_file_path, encoding="utf-8").read()
         result = self._inner.layout_py_str_to_debug_py_str(py_layout_str)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(result)
-        return result
 
-    def layout(self, pdf_file_path: str, output_file: str) -> str:
+    def layout(self, pdf_file_path: str, output_file: str) -> None:
         """Extract, write and return a text layout representation of the PDF page.
 
         :param pdf_file_path: Path to the PDF file to be processed
-        :return: A string representing the text layout of the page
         """
         layout_str: str = self._inner.py_pdf_path_to_layout_py_str(pdf_file_path)
         with open(output_file, "w", encoding="utf-8") as fh:
             fh.write(layout_str)
-        return layout_str
 
     def load(self, json_file_path: str) -> None:
         """Load a custom parsing configuration from a JSON file.
