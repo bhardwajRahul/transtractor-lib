@@ -163,4 +163,19 @@ impl LibParser {
         })?;
         str_to_file(spec_str, py_spec_path)
     }
+
+    /// Process a layout file path from Python caller and return a JSON spec string.
+    pub fn py_layout_path_to_spec(
+        &self,
+        py_layout_path: &Bound<'_, PyAny>,
+        py_spec_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
+        let py_layout_str = file_to_str(py_layout_path)?;
+        let text_items = layout_to_text_items(&py_layout_str).map_err(PyRuntimeError::new_err)?;
+        let spec = Spec::new(&self.db, text_items).map_err(ParseError::new_err)?;
+        let spec_str = spec.to_json().map_err(|e| {
+            PyRuntimeError::new_err(format!("Failed to convert Spec to JSON string: {}", e))
+        })?;
+        str_to_file(spec_str, py_spec_path)
+    }
 }

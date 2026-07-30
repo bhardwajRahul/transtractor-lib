@@ -122,6 +122,20 @@ class Parser:
         """
         self._inner.py_pdf_path_to_spec(pdf_file_path, output_file)
 
+    def spec_layout(self, layout_file_path: str, output_file: str) -> None:
+        """Extract and write a JSON I/O spec representation of a layout text file.
+
+        JSON I/O spec files comprise of a text-based representation of the PDF file
+        (text_items) along with the structured statement data extracted from it
+        (statement_data). These files are used as sanity checks to ensure the parser
+        is extracting data consistently and correctly from the PDF files.
+
+        :param layout_file_path: Path to the layout text file to be processed
+        :param output_file: Path to the output JSON spec file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
+        """
+        self._inner.py_layout_path_to_spec(layout_file_path, output_file)
+
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"
     ) -> None:

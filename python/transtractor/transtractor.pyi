@@ -77,6 +77,16 @@ class LibParser:
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
+    def py_layout_path_to_spec(self, py_layout_path: str, py_spec_path: str) -> None:
+        """
+        Process a layout text file from Python caller and write a JSON spec string to a
+        file.
+
+        :param py_layout_path: Path to the layout text file
+        :param py_spec_path: Path to the output JSON spec file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
+        """
+
 class ParseError(Exception):
     """Raised when the content of a PDF file cannot be parsed correctly."""
 
