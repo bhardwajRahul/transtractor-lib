@@ -157,10 +157,7 @@ impl LibParser {
         py_spec_path: &Bound<'_, PyAny>,
     ) -> PyResult<()> {
         let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
-        let spec = Spec::new(
-            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?,
-            text_items,
-        );
+        let spec = Spec::new(&self.db, text_items).map_err(ParseError::new_err)?;
         let spec_str = spec.to_json().map_err(|e| {
             PyRuntimeError::new_err(format!("Failed to convert Spec to JSON string: {}", e))
         })?;
