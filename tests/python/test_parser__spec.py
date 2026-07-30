@@ -53,7 +53,7 @@ def test_spec_raises_parse_error_without_config():
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     test_pdf = fixtures_dir / "test1.pdf"
 
-    # Should raise ParserError since no config is loaded
+    # Should raise ParseError since no config is loaded
     with pytest.raises(ParseError):
         parser.spec(str(test_pdf), "dummy_path.json")
 
@@ -68,6 +68,6 @@ def test_spec_raises_parse_error_with_misconfigured_config():
     misconfigured_config = fixtures_dir / "test1_config_misconfigured.json"
     parser.load(str(misconfigured_config))
 
-    # Should raise ParserError since the config is misconfigured
+    # Should raise ParseError since the config is misconfigured
     with pytest.raises(ParseError):
         parser.spec(str(test_pdf), "dummy_path.json")
