@@ -1,7 +1,6 @@
 """Python wrapper for the Transtractor PDF bank statement parser."""
 
 import warnings
-from pathlib import Path
 from typing import cast
 
 from .structs.statement_data import StatementData
@@ -50,9 +49,9 @@ class Parser:
         :return: StatementData object representing the parsed bank statement data
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
-        py_layout_str = open(layout_file_path, encoding="utf-8").read()
         sd: StatementData = cast(
-            StatementData, self._inner.layout_py_str_py_statement_data(py_layout_str)
+            StatementData,
+            self._inner.py_layout_path_to_py_statement_data(layout_file_path),
         )
         return sd
 
@@ -64,9 +63,7 @@ class Parser:
         :param output_file: Path to the output debug text file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
-        result = self._inner.py_pdf_path_to_debug_py_str(pdf_file_path)
-        with open(output_file, "w", encoding="utf-8") as fh:
-            fh.write(result)
+        self._inner.py_pdf_path_to_debug(pdf_file_path, output_file)
 
     def debug_layout(self, layout_file_path: str, output_file: str):
         """Write a summary of the statement data and quality checks for
@@ -76,19 +73,14 @@ class Parser:
         :param output_file: Path to the output debug text file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
-        py_layout_str = open(layout_file_path, encoding="utf-8").read()
-        result = self._inner.layout_py_str_to_debug_py_str(py_layout_str)
-        with open(output_file, "w", encoding="utf-8") as fh:
-            fh.write(result)
+        self._inner.py_layout_path_to_debug(layout_file_path, output_file)
 
     def layout(self, pdf_file_path: str, output_file: str) -> None:
         """Extract, write and return a text layout representation of the PDF page.
 
         :param pdf_file_path: Path to the PDF file to be processed
         """
-        layout_str: str = self._inner.py_pdf_path_to_layout_py_str(pdf_file_path)
-        with open(output_file, "w", encoding="utf-8") as fh:
-            fh.write(layout_str)
+        self._inner.py_pdf_path_to_layout(pdf_file_path, output_file)
 
     def load(self, json_file_path: str) -> None:
         """Load a custom parsing configuration from a JSON file.
@@ -98,18 +90,13 @@ class Parser:
         key.
 
         :param json_file_path: Path to the JSON configuration file
-        :return: None
         :raises ConfigLoadError: Configuration file is invalid or cannot be loaded
 
         See the docs for detailed instructions for creating custom
         configuration JSON files.
         """
-        # Read the JSON file
-        file_path = Path(json_file_path)
-        json_content = file_path.read_text(encoding="utf-8")
-
         # Register the configuration via string to capture deprecation warnings
-        self._inner.register_config_from_json_str(json_content)
+        self._inner.register_config_from_json(json_file_path)
 
         # Check for and emit any deprecation warnings
         deprecation_warnings = self._inner.get_deprecation_warnings()
@@ -133,9 +120,7 @@ class Parser:
         :param output_file: Path to the output JSON spec file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
-        spec_str: str = self._inner.py_pdf_path_to_spec_py_str(pdf_file_path)
-        with open(output_file, "w", encoding="utf-8") as fh:
-            fh.write(spec_str)
+        self._inner.py_pdf_path_to_spec(pdf_file_path, output_file)
 
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"

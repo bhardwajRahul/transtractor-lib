@@ -8,28 +8,42 @@ use crate::python::exceptions::{ConfigLoadError, ParseError};
 use crate::python::utils;
 use crate::structs::{Spec, TextItem};
 use pdfsink_rs::PdfDocument;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
+use std::io::Write;
 
+/// Helper to convert Python PDF file path to Rust text items
 fn py_pdf_path_to_text_items(py_pdf_path: &Bound<'_, PyAny>) -> PyResult<Vec<TextItem>> {
     let rust_pdf_path = py_pdf_path.extract::<String>()?;
-    let pdf_document = PdfDocument::open(&rust_pdf_path).map_err(|e| {
-        pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e))
-    })?;
-    pdf_to_text_items(&pdf_document).map_err(|e| {
-        pyo3::exceptions::PyRuntimeError::new_err(format!(
-            "Failed to convert PDF to text items: {}",
-            e
-        ))
-    })
+    let pdf_document = PdfDocument::open(&rust_pdf_path)
+        .map_err(|e| PyRuntimeError::new_err(format!("Failed to open PDF document: {}", e)))?;
+    pdf_to_text_items(&pdf_document)
+        .map_err(|e| PyRuntimeError::new_err(format!("Failed to convert PDF to text items: {}", e)))
 }
 
-fn py_layout_str_to_text_items(py_layout_str: &Bound<'_, PyAny>) -> PyResult<Vec<TextItem>> {
-    let rust_layout_str = py_layout_str.extract::<String>()?;
-    layout_to_text_items(&rust_layout_str).map_err(|e| {
-        pyo3::exceptions::PyRuntimeError::new_err(format!(
-            "Failed to convert layout string to text items: {}",
-            e
+/// Helper to write Rust string to text file to path specified by Python caller.
+fn str_to_file(content: String, py_file_path: &Bound<'_, PyAny>) -> PyResult<()> {
+    let rust_file_path = py_file_path.extract::<String>()?;
+    let mut file = std::fs::File::create(&rust_file_path).map_err(|e| {
+        PyRuntimeError::new_err(format!(
+            "Failed to create file at {}: {}",
+            rust_file_path, e
         ))
+    })?;
+    file.write_all(content.as_bytes()).map_err(|e| {
+        PyRuntimeError::new_err(format!(
+            "Failed to write to file at {}: {}",
+            rust_file_path, e
+        ))
+    })?;
+    Ok(())
+}
+
+/// Helper to read string from text file to path specified by Python caller.
+fn file_to_str(py_file_path: &Bound<'_, PyAny>) -> PyResult<String> {
+    let rust_file_path = py_file_path.extract::<String>()?;
+    std::fs::read_to_string(&rust_file_path).map_err(|e| {
+        PyRuntimeError::new_err(format!("Failed to read file at {}: {}", rust_file_path, e))
     })
 }
 
@@ -52,13 +66,24 @@ impl LibParser {
         }
     }
 
-    /// Register JSON configuration string into the parser database
-    pub fn register_config_from_json_str(&mut self, py_json_str: &str) -> PyResult<()> {
+    /// Get deprecation warnings from the last loaded configuration
+    pub fn get_deprecation_warnings(&self) -> Vec<String> {
+        self.last_deprecation_warnings.clone()
+    }
+
+    /// Register configuration file, update the StatementTyper and return any
+    /// deprecation warnings.
+    pub fn register_config_from_json(
+        &mut self,
+        py_config_json_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
+        let json_str = file_to_str(py_config_json_path)?;
+
         // Clear previous warnings
         self.last_deprecation_warnings.clear();
 
         // Register and get deprecation warnings
-        match self.db.register_from_str_with_warnings(py_json_str) {
+        match self.db.register_from_str_with_warnings(&json_str) {
             Ok(warnings) => {
                 self.last_deprecation_warnings = warnings;
                 Ok(())
@@ -67,55 +92,51 @@ impl LibParser {
         }
     }
 
-    /// Get deprecation warnings from the last loaded configuration
-    pub fn get_deprecation_warnings(&self) -> Vec<String> {
-        self.last_deprecation_warnings.clone()
-    }
-
-    /// Import JSON configuration file into the parser database and update the StatementTyper.
-    pub fn register_config_from_file(&mut self, py_file_path: &str) -> PyResult<()> {
-        match self.db.register_from_file(py_file_path) {
-            Ok(_) => {}
-            Err(e) => return Err(ConfigLoadError::new_err(e)),
-        }
-        Ok(())
-    }
-
     /// Process a layout string and return statement data as a Python object of type
     /// StatementData.
-    pub fn layout_py_str_py_statement_data(
+    pub fn py_layout_path_to_py_statement_data(
         &self,
-        py_layout_str: &Bound<'_, PyAny>,
+        py_layout_path: &Bound<'_, PyAny>,
     ) -> PyResult<Py<PyAny>> {
-        let text_items = py_layout_str_to_text_items(py_layout_str)?;
+        let py_layout_str = file_to_str(py_layout_path)?;
+        let text_items = layout_to_text_items(&py_layout_str).map_err(PyRuntimeError::new_err)?;
         let data =
             text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
         utils::rust_statement_data_to_py_statement_data(&data)
     }
 
-    pub fn py_pdf_path_to_layout_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
-        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
-        match text_items_to_layout(&text_items) {
-            Ok(layout_str) => Ok(layout_str),
-            Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
-        }
-    }
-
-    /// Process a PDF file path from Python caller and return debug information as a string.
-    pub fn py_pdf_path_to_debug_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
-        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
-        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
-        Ok(debug_str)
-    }
-
-    /// Process a layout string from Python caller and return debug information as a string.
-    pub fn layout_py_str_to_debug_py_str(
+    /// Process a PDF file path from Python caller and write layout file.
+    pub fn py_pdf_path_to_layout(
         &self,
-        py_layout_str: &Bound<'_, PyAny>,
-    ) -> PyResult<String> {
-        let text_items = py_layout_str_to_text_items(py_layout_str)?;
+        py_pdf_path: &Bound<'_, PyAny>,
+        py_layout_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
+        let layout_str = text_items_to_layout(&text_items).map_err(PyRuntimeError::new_err)?;
+        str_to_file(layout_str, py_layout_path)
+    }
+
+    /// Process a PDF file path from Python caller and write debug file.
+    pub fn py_pdf_path_to_debug(
+        &self,
+        py_pdf_path: &Bound<'_, PyAny>,
+        py_debug_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
+        let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
-        Ok(debug_str)
+        str_to_file(debug_str, py_debug_path)
+    }
+
+    /// Process a layout string from Python caller and write debug file.
+    pub fn py_layout_path_to_debug(
+        &self,
+        py_layout_path: &Bound<'_, PyAny>,
+        py_debug_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
+        let py_layout_str = file_to_str(py_layout_path)?;
+        let text_items = layout_to_text_items(&py_layout_str).map_err(PyRuntimeError::new_err)?;
+        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
+        str_to_file(debug_str, py_debug_path)
     }
 
     /// Process a PDF file path from Python caller and return a Python StatementData object.
@@ -130,17 +151,19 @@ impl LibParser {
     }
 
     /// Process a PDF file path from Python caller and return a JSON spec string.
-    pub fn py_pdf_path_to_spec_py_str(&self, py_pdf_path: &Bound<'_, PyAny>) -> PyResult<String> {
+    pub fn py_pdf_path_to_spec(
+        &self,
+        py_pdf_path: &Bound<'_, PyAny>,
+        py_spec_path: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
         let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
         let spec = Spec::new(
             text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?,
             text_items,
         );
-        spec.to_json().map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!(
-                "Failed to convert Spec to JSON string: {}",
-                e
-            ))
-        })
+        let spec_str = spec.to_json().map_err(|e| {
+            PyRuntimeError::new_err(format!("Failed to convert Spec to JSON string: {}", e))
+        })?;
+        str_to_file(spec_str, py_spec_path)
     }
 }
