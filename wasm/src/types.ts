@@ -10,7 +10,6 @@ export interface StatementData {
   key: string;
   account_number: string;
   start_date: number;
-  start_date_year: number;
   opening_balance: number;
   closing_balance: number;
   transactions: Transaction[];

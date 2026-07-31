@@ -21,7 +21,6 @@ def validate_fields(fields: list[str]) -> None:
         "amount",
         "balance",
         "start_date",
-        "start_date_year",
         "opening_balance",
         "closing_balance",
         "key",
@@ -43,7 +42,6 @@ class StatementData:
         key: str,
         account_number: str,
         start_date: int,
-        start_date_year: int,
         opening_balance: float,
         closing_balance: float,
         transactions: list[Transaction],
@@ -56,8 +54,6 @@ class StatementData:
         :type account_number: str
         :param start_date: Statement start date in milliseconds since epoch
         :type start_date: int
-        :param start_date_year: Calendar year corresponding to start_date
-        :type start_date_year: int
         :param opening_balance: Opening balance for the statement
         :type opening_balance: float
         :param closing_balance: Closing balance for the statement
@@ -69,7 +65,6 @@ class StatementData:
         self._filename = ""
         self._account_number = ""
         self._start_date = 0
-        self._start_date_year = 0
         self._opening_balance = 0.0
         self._closing_balance = 0.0
         self._transactions = []
@@ -78,7 +73,6 @@ class StatementData:
         self.set_key(key)
         self.set_account_number(account_number)
         self.set_start_date(start_date)
-        self.set_start_date_year(start_date_year)
         self.set_opening_balance(opening_balance)
         self.set_closing_balance(closing_balance)
         self.set_transactions(transactions)
@@ -89,7 +83,6 @@ class StatementData:
             f"filename={self._filename!r}, "
             f"account_number={self._account_number!r}, "
             f"start_date={self._start_date!r}, "
-            f"start_date_year={self._start_date_year!r}, "
             f"opening_balance={self._opening_balance!r}, "
             f"closing_balance={self._closing_balance!r}, "
             f"transactions=[{len(self._transactions)} transactions])"
@@ -114,11 +107,6 @@ class StatementData:
     def start_date(self) -> int:
         """Get the statement start date in milliseconds since epoch."""
         return self._start_date
-
-    @property
-    def start_date_year(self) -> int:
-        """Get the statement start-date year."""
-        return self._start_date_year
 
     @property
     def opening_balance(self) -> float:
@@ -178,14 +166,6 @@ class StatementData:
             )
         self._start_date = start_date
 
-    def set_start_date_year(self, start_date_year: int) -> None:
-        """Set the year derived from the statement start date."""
-        if not isinstance(start_date_year, int):
-            raise TypeError(
-                f"start_date_year must be an int, got {type(start_date_year).__name__}"
-            )
-        self._start_date_year = start_date_year
-
     def set_opening_balance(self, opening_balance: float) -> None:
         """Set the opening balance for the statement."""
         if not isinstance(opening_balance, int | float):
@@ -240,8 +220,8 @@ class StatementData:
         :param fields: Fields to include in the CSV. Defaults to
             ('date', 'description', 'amount', 'balance'). Valid fields are:
             'date', 'date_index', 'description', 'amount', 'balance',
-            'start_date', 'start_date_year', 'opening_balance', 'closing_balance',
-            'key', 'filename', 'account_number'.
+            'start_date', 'opening_balance', 'closing_balance', 'key',
+            'filename', 'account_number'.
         :type fields: Union[tuple[str, ...], list[str]]
 
         Example usage::
@@ -272,7 +252,6 @@ class StatementData:
                         "filename",
                         "account_number",
                         "start_date",
-                        "start_date_year",
                         "opening_balance",
                         "closing_balance",
                     }:
@@ -320,7 +299,6 @@ class StatementData:
                     "filename",
                     "account_number",
                     "start_date",
-                    "start_date_year",
                     "opening_balance",
                     "closing_balance",
                 }:

@@ -22,7 +22,6 @@ struct JsStatementData {
     key: String,
     account_number: String,
     start_date: i64,
-    start_date_year: i32,
     opening_balance: f64,
     closing_balance: f64,
     transactions: Vec<JsTransaction>,
@@ -187,11 +186,6 @@ impl TryFrom<&StatementData> for JsStatementData {
             })?,
             start_date: value.start_date.ok_or_else(|| {
                 JsValue::from_str("Parsed statement data is missing required field: start_date")
-            })?,
-            start_date_year: value.start_date_year.ok_or_else(|| {
-                JsValue::from_str(
-                    "Parsed statement data is missing required field: start_date_year",
-                )
             })?,
             opening_balance: value.opening_balance.ok_or_else(|| {
                 JsValue::from_str(

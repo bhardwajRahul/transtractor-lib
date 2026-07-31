@@ -39,7 +39,6 @@ describe("Parser", () => {
     expect(actual.key).toBe(expected.statement_data.key);
     expect(actual.account_number).toBe(expected.statement_data.account_number);
     expect(actual.start_date).toBe(expected.statement_data.start_date);
-    expect(actual.start_date_year).toBe(expected.statement_data.start_date_year);
     expect(actual.opening_balance).toBe(expected.statement_data.opening_balance);
     expect(actual.closing_balance).toBe(expected.statement_data.closing_balance);
     expect(actual.transactions).toHaveLength(

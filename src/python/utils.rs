@@ -29,11 +29,6 @@ pub fn rust_statement_data_to_py_statement_data(
             PyRuntimeError::new_err("StatementData is missing required field: start_date")
         })?;
 
-        // Get start_date_year (required field)
-        let start_date_year = rust_statement_data.start_date_year.ok_or_else(|| {
-            PyRuntimeError::new_err("StatementData is missing required field: start_date_year")
-        })?;
-
         // Get opening_balance (required field)
         let opening_balance = rust_statement_data.opening_balance.ok_or_else(|| {
             PyRuntimeError::new_err("StatementData is missing required field: opening_balance")
@@ -84,7 +79,6 @@ pub fn rust_statement_data_to_py_statement_data(
             key,
             account_number,
             start_date,
-            start_date_year,
             opening_balance,
             closing_balance,
             py_transactions,
