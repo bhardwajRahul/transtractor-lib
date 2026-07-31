@@ -89,7 +89,7 @@ def write_github_output(name: str, value: str) -> None:
     output_path = os.environ.get("GITHUB_OUTPUT")
     if output_path:
         with open(output_path, "a", encoding="utf-8") as fh:
-            fh.write(f"{name}={value}\\n")
+            fh.write(f"{name}={value}\n")
 
 
 def main() -> None:
