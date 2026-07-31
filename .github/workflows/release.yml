@@ -229,8 +229,8 @@ jobs:
       - name: Append Python license findings to workflow summary
         run: cat pip-licenses.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Scan JavaScript dependencies for vulnerabilities
-        run: cd wasm && npm audit --json > ../npm-audit.json || true
+      - name: Scan JavaScript runtime dependencies for vulnerabilities
+        run: cd wasm && npm run audit:runtime
 
       - name: Render JavaScript audit findings
         id: render-npm-audit
@@ -239,7 +239,7 @@ jobs:
       - name: Append JavaScript findings to workflow summary
         run: cat npm-audit.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Scan JavaScript dependencies for licenses
+      - name: Scan JavaScript runtime dependencies for licenses
         run: cd wasm && npx license-checker --json --production > ../npm-licenses.json || true
 
       - name: Render JavaScript license findings

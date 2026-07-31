@@ -278,13 +278,13 @@ uv run python scripts/render-cargo-deny.py cargo-deny.json cargo-deny.md
 ```
 
 ### TypeScript/WASM
-JavaScript dependency audits are run from the `wasm` package.
+JavaScript dependency audits are run from the `wasm` package and target runtime dependencies only.
 
 Scan dependencies for known vulnerabilities:
 
 ```shell
 cd wasm
-npm audit --json > ../npm-audit.json
+npm run audit:runtime
 ```
 
 Render vulnerability findings:
@@ -370,6 +370,25 @@ uv run pytest
 
 If Maturin has been updated, then regenerate release workflows by `maturin generate-ci github` and update the respective `steps` in the **build.yml** and **release.yml** files.
 
+#### TypeScript/WASM Dependencies
+Update the WASM package dependencies by editing `wasm/package.json` and refreshing `wasm/package-lock.json`:
+
+```shell
+cd wasm
+npm install
+```
+
+This keeps the lockfile in sync with `package.json` and ensures the CI jobs that run `npm ci` remain reproducible. After updating the JS dependencies, run the WASM package checks:
+
+```shell
+cd wasm
+npm run lint
+npm run test
+npm run build
+```
+
+The JavaScript audit checks are scoped to runtime dependencies only. The current WASM package does not declare any runtime dependencies, but the audit jobs remain in place so that future runtime additions are scanned automatically.
+
 ### Step 2: Updating Documentation
 Review and update documentation as required.
 
@@ -397,7 +416,7 @@ parser.parse("pdfs/")
 All PDF files in this directory and its subdirectories should parse successfully.
 
 ### Step 4: Bump Version
-Version numbers must be updated in both `Cargo.toml` and `docs/conf.py` to reflect the new release.
+Version numbers must be updated in `Cargo.toml`, `docs/conf.py`, and `wasm/package.json` to reflect the new release.
 
 This project follows **Semantic Versioning (SemVer)**, using the `Major.Minor.Patch` convention. The initial release was set to `0.9.0` to indicate a near‑production beta. Subsequent increments follow these rules:
 
@@ -419,6 +438,8 @@ git push origin v1.0.1
 ```
 
 Pushing the tag triggers the `release.yml` workflow. As a pre‑flight check, the workflow verifies that the tag conforms to the SemVer format and that the version has been updated in both `Cargo.toml` and `docs/conf.py`. Once validated, the package is automatically published to PyPI, and the Sphinx documentation is rebuilt on **Read the Docs**, ensuring the hosted docs match the newly released version.
+
+The release workflow also verifies that `wasm/package.json` matches the tag version, so remember to bump the WASM package version alongside the Rust and documentation versions before tagging.
 
 ### Step 7: Completing the Release Notes
 Complete the Release Notes using the template generated at the end of the `release.yml` workflow. The draft is already associated with the correct version tag, removing one more detail to remember to set.
