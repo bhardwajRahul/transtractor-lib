@@ -26,7 +26,6 @@ struct JsStatementData {
     opening_balance: f64,
     closing_balance: f64,
     transactions: Vec<JsTransaction>,
-    errors: Vec<String>,
 }
 
 #[wasm_bindgen(js_name = Parser)]
@@ -167,6 +166,12 @@ impl TryFrom<&StatementData> for JsStatementData {
     type Error = JsValue;
 
     fn try_from(value: &StatementData) -> Result<Self, Self::Error> {
+        if !value.errors.is_empty() {
+            return Err(JsValue::from_str(
+                "Parsed statement data must be error-free before export to JavaScript",
+            ));
+        }
+
         let transactions = value
             .proto_transactions
             .iter()
@@ -199,7 +204,6 @@ impl TryFrom<&StatementData> for JsStatementData {
                 )
             })?,
             transactions,
-            errors: value.errors.clone(),
         })
     }
 }

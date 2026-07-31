@@ -14,5 +14,4 @@ export interface StatementData {
   opening_balance: number;
   closing_balance: number;
   transactions: Transaction[];
-  errors: string[];
 }

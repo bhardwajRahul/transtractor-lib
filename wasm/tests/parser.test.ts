@@ -36,7 +36,6 @@ describe("Parser", () => {
 
     const actual = parser.parseLayoutText(layoutText);
 
-    expect(actual.errors).toEqual([]);
     expect(actual.key).toBe(expected.statement_data.key);
     expect(actual.account_number).toBe(expected.statement_data.account_number);
     expect(actual.start_date).toBe(expected.statement_data.start_date);
