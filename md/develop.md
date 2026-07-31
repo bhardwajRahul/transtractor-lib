@@ -8,6 +8,7 @@ This guide brings together the current development, validation, and release work
 - [Linting and Formatting](#linting-and-formatting)
 - [Static Type Checking](#static-type-checking)
 - [Dependency Audits](#dependency-audits)
+- [WASM Package](#wasm-package)
 - [Sphinx User Documentation](#sphinx-user-documentation)
 - [Release-Day Workflow](#release-day-workflow)
 
@@ -15,7 +16,9 @@ This guide brings together the current development, validation, and release work
 Before proceeding, ensure the following tools are installed:
 
 * [**Rust Toolchain**](https://rust-lang.org/tools/install/) — Required to compile and test the core processing engine.
+* [**Node.js**](https://nodejs.org/) — Required for TypeScript tooling and WASM package tests.
 * [**uv**](https://docs.astral.sh/uv/getting-started/installation/) — Used to create the Python virtual environment and install all package dependencies.
+* [**wasm-pack**](https://rustwasm.github.io/wasm-pack/installer/) — Required to build Rust WebAssembly artifacts.
 * [**VS Code**](https://code.visualstudio.com/) — Recommended IDE. Project‑specific settings are provided in `.vscode/extensions.json` and `.vscode/settings.json`.
 
 Clone the repository:
@@ -33,27 +36,36 @@ uv sync --locked --all-groups
 
 This command installs Maturin and all Python runtime dependencies, compiles the Rust components, and installs the Python module. Development Python dependencies are also included. Some additional Rust tooling will need to be installed manually; these are described in their respective sections.
 
+Install and sync TypeScript dependencies for the WASM package:
+
+```shell
+cd wasm
+npm ci
+```
+
 
 ## CI/CD
-The Transtractor repository implements a set of GitHub Actions workflows that automate testing, validation, security auditing, and release publishing across both the Rust and Python components. 
+The Transtractor repository implements a set of GitHub Actions workflows that automate testing, validation, security auditing, and release publishing across the Rust, Python and TypeScript/WASM components. 
 
 ### ci.yml
 This workflow runs on every push or pull request targeting the main branch. It guards against regressions, enforces code quality, and surfaces useful diagnostics for ongoing improvement. It consists of the following jobs:
 
 * **test** — Runs unit tests (`pytest`, `cargo test`), linting (`ruff check`, `cargo clippy`), formatting (`ruff format`, `cargo fmt`), and a Sphinx documentation build (`make html`) across all [actively supported Python versions](https://devguide.python.org/versions/) and the major operating systems (Windows, macOS, and Ubuntu). The job fails if any test fails or if linting or formatting issues are detected. These checks run only on the default architecture of GitHub‑hosted runners and do not attempt to cover all build targets published to PyPI via the *build-release.yml* workflow. 
 
+* **test-wasm** — Runs WASM package checks on Ubuntu, including TypeScript linting (`eslint`) and unit tests (`vitest`).
+
 * **typecheck** — Performs static type checking on Python components using `pyright` and writes the results to the GitHub Markdown summary. Type errors do not fail the pipeline, but they should be fully resolved before release.
 
-* **coverage** — Computes and renders per‑module test coverage for Rust (`cargo llvm-cov`) and Python (`pytest`) in the GitHub Markdown summary. Cobertura XML artifacts for both languages are uploaded to Codecov, which produces a combined coverage metric displayed in the *README.md*. The workflow does not enforce a minimum coverage threshold, though this may be introduced as the project matures beyond beta.
+* **coverage** — Computes and renders per‑module test coverage for Rust (`cargo llvm-cov`), Python (`pytest`) and TypeScript (`vitest`) in the GitHub Markdown summary. Cobertura XML artifacts for all three are uploaded to Codecov, which produces a combined coverage metric displayed in the *README.md*. The workflow does not enforce a minimum coverage threshold, though this may be introduced as the project matures beyond beta.
 
 ### audit.yml
-This workflow runs on every push or pull request targeting the *main* branch. It scans Rust and Python dependencies for known vulnerabilities (`cargo audit`, `pip-audit`) and for license incompatibilities (`pip-licenses`, `cargo deny`). It is also scheduled to run weekly to catch any issues that may have surfaced since the last push or pull request. All findings are written to the GitHub Markdown summary. The workflow is configured to fail if any issues are detected, but only after they have been fully rendered in the summary.
+This workflow runs on every push or pull request targeting the *main* branch. It scans Rust, Python and JavaScript dependencies for known vulnerabilities (`cargo audit`, `pip-audit`, `npm audit`) and for license incompatibilities (`pip-licenses`, `cargo deny`, `license-checker`). It is also scheduled to run weekly to catch any issues that may have surfaced since the last push or pull request. All findings are written to the GitHub Markdown summary. The workflow is configured to fail if any issues are detected, but only after they have been fully rendered in the summary.
 
 ### build.yml
-This workflow runs on every push or pull request targeting the main branch and verifies that the package can be built across all supported architectures intended for publication to PyPI. Its contents are adapted from the configuration generated automatically by `maturin generate-ci github`.
+This workflow runs on every push or pull request targeting the main branch and verifies that the package can be built across all supported architectures intended for publication to PyPI. It also verifies that the WASM package can be built end-to-end. Its Python wheel contents are adapted from the configuration generated automatically by `maturin generate-ci github`.
 
 ### release.yml
-This workflow runs whenever a new version tag is pushed to the repository. It performs a series of sequential checks designed to prevent faulty or incomplete releases from being published to [PyPI](https://pypi.org/project/transtractor/). These checks include tag validation and the full suite of tests drawn from the **ci.yml**, **build.yml**, and **audit.yml** workflows. Once all checks pass and the package has been successfully built across all supported architectures, the new version is published to PyPI and a draft GitHub release is created.
+This workflow runs whenever a new version tag is pushed to the repository. It performs a series of sequential checks designed to prevent faulty or incomplete releases from being published to [PyPI](https://pypi.org/project/transtractor/) and npm. These checks include tag validation and the full suite of tests drawn from the **ci.yml**, **build.yml**, and **audit.yml** workflows. Version parity is also enforced across `Cargo.toml`, `docs/conf.py` and `wasm/package.json`. Once all checks pass and all package artifacts have been built, the new version is published to PyPI and npm and a draft GitHub release is created.
 
 Creating this draft release triggers the Sphinx documentation build on [**Read the Docs**](https://transtractor-lib.readthedocs.io/en/latest/), ensuring that the hosted user documentation is updated to match the newly released version.
 
@@ -98,12 +110,29 @@ cargo llvm-cov --all-features --cobertura --output-path cov-rust.xml
 
 This produces line‑level coverage information for all Rust modules included in the build.
 
+### TypeScript/WASM
+WASM package tests are maintained under `wasm/tests` and run with Vitest:
+
+```shell
+cd wasm
+npm run test
+```
+
+TypeScript coverage can be generated with:
+
+```shell
+cd wasm
+npm run coverage
+cp coverage/cobertura-coverage.xml ../cov-js.xml
+```
+
 ### Rendering Markdown Reports
 The Python script `render-coverage.py` converts Cobertura XML coverage outputs into per‑module Markdown reports suitable for inclusion in the GitHub Actions summary. It can be invoked as follows:
 
 ```shell
 uv run python scripts/render-coverage.py cov-rust.xml cov-rust.md Rust
 uv run python scripts/render-coverage.py cov-python.xml cov-python.md Python
+uv run python scripts/render-coverage.py cov-js.xml cov-js.md JavaScript
 ```
 
 
@@ -140,6 +169,14 @@ To assert formatting:
 
 ```shell
 cargo fmt --check
+```
+
+### TypeScript/WASM
+TypeScript linting for the WASM package is handled by **ESLint**:
+
+```shell
+cd wasm
+npm run lint
 ```
 
 ## Static Type Checking
@@ -239,6 +276,38 @@ Render Rust licence audit findings into Markdown:
 ```shell
 uv run python scripts/render-cargo-deny.py cargo-deny.json cargo-deny.md
 ```
+
+### TypeScript/WASM
+JavaScript dependency audits are run from the `wasm` package.
+
+Scan dependencies for known vulnerabilities:
+
+```shell
+cd wasm
+npm audit --json > ../npm-audit.json
+```
+
+Render vulnerability findings:
+
+```shell
+uv run python scripts/render-npm-audit.py npm-audit.json npm-audit.md
+```
+
+Scan dependencies for license compatibility:
+
+```shell
+cd wasm
+npx license-checker --json --production > ../npm-licenses.json
+```
+
+Render license findings:
+
+```shell
+uv run python scripts/render-npm-licenses.py npm-licenses.json npm-licenses.md
+```
+
+## WASM Package
+WASM-specific implementation and usage guidance is maintained in [wasm.md](wasm.md). This includes build instructions, browser/static-site examples, and TypeScript runtime examples.
 
 ## Sphinx User Documentation
 User documentation is authored using **Sphinx** and published to [**Read the Docs**](https://transtractor-lib.readthedocs.io/en/latest/). Deployment is handled via a repository‑level webhook that triggers builds on Read the Docs whenever a release is created, edited, published, unpublished or deleted. Therefore, this process is automatically triggered when the `release.yml` GitHub Actions workflow has created a draft release once all preflight checks have passed and artifacts have been published to PyPI. Read the Docs automatically pulls the repository, builds the documentation, and publishes it so that the hosted docs always reflect the latest released version of the code. The build configuration used by Read the Docs is defined in `.readthedocs.yaml`.

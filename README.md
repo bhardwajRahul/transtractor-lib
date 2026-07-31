@@ -89,3 +89,4 @@ The following pages provide further information about how this package is built 
 
 * [Architecture Guide](md/architecture.md): Overview of key application components and design principles.
 * [Developer Guide](md/develop.md): Reference page for core development and maintenance.
+* [WASM Guide](md/wasm.md): Build and usage notes for the TypeScript/WASM package.

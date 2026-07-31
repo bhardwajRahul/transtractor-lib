@@ -1,0 +1,41 @@
+{
+  "name": "@transtractor/wasm",
+  "version": "0.10.0",
+  "description": "WASM + TypeScript bindings for transtractor",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "pkg",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "rimraf dist pkg coverage",
+    "build:wasm": "PATH=\"$HOME/.cargo/bin:$PATH\" wasm-pack build .. --target nodejs --out-dir wasm/pkg --out-name transtractor --features wasm-bindings --no-default-features",
+    "build:web": "PATH=\"$HOME/.cargo/bin:$PATH\" wasm-pack build .. --target web --out-dir wasm/pkg-web --out-name transtractor --features wasm-bindings --no-default-features",
+    "build:ts": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && npm run build:wasm && npm run build:ts",
+    "lint": "eslint src tests --max-warnings=0",
+    "pretest": "npm run build:wasm",
+    "test": "vitest run",
+    "precoverage": "npm run build:wasm",
+    "coverage": "vitest run --coverage",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.34.0",
+    "license-checker": "^25.0.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

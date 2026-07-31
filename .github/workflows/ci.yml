@@ -1,7 +1,6 @@
-# Runs Python and Rust tests on all platforms and Python versions. Also runs type 
-# checking and coverage reporting and shows the results in the workflow summary. Code 
-# coverage is uploaded to Codecov. Builds are triggered on push and pull requests 
-# targeting the main branch.
+# Runs Python, Rust and TypeScript/WASM tests. Also runs type checking and coverage
+# reporting and shows the results in the workflow summary. Coverage is uploaded to
+# Codecov. Builds are triggered on push and pull requests targeting the main branch.
 
 name: CI
 
@@ -61,6 +60,37 @@ jobs:
       - name: Build Sphinx documentation
         run: cd docs && uv run make html
 
+  test-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wasm/package-lock.json
+
+      - name: Install WASM package dependencies
+        run: cd wasm && npm ci
+
+      - name: Run TypeScript lint checks
+        run: cd wasm && npm run lint
+
+      - name: Run WASM unit tests
+        run: cd wasm && npm run test
+
   typecheck:
     runs-on: ubuntu-latest
 
@@ -119,18 +149,37 @@ jobs:
       - name: Sync Python dev environment
         run: uv sync --locked --group dev
 
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wasm/package-lock.json
+
+      - name: Install WASM package dependencies
+        run: cd wasm && npm ci
+
       - name: Generate Rust Coverage (Cobertura XML)
         run: cargo llvm-cov --all-features --cobertura --output-path cov-rust.xml
 
       - name: Generate Python Coverage (pytest, Cobertura XML)
         run: uv run pytest
 
+      - name: Generate JavaScript Coverage (Vitest, Cobertura XML)
+        run: |
+          cd wasm
+          npm run coverage
+          cp coverage/cobertura-coverage.xml ../cov-js.xml
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./cov-rust.xml,./cov-python.xml
-          flags: rust,python
+          files: ./cov-rust.xml,./cov-python.xml,./cov-js.xml
+          flags: rust,python,js
           fail_ci_if_error: false
           verbose: true
 
@@ -148,6 +197,13 @@ jobs:
       - name: Write Python Coverage to Job Summary
         run: cat cov-python.md >> $GITHUB_STEP_SUMMARY
 
+      - name: Generate Detailed JavaScript Coverage Report
+        run: uv run python scripts/render-coverage.py cov-js.xml cov-js.md JavaScript
+        continue-on-error: true
+
+      - name: Write JavaScript Coverage to Job Summary
+        run: cat cov-js.md >> $GITHUB_STEP_SUMMARY
+
       - name: Upload coverage artifacts
         if: always()
         uses: actions/upload-artifact@v7
@@ -158,4 +214,6 @@ jobs:
             cov-rust.md
             cov-python.xml
             cov-python.md
+            cov-js.xml
+            cov-js.md
           if-no-files-found: warn
