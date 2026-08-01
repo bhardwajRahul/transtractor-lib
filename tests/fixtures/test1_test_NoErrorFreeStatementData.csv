@@ -1,2 +1,2 @@
 PDF File,Transactions,Config Key,Total Time (ms),Status,Reason Failed
-tests/fixtures/test1.pdf,0,,608,FAIL,Bank statement recognised but cannot be parsed. Debugged configurations: ["au__gtb__fake_account__1"]
+tests/fixtures/test1.pdf,0,,608,FAIL,Bank statement recognised but cannot be parsed. Debug configurations: ["au__gtb__fake_account__1"]
