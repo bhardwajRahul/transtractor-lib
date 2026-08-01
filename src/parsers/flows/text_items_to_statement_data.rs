@@ -25,7 +25,7 @@ pub fn text_items_to_statement_data(
     // Software bug: If statement is recognised, it should be parsed successfully
     let keys: Vec<String> = configs.iter().map(|cfg| cfg.key.clone()).collect();
     Err(format!(
-        "Bank statement recognised but cannot be parsed. Debugged configurations: {:?}",
+        "Bank statement recognised but cannot be parsed. Debug configurations: {:?}",
         keys
     ))
 }
