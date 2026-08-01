@@ -1,6 +1,5 @@
 use crate::configs::db::ConfigDB;
 use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
-use crate::structs::ProtoTransaction;
 use crate::structs::StatementData;
 use crate::structs::text_item::TextItem;
 use serde::{Deserialize, Serialize};
@@ -16,31 +15,149 @@ fn option_f64_matches(left: Option<f64>, right: Option<f64>) -> bool {
     }
 }
 
-fn proto_transaction_matches(left: &ProtoTransaction, right: &ProtoTransaction) -> bool {
-    left.date == right.date
-        && left.index == right.index
-        && left.description == right.description
-        && option_f64_matches(left.amount, right.amount)
-        && option_f64_matches(left.balance, right.balance)
+fn push_option_field_diff<T: std::fmt::Debug + PartialEq>(
+    diffs: &mut Vec<String>,
+    field_name: &str,
+    generated: Option<T>,
+    expected: Option<T>,
+) {
+    if generated != expected {
+        diffs.push(format!(
+            "{} mismatch: generated {:?}, expected {:?}",
+            field_name, generated, expected
+        ));
+    }
 }
 
-fn proto_transactions_match(left: &[ProtoTransaction], right: &[ProtoTransaction]) -> bool {
-    left.len() == right.len()
-        && left
-            .iter()
-            .zip(right.iter())
-            .all(|(l, r)| proto_transaction_matches(l, r))
+fn push_option_f64_field_diff(
+    diffs: &mut Vec<String>,
+    field_name: &str,
+    generated: Option<f64>,
+    expected: Option<f64>,
+) {
+    match (generated, expected) {
+        (Some(g), Some(e)) => {
+            if !option_f64_matches(Some(g), Some(e)) {
+                let delta = (g - e).abs();
+                diffs.push(format!(
+                    "{} mismatch: generated {:.6}, expected {:.6}, |delta| {:.6} >= {:.6}",
+                    field_name, g, e, delta, FLOAT_MATCH_TOLERANCE
+                ));
+            }
+        }
+        (None, None) => {}
+        _ => {
+            diffs.push(format!(
+                "{} mismatch: generated {:?}, expected {:?}",
+                field_name, generated, expected
+            ));
+        }
+    }
 }
 
-pub fn matches(generated: &StatementData, expected: &StatementData) -> bool {
-    generated.key == expected.key
-        && generated.account_number == expected.account_number
-        && generated.start_date == expected.start_date
-        && generated.start_date_year == expected.start_date_year
-        && option_f64_matches(generated.opening_balance, expected.opening_balance)
-        && option_f64_matches(generated.closing_balance, expected.closing_balance)
-        && proto_transactions_match(&generated.proto_transactions, &expected.proto_transactions)
-        && generated.errors == expected.errors
+pub fn diff(generated: &StatementData, expected: &StatementData) -> Vec<String> {
+    let mut diffs = Vec::new();
+
+    push_option_field_diff(
+        &mut diffs,
+        "key",
+        generated.key.clone(),
+        expected.key.clone(),
+    );
+    push_option_field_diff(
+        &mut diffs,
+        "account_number",
+        generated.account_number.clone(),
+        expected.account_number.clone(),
+    );
+    push_option_field_diff(
+        &mut diffs,
+        "start_date",
+        generated.start_date,
+        expected.start_date,
+    );
+    push_option_field_diff(
+        &mut diffs,
+        "start_date_year",
+        generated.start_date_year,
+        expected.start_date_year,
+    );
+    push_option_f64_field_diff(
+        &mut diffs,
+        "opening_balance",
+        generated.opening_balance,
+        expected.opening_balance,
+    );
+    push_option_f64_field_diff(
+        &mut diffs,
+        "closing_balance",
+        generated.closing_balance,
+        expected.closing_balance,
+    );
+
+    if generated.proto_transactions.len() != expected.proto_transactions.len() {
+        diffs.push(format!(
+            "proto_transactions length mismatch: generated {}, expected {}",
+            generated.proto_transactions.len(),
+            expected.proto_transactions.len()
+        ));
+    }
+
+    for (index, (g, e)) in generated
+        .proto_transactions
+        .iter()
+        .zip(expected.proto_transactions.iter())
+        .enumerate()
+    {
+        if g.date != e.date {
+            diffs.push(format!(
+                "proto_transactions[{}].date mismatch: generated {:?}, expected {:?}",
+                index, g.date, e.date
+            ));
+        }
+        if g.index != e.index {
+            diffs.push(format!(
+                "proto_transactions[{}].index mismatch: generated {}, expected {}",
+                index, g.index, e.index
+            ));
+        }
+        if g.description != e.description {
+            diffs.push(format!(
+                "proto_transactions[{}].description mismatch: generated {:?}, expected {:?}",
+                index, g.description, e.description
+            ));
+        }
+        push_option_f64_field_diff(
+            &mut diffs,
+            &format!("proto_transactions[{}].amount", index),
+            g.amount,
+            e.amount,
+        );
+        push_option_f64_field_diff(
+            &mut diffs,
+            &format!("proto_transactions[{}].balance", index),
+            g.balance,
+            e.balance,
+        );
+    }
+
+    if generated.errors != expected.errors {
+        diffs.push(format!(
+            "errors mismatch: generated {:?}, expected {:?}",
+            generated.errors, expected.errors
+        ));
+    }
+
+    diffs
+}
+
+pub fn matches(generated: &StatementData, expected: &StatementData) -> Result<(), String> {
+    let diffs = diff(generated, expected);
+    if diffs.is_empty() {
+        Ok(())
+    } else {
+        Err(diffs.join("\n"))
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -65,11 +182,22 @@ impl Spec {
     pub fn from_json(json_str: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json_str)
     }
+
+    pub fn validate(&self, config_db: &ConfigDB) -> Result<(), String> {
+        let generated = Spec::new(config_db, self.text_items.clone())?;
+        matches(&generated.statement_data, &self.statement_data).map_err(|summary| {
+            format!(
+                "StatementData generated from spec TextItems does not match StatementData in spec:\n{}",
+                summary
+            )
+        })
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::structs::ProtoTransaction;
 
     #[test]
     fn compares_statement_data_objects() {
@@ -98,8 +226,8 @@ mod tests {
         let mut third = StatementData::new();
         third.set_key("statement-2".to_string());
 
-        assert!(matches(&first, &second));
-        assert!(!matches(&first, &third));
+        assert!(matches(&first, &second).is_ok());
+        assert!(matches(&first, &third).is_err());
     }
 
     #[test]
@@ -137,7 +265,22 @@ mod tests {
             balance: Some(104.01),
         });
 
-        assert!(matches(&first, &within_tolerance));
-        assert!(!matches(&first, &at_tolerance));
+        assert!(matches(&first, &within_tolerance).is_ok());
+        assert!(matches(&first, &at_tolerance).is_err());
+    }
+
+    #[test]
+    fn returns_diff_summary_for_mismatch() {
+        let mut first = StatementData::new();
+        first.set_key("statement-1".to_string());
+        first.set_opening_balance(100.0);
+
+        let mut second = StatementData::new();
+        second.set_key("statement-2".to_string());
+        second.set_opening_balance(100.02);
+
+        let mismatch = matches(&first, &second).unwrap_err();
+        assert!(mismatch.contains("key mismatch"));
+        assert!(mismatch.contains("opening_balance mismatch"));
     }
 }

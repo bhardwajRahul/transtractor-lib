@@ -4,7 +4,7 @@ use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
 use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
 use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
-use crate::python::exceptions::{ConfigLoadError, ParseError};
+use crate::python::exceptions::{ConfigLoadError, ParseError, SpecError};
 use crate::python::utils;
 use crate::structs::{Spec, TextItem};
 use pdfsink_rs::PdfDocument;
@@ -177,5 +177,14 @@ impl LibParser {
             PyRuntimeError::new_err(format!("Failed to convert Spec to JSON string: {}", e))
         })?;
         str_to_file(spec_str, py_spec_path)
+    }
+
+    /// Validate a JSON spec file from Python caller and return any validation errors.
+    pub fn py_spec_path_to_validate(&self, py_spec_path: &Bound<'_, PyAny>) -> PyResult<()> {
+        let spec_str = file_to_str(py_spec_path)?;
+        let spec = Spec::from_json(&spec_str).map_err(|e| {
+            PyRuntimeError::new_err(format!("Failed to parse Spec from JSON string: {}", e))
+        })?;
+        spec.validate(&self.db).map_err(SpecError::new_err)
     }
 }

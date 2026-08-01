@@ -10,7 +10,7 @@ pub mod structs;
 pub mod wasm;
 
 #[cfg(feature = "python-bindings")]
-use crate::python::exceptions::{ConfigLoadError, ParseError};
+use crate::python::exceptions::{ConfigLoadError, ParseError, SpecError};
 #[cfg(feature = "python-bindings")]
 use crate::python::lib_parser::LibParser;
 #[cfg(feature = "python-bindings")]
@@ -23,5 +23,6 @@ fn transtractor(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<LibParser>()?;
     m.add("ConfigLoadError", m.py().get_type::<ConfigLoadError>())?;
     m.add("ParseError", m.py().get_type::<ParseError>())?;
+    m.add("SpecError", m.py().get_type::<SpecError>())?;
     Ok(())
 }

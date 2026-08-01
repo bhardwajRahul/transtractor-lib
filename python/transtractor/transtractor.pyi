@@ -87,8 +87,23 @@ class LibParser:
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
+    def py_spec_path_to_validate(self, py_spec_path: str) -> None:
+        """
+        Validate a JSON spec file from Python caller and return any validation errors.
+
+        If invalid, a diff summary will be included in the error message of the raised
+        SpecError.
+
+        :param py_spec_path: Path to the JSON spec file
+        :raises SpecError: If the spec is invalid against the current configuration
+        """
+
 class ParseError(Exception):
     """Raised when the content of a PDF file cannot be parsed correctly."""
+
+class SpecError(Exception):
+    """Raised when a JSON spec file is invalid against the current configuration
+    database."""
 
 class ConfigLoadError(Exception):
     """Raised when a configuration cannot be loaded."""

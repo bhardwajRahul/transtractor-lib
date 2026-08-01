@@ -111,11 +111,6 @@ class Parser:
     def spec(self, pdf_file_path: str, output_file: str) -> None:
         """Extract and write a JSON I/O spec representation of a PDF file.
 
-        JSON I/O spec files comprise of a text-based representation of the PDF file
-        (text_items) along with the structured statement data extracted from it
-        (statement_data). These files are used as sanity checks to ensure the parser
-        is extracting data consistently and correctly from the PDF files.
-
         :param pdf_file_path: Path to the PDF file to be processed
         :param output_file: Path to the output JSON spec file
         :raises ParseError: If statement is not recognisable or not parsed correctly
@@ -125,16 +120,20 @@ class Parser:
     def spec_layout(self, layout_file_path: str, output_file: str) -> None:
         """Extract and write a JSON I/O spec representation of a layout text file.
 
-        JSON I/O spec files comprise of a text-based representation of the PDF file
-        (text_items) along with the structured statement data extracted from it
-        (statement_data). These files are used as sanity checks to ensure the parser
-        is extracting data consistently and correctly from the PDF files.
-
         :param layout_file_path: Path to the layout text file to be processed
         :param output_file: Path to the output JSON spec file
         :raises ParseError: If statement is not recognisable or not parsed correctly
         """
         self._inner.py_layout_path_to_spec(layout_file_path, output_file)
+
+    def validate_spec(self, spec_file_path: str) -> None:
+        """Validate a JSON I/O spec file against the current parser configuration.
+
+        :param spec_file_path: Path to the JSON spec file to be validated
+        :raises SpecError: If the TextItems in the spec file cannot be parsed, or
+            parsed differently to what is expected in the spec file's StatementData.
+        """
+        self._inner.py_spec_path_to_validate(spec_file_path)
 
     def test(
         self, pdf_dir: str, output_file: str = "", log_level: str = "INFO"
