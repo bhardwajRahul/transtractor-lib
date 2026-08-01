@@ -16,6 +16,8 @@ pub struct StatementData {
 }
 
 impl StatementData {
+    const FLOAT_MATCH_TOLERANCE: f64 = 0.01;
+
     pub fn new() -> Self {
         Self {
             key: None,
@@ -79,14 +81,38 @@ impl StatementData {
         println!("{}", self);
     }
 
+    fn option_f64_matches(left: Option<f64>, right: Option<f64>) -> bool {
+        match (left, right) {
+            (Some(l), Some(r)) => (l - r).abs() < Self::FLOAT_MATCH_TOLERANCE,
+            (None, None) => true,
+            _ => false,
+        }
+    }
+
+    fn proto_transaction_matches(left: &ProtoTransaction, right: &ProtoTransaction) -> bool {
+        left.date == right.date
+            && left.index == right.index
+            && left.description == right.description
+            && Self::option_f64_matches(left.amount, right.amount)
+            && Self::option_f64_matches(left.balance, right.balance)
+    }
+
+    fn proto_transactions_match(left: &[ProtoTransaction], right: &[ProtoTransaction]) -> bool {
+        left.len() == right.len()
+            && left
+                .iter()
+                .zip(right.iter())
+                .all(|(l, r)| Self::proto_transaction_matches(l, r))
+    }
+
     pub fn matches(&self, other: &Self) -> bool {
         self.key == other.key
             && self.account_number == other.account_number
             && self.start_date == other.start_date
             && self.start_date_year == other.start_date_year
-            && self.opening_balance == other.opening_balance
-            && self.closing_balance == other.closing_balance
-            && self.proto_transactions == other.proto_transactions
+            && Self::option_f64_matches(self.opening_balance, other.opening_balance)
+            && Self::option_f64_matches(self.closing_balance, other.closing_balance)
+            && Self::proto_transactions_match(&self.proto_transactions, &other.proto_transactions)
             && self.errors == other.errors
     }
 }
@@ -199,5 +225,44 @@ mod tests {
 
         assert!(first.matches(&second));
         assert!(!first.matches(&third));
+    }
+
+    #[test]
+    fn compares_statement_data_with_float_tolerance() {
+        let mut first = StatementData::new();
+        first.set_opening_balance(100.0);
+        first.set_closing_balance(120.0);
+        first.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.5),
+            balance: Some(104.0),
+        });
+
+        let mut within_tolerance = StatementData::new();
+        within_tolerance.set_opening_balance(100.009);
+        within_tolerance.set_closing_balance(119.991);
+        within_tolerance.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.509),
+            balance: Some(104.009),
+        });
+
+        let mut at_tolerance = StatementData::new();
+        at_tolerance.set_opening_balance(100.01);
+        at_tolerance.set_closing_balance(120.01);
+        at_tolerance.add_proto_transaction(ProtoTransaction {
+            date: Some(1_700_000_000_000i64),
+            index: 1,
+            description: "Coffee".to_string(),
+            amount: Some(4.51),
+            balance: Some(104.01),
+        });
+
+        assert!(first.matches(&within_tolerance));
+        assert!(!first.matches(&at_tolerance));
     }
 }
