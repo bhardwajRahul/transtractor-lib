@@ -30,6 +30,19 @@ fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 fn validate_spec_file_name(spec_path: &Path, spec: &Spec) -> Result<(), String> {
+    let file_name = spec_path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or_else(|| format!("{}: missing or invalid file name", spec_path.display()))?;
+
+    if file_name != file_name.to_lowercase() {
+        return Err(format!(
+            "{}: file name {:?} must be lowercase",
+            spec_path.display(),
+            file_name
+        ));
+    }
+
     let file_stem = spec_path
         .file_stem()
         .and_then(|stem| stem.to_str())
