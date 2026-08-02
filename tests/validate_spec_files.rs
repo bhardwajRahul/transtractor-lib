@@ -30,7 +30,7 @@ fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 #[test]
-fn validates_all_spec_files() {
+fn all_spec_files_valid() {
     let fixtures_root = Path::new("tests/fixtures/spec");
     assert!(
         fixtures_root.exists(),
