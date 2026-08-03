@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use transtractor::configs::db::ConfigDB;
+use transtractor::configs::registry::get_config_map;
 use transtractor::structs::Spec;
 
 fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) {
@@ -27,6 +28,27 @@ fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) {
             out.push(path);
         }
     }
+}
+
+fn collect_spec_files() -> Vec<PathBuf> {
+    let fixtures_root = Path::new("tests/fixtures/spec");
+    assert!(
+        fixtures_root.exists(),
+        "Spec fixtures directory does not exist: {}",
+        fixtures_root.display()
+    );
+
+    let mut spec_files = Vec::new();
+    collect_json_files(fixtures_root, &mut spec_files);
+    spec_files.sort();
+
+    assert!(
+        !spec_files.is_empty(),
+        "No JSON spec fixtures found under {}",
+        fixtures_root.display()
+    );
+
+    spec_files
 }
 
 fn validate_spec_file_name(spec_path: &Path, spec: &Spec) -> Result<(), String> {
@@ -117,22 +139,7 @@ fn validate_spec_file_name(spec_path: &Path, spec: &Spec) -> Result<(), String> 
 
 #[test]
 fn all_spec_files_valid() {
-    let fixtures_root = Path::new("tests/fixtures/spec");
-    assert!(
-        fixtures_root.exists(),
-        "Spec fixtures directory does not exist: {}",
-        fixtures_root.display()
-    );
-
-    let mut spec_files = Vec::new();
-    collect_json_files(fixtures_root, &mut spec_files);
-    spec_files.sort();
-
-    assert!(
-        !spec_files.is_empty(),
-        "No JSON spec fixtures found under {}",
-        fixtures_root.display()
-    );
+    let spec_files = collect_spec_files();
 
     let config_db = ConfigDB::new();
     let mut failures = Vec::new();
@@ -177,5 +184,70 @@ fn all_spec_files_valid() {
         "{} spec validation failure(s):\n\n{}",
         failures.len(),
         failures.join("\n\n")
+    );
+}
+
+#[test]
+fn every_registered_config_has_a_spec_file() {
+    let spec_files = collect_spec_files();
+    let mut spec_keys = std::collections::HashSet::new();
+    let mut read_failures = Vec::new();
+
+    for spec_path in spec_files {
+        let spec_content = match fs::read_to_string(&spec_path) {
+            Ok(content) => content,
+            Err(error) => {
+                read_failures.push(format!(
+                    "{}: failed to read file: {}",
+                    spec_path.display(),
+                    error
+                ));
+                continue;
+            }
+        };
+
+        let spec = match Spec::from_json(&spec_content) {
+            Ok(spec) => spec,
+            Err(error) => {
+                read_failures.push(format!(
+                    "{}: failed to parse JSON spec: {}",
+                    spec_path.display(),
+                    error
+                ));
+                continue;
+            }
+        };
+
+        match spec.statement_data.key {
+            Some(key) => {
+                spec_keys.insert(key);
+            }
+            None => read_failures.push(format!(
+                "{}: statement_data.key is missing",
+                spec_path.display()
+            )),
+        }
+    }
+
+    assert!(
+        read_failures.is_empty(),
+        "{} spec read/parse failure(s):\n\n{}",
+        read_failures.len(),
+        read_failures.join("\n\n")
+    );
+
+    let config_map = get_config_map();
+    let mut missing = config_map
+        .keys()
+        .filter(|key| !spec_keys.contains(*key))
+        .cloned()
+        .collect::<Vec<String>>();
+    missing.sort();
+
+    assert!(
+        missing.is_empty(),
+        "{} config(s) are missing associated spec files in tests/fixtures/spec:\n{}",
+        missing.len(),
+        missing.join("\n")
     );
 }
