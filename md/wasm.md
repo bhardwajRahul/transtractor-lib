@@ -8,8 +8,8 @@ The WASM package is implemented in TypeScript under `wasm/` and wraps Rust bindi
 
 * The API is exposed as a `Parser` class, aligned with the Python parser shape.
 * File-based parsing via `Parser.parse(filePath)` is available.
-* Byte-based parsing is already present as `Parser.parseBytes(bytes)` but currently returns a placeholder error because `pdfsink-rs` does not yet expose a byte-input API.
-* `Parser.parseLayoutText(layoutText)` is available now and works without filesystem access.
+* Byte-based parsing via `Parser.parseBytes(bytes)` is available.
+* `Parser.parseLayoutText(layoutText)` is available and works without filesystem access.
 
 ## Build Prerequisites
 
@@ -50,7 +50,7 @@ The following example uses the direct browser (`--target web`) output as ES modu
     <title>Transtractor WASM Demo</title>
   </head>
   <body>
-    <input id="layout-file" type="file" accept=".txt" />
+    <input id="pdf-file" type="file" accept=".pdf" />
     <pre id="output"></pre>
 
     <script type="module">
@@ -58,7 +58,7 @@ The following example uses the direct browser (`--target web`) output as ES modu
 
       await init();
       const parser = new Parser();
-      const input = document.getElementById("layout-file");
+      const input = document.getElementById("pdf-file");
       const output = document.getElementById("output");
 
       input.addEventListener("change", async (event) => {
@@ -67,10 +67,8 @@ The following example uses the direct browser (`--target web`) output as ES modu
           return;
         }
 
-        // Current placeholder route: parse layout text directly.
-        // PDF byte parsing will be enabled once pdfsink-rs supports byte input.
-        const layoutText = await file.text();
-        const statementData = parser.parseLayoutText(layoutText);
+        const pdfBytes = new Uint8Array(await file.arrayBuffer());
+        const statementData = parser.parseBytes(pdfBytes);
         output.textContent = JSON.stringify(statementData, null, 2);
       });
     </script>
@@ -80,8 +78,8 @@ The following example uses the direct browser (`--target web`) output as ES modu
 
 Notes:
 
-* `Parser.parse(...)` is the intended route for PDF parsing, but in browser-only contexts this depends on future byte-based PDF input support in `pdfsink-rs`.
-* Until then, use `parseLayoutText(...)` in static web contexts.
+* `Parser.parse(...)` is convenient in runtimes with filesystem access.
+* `Parser.parseBytes(...)` is the preferred route in browser-only contexts.
 
 ## TypeScript Example (Runtime With Filesystem)
 

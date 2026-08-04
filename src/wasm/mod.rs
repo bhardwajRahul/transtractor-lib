@@ -94,10 +94,14 @@ impl WasmParser {
     }
 
     #[wasm_bindgen(js_name = parseBytes)]
-    pub fn parse_bytes(&self, _pdf_bytes: &[u8]) -> Result<JsValue, JsValue> {
-        Err(JsValue::from_str(
-            "Byte-based PDF parsing is not available yet in pdfsink-rs. Use parse(filePath) for now.",
-        ))
+    pub fn parse_bytes(&self, pdf_bytes: &[u8]) -> Result<JsValue, JsValue> {
+        let doc = PdfDocument::from_bytes(pdf_bytes).map_err(|e| {
+            JsValue::from_str(&format!(
+                "Failed to open PDF document from byte input: {}",
+                e
+            ))
+        })?;
+        self.parse_from_pdf_document(&doc)
     }
 
     #[wasm_bindgen(js_name = parseLayout)]

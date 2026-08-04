@@ -39,8 +39,12 @@ describe("Parser", () => {
     expect(actual.key).toBe(expected.statement_data.key);
     expect(actual.account_number).toBe(expected.statement_data.account_number);
     expect(actual.start_date).toBe(expected.statement_data.start_date);
-    expect(actual.opening_balance).toBe(expected.statement_data.opening_balance);
-    expect(actual.closing_balance).toBe(expected.statement_data.closing_balance);
+    expect(actual.opening_balance).toBe(
+      expected.statement_data.opening_balance,
+    );
+    expect(actual.closing_balance).toBe(
+      expected.statement_data.closing_balance,
+    );
     expect(actual.transactions).toHaveLength(
       expected.statement_data.proto_transactions.length,
     );
@@ -53,9 +57,35 @@ describe("Parser", () => {
     });
   });
 
-  it("keeps bytes-based parsing as a placeholder", () => {
-    expect(() => parser.parseBytes(new Uint8Array([0x25, 0x50, 0x44, 0x46]))).toThrow(
-      /Byte-based PDF parsing is not available yet/,
+  it("parses PDF bytes into statement data", () => {
+    const pdfPath = resolve(FIXTURE_DIR, "test1.pdf");
+    const specPath = resolve(FIXTURE_DIR, "test1_spec.json");
+
+    const pdfBytes = new Uint8Array(readFileSync(pdfPath));
+    const expected = JSON.parse(readFileSync(specPath, "utf8")) as {
+      statement_data: {
+        key: string;
+        account_number: string;
+        start_date: number;
+        opening_balance: number;
+        closing_balance: number;
+        proto_transactions: unknown[];
+      };
+    };
+
+    const actual = parser.parseBytes(pdfBytes);
+
+    expect(actual.key).toBe(expected.statement_data.key);
+    expect(actual.account_number).toBe(expected.statement_data.account_number);
+    expect(actual.start_date).toBe(expected.statement_data.start_date);
+    expect(actual.opening_balance).toBe(
+      expected.statement_data.opening_balance,
+    );
+    expect(actual.closing_balance).toBe(
+      expected.statement_data.closing_balance,
+    );
+    expect(actual.transactions).toHaveLength(
+      expected.statement_data.proto_transactions.length,
     );
   });
 });
