@@ -5,35 +5,6 @@ Configuration files specify the parsing parameters that the Transtractor uses to
 data from bank statements. This guide explains how to create your own configuration files 
 for unsupported banks or account types.
 
-TL;DR
---------------
-Use an IDE with an AI agent (e.g., GitHub Copilot) to do this for you. First clone the 
-repository and set up the  `development environment from source <https://github.com/transtractor/transtractor-lib#compile-from-source>`_
-so that your agent has enough context to work with. Then create a "pdf" folder in the 
-root of the repository and add your sample bank statement PDF files into it. 
-
-.. warning::
-
-    You will be uploading sensitive financial data to 
-    a third-party AI service. Make sure you are comfortable with this
-    before proceeding.
-
-Then prompt your agent with something like:
-
-*"Create a Transtractor configuration file in JSON format to parse 
-the bank statement PDF file 'pdf/my_bank_statement.pdf'. Use the
-instructions in 'docs/configuration.rst' as a guide. Save the 
-configuration file in the 'python/transtractor/configs' folder.
-Test if the configuration works by parsing the PDF file
-in Python. Debug as appropriate, but do not modify any of 
-the Rust or Python source code. If there are multiple 
-PDFs in the "pdf" folder, run the Parser.test() method to 
-confirm the configuration works across all files. Finally,
-make sure the package still passes
-cargo test and pytest."*
-
-Please submit a pull request or email the configuration file
-to the project maintainer for inclusion in future releases.
 
 Basic Template
 --------------
@@ -621,8 +592,6 @@ assistance with this process.
 Contributing Your Configuration
 --------------------------------------
 If you have created a well-tested configuration file for a bank or account type that is not
-currently supported, please consider contributing it to the project. You can submit a
-pull request on the
-`GitHub repository <https://github.com/transtractor/transtractor-lib>`_, registering your configuration
-as a Rust module under *src/configs/registry*. Otherwise, feel free to email it to the project maintainers
-for inclusion (gravytoast@pm.me).
+currently supported, please consider contributing it to the project. Follow the 
+`Guidance Documentation <https://github.com/transtractor/transtractor-lib/md/contribute.md>`_ 
+in the GitHub repository.
