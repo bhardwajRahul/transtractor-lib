@@ -80,13 +80,12 @@ parser.load('my_config.json')
 parser.parse('statement.pdf').to_csv('statement.csv')
 ```
 
-## Contributions
-New and well-tested configuration files are especially welcome. Please
-submit a pull request with them registered as a Rust module under `src/configs/registry`, or
-email to gravytoast@pm.me.
-
+## Developers
 The following pages provide further information about how this package is built and developed:
 
 * [Architecture Guide](md/architecture.md): Overview of key application components and design principles.
 * [Developer Guide](md/develop.md): Reference page for core development and maintenance.
+* [Contributor Guide](md/contribute.md): Extending the package to parse additional bank statements.
 * [WASM Guide](md/wasm.md): Build and usage notes for the TypeScript/WASM package.
+
+Please get involved or email gravytoast@pm.me if you have any questions.
