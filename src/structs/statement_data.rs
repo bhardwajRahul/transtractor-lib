@@ -1,8 +1,9 @@
 use crate::structs::ProtoTransaction;
 use chrono::{DateTime, Datelike, TimeZone, Utc};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StatementData {
     pub key: Option<String>,
     pub account_number: Option<String>,

@@ -24,6 +24,27 @@ pub fn rust_statement_data_to_py_statement_data(
             PyRuntimeError::new_err("StatementData is missing required field: account_number")
         })?;
 
+        // Get start_date (required field)
+        let start_date = rust_statement_data.start_date.ok_or_else(|| {
+            PyRuntimeError::new_err("StatementData is missing required field: start_date")
+        })?;
+
+        // Get opening_balance (required field)
+        let opening_balance = rust_statement_data.opening_balance.ok_or_else(|| {
+            PyRuntimeError::new_err("StatementData is missing required field: opening_balance")
+        })?;
+
+        // Get closing_balance (required field)
+        let closing_balance = rust_statement_data.closing_balance.ok_or_else(|| {
+            PyRuntimeError::new_err("StatementData is missing required field: closing_balance")
+        })?;
+
+        if !rust_statement_data.errors.is_empty() {
+            return Err(PyRuntimeError::new_err(
+                "StatementData must be error-free before export to Python",
+            ));
+        }
+
         // Convert proto_transactions to Transaction objects
         let py_transactions = PyList::empty(py);
         for proto_tx in &rust_statement_data.proto_transactions {
@@ -52,11 +73,16 @@ pub fn rust_statement_data_to_py_statement_data(
             py_transactions.append(py_transaction)?;
         }
 
-        // Create Python StatementData object
-        // StatementData(key: str, filename: str, account_number: str, transactions: list[Transaction])
-        // filename is set to empty string - to be set by Python calling function
-        let py_statement_data =
-            statement_data_class.call1((key, account_number, py_transactions))?;
+        // Create Python StatementData object.
+        // filename remains unset here and is attached by the Python parser wrapper.
+        let py_statement_data = statement_data_class.call1((
+            key,
+            account_number,
+            start_date,
+            opening_balance,
+            closing_balance,
+            py_transactions,
+        ))?;
 
         Ok(py_statement_data.into())
     })

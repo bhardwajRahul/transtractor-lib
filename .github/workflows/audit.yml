@@ -1,4 +1,5 @@
-# Run a scan of all Python and Rust dependencies for known vulnerabilities and licenses.
+# Run a scan of all Python, Rust, and JavaScript dependencies for known
+# vulnerabilities and licenses.
 # Workflow is scheduled to run weekly, triggered manually via the "Run workflow" button 
 # in the Actions tab or automatically on pushes and pull requests targeting the main 
 # branch. The workflow will fail if any vulnerabilities are found in the dependencies.
@@ -36,8 +37,18 @@ jobs:
           enable-cache: true
           python-version: 3.14
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wasm/package-lock.json
+
       - name: Sync Python dev environment
         run: uv sync --locked --group dev
+
+      - name: Install WASM package dependencies
+        run: cd wasm && npm ci
 
       - name: Scan Rust binaries for vulnerabilities
         run: cargo audit --json > cargo-audit.json || true
@@ -100,6 +111,26 @@ jobs:
       - name: Append Python license findings to workflow summary
         run: cat pip-licenses.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Scan JavaScript runtime dependencies for vulnerabilities
+        run: cd wasm && npm run audit:runtime
+
+      - name: Render JavaScript audit findings
+        id: render-npm-audit
+        run: uv run python scripts/render-npm-audit.py npm-audit.json npm-audit.md
+
+      - name: Append JavaScript findings to workflow summary
+        run: cat npm-audit.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Scan JavaScript runtime dependencies for licenses
+        run: cd wasm && npx license-checker --json --production > ../npm-licenses.json || true
+
+      - name: Render JavaScript license findings
+        id: render-npm-licenses
+        run: uv run python scripts/render-npm-licenses.py npm-licenses.json npm-licenses.md
+
+      - name: Append JavaScript license findings to workflow summary
+        run: cat npm-licenses.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload audit artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -114,6 +145,10 @@ jobs:
             pip-audit.md
             pip-licenses.json
             pip-licenses.md
+            npm-audit.json
+            npm-audit.md
+            npm-licenses.json
+            npm-licenses.md
           if-no-files-found: warn
       
       - name: Fail workflow if vulnerabilities found
@@ -123,4 +158,6 @@ jobs:
             "${{ steps.render-cargo-audit.outputs.has_findings }}" \
             "${{ steps.render-cargo-deny.outputs.has_findings }}" \
             "${{ steps.render-pip-audit.outputs.has_findings }}" \
-            "${{ steps.render-pip-licenses.outputs.has_findings }}"
+            "${{ steps.render-pip-licenses.outputs.has_findings }}" \
+            "${{ steps.render-npm-audit.outputs.has_findings }}" \
+            "${{ steps.render-npm-licenses.outputs.has_findings }}"

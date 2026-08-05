@@ -21,6 +21,36 @@ permissions:
   contents: read
 
 jobs:
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wasm/package-lock.json
+      - name: Install WASM package dependencies
+        run: cd wasm && npm ci
+      - name: Build WASM package
+        run: cd wasm && npm run build
+      - name: Upload WASM package artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: wasm-package
+          path: |
+            wasm/dist
+            wasm/pkg
+            wasm/package.json
+            wasm/README.md
+
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:

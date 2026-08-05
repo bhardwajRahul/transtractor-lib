@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// Represents a text item from a PDF document with its position and size.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TextItem {
     /// The text content of the item
     pub text: String,

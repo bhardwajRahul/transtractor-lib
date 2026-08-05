@@ -1,70 +1,31 @@
-use crate::parsers::statement::{
-    AccountNumberParser, ClosingBalanceParser, OpeningBalanceParser, StartDateParser,
-    TransactionParser,
-};
-use crate::structs::StatementConfig;
-use crate::structs::StatementData;
-use crate::structs::TextItem;
-use crate::structs::text_items::get_text_item_buffer;
+use crate::configs::db::ConfigDB;
+use crate::parsers::flows::text_items_to_statement_datas::text_items_to_statement_datas;
+use crate::structs::{StatementData, TextItem};
 
-/// Converts a list of TextItems into structured StatementData
+/// Top-level workflow to parse extracted text items into structured statement data
 pub fn text_items_to_statement_data(
-    config: &StatementConfig,
-    text_items: &[TextItem],
-) -> StatementData {
-    let mut statement_data = StatementData::new();
+    config_db: &ConfigDB,
+    items: &Vec<TextItem>,
+) -> Result<StatementData, String> {
+    let configs = config_db.identify(items);
 
-    // Initialize parsers
-    let mut account_number_parser = AccountNumberParser::new(config);
-    let mut opening_balance_parser = OpeningBalanceParser::new(config);
-    let mut closing_balance_parser = ClosingBalanceParser::new(config);
-    let mut start_date_parser = StartDateParser::new(config);
-    let mut transaction_parser = TransactionParser::new(config);
-
-    // Other settings based on parsers
-    // Compute max lookahead across all parsers generically to keep this scalable
-    let lookaheads = [
-        account_number_parser.get_max_lookahead(),
-        opening_balance_parser.get_max_lookahead(),
-        closing_balance_parser.get_max_lookahead(),
-        start_date_parser.get_max_lookahead(),
-        transaction_parser.get_max_lookahead(),
-    ];
-    let max_lookahead = *lookaheads.iter().max().unwrap_or(&0);
-
-    // Iterate through text items, attempting to match account_terms
-    let len = text_items.len();
-    if len == 0 {
-        return statement_data;
+    // User error: trying to parse unsupported bank statement format
+    if configs.is_empty() {
+        return Err("Bank statement format cannot be identified.".to_string());
     }
-    let mut i: usize = 0;
-    while i < len {
-        let buffer_size = max_lookahead.min(len - i);
-        let buffer = get_text_item_buffer(text_items, i, buffer_size);
-        let mut consumed = 0usize;
-        // Try parsers in a stable order: account number -> start date -> opening balance -> closing balance
-        if consumed == 0 {
-            consumed = account_number_parser.parse_items(&buffer, &mut statement_data);
-        }
-        if consumed == 0 {
-            consumed = start_date_parser.parse_items(&buffer, &mut statement_data);
-        }
-        if consumed == 0 {
-            consumed = opening_balance_parser.parse_items(&buffer, &mut statement_data);
-        }
-        if consumed == 0 {
-            consumed = closing_balance_parser.parse_items(&buffer, &mut statement_data);
-        }
-        if consumed == 0 {
-            consumed = transaction_parser.parse_items(&buffer, &mut statement_data);
-        }
-        if consumed > 0 {
-            i += consumed;
-            continue;
-        }
 
-        // No parser matched, move to next item
-        i += 1;
+    // Return first error-free StatementData
+    let statement_data_results = text_items_to_statement_datas(items, &configs, true)?;
+    for data in statement_data_results {
+        if data.errors.is_empty() {
+            return Ok(data);
+        }
     }
-    statement_data
+
+    // Software bug: If statement is recognised, it should be parsed successfully
+    let keys: Vec<String> = configs.iter().map(|cfg| cfg.key.clone()).collect();
+    Err(format!(
+        "Bank statement recognised but cannot be parsed. Debug configurations: {:?}",
+        keys
+    ))
 }

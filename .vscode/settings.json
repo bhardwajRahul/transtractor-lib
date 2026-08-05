@@ -25,7 +25,8 @@
     },
     "coverage-gutters.coverageFileNames": [
         "cov-python.xml",
-        "cov-rust.xml"
+        "cov-rust.xml",
+        "cov-js.xml"
     ],
     "coverage-gutters.showLineCoverage": true,
     "coverage-gutters.showRulerCoverage": true,
@@ -40,11 +41,13 @@
         "datas",
         "datelike",
         "defusedxml",
+        "deserialises",
         "dtolnay",
         "getattr",
         "isort",
         "lookaheads",
         "maturin",
+        "npmjs",
         "outputjson",
         "pdfplumber",
         "pdfsink",
@@ -61,9 +64,13 @@
         "serde",
         "swatinem",
         "testpaths",
+        "transtractorjs",
         "tokenise",
         "tokenised",
         "transtractor",
+        "vitest",
+        "wasmbindgen",
+        "wasmpack",
         "typer",
         "venv",
         "viewcode"
@@ -75,5 +82,19 @@
     "python.testing.pytestEnabled": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.analysis.diagnosticMode": "workspace",
-    "rust-analyzer.check.command": "clippy"
+    "rust-analyzer.check.command": "clippy",
+    "[javascript]": {
+        "editor.tabSize": 2,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.tabSize": 2,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

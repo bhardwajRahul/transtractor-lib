@@ -3,13 +3,13 @@
 from .parser import Parser
 from .transtractor import (
     LibParser,  # Rust PyO3 class
-    NoErrorFreeStatementData,
-    StatementNotSupported,
+    ParseError,  # Rust PyO3 class
+    SpecError,  # Rust PyO3 class
 )
 
 __all__ = [
     "Parser",
     "LibParser",
-    "StatementNotSupported",
-    "NoErrorFreeStatementData",
+    "ParseError",
+    "SpecError",
 ]

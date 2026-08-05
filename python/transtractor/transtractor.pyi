@@ -8,19 +8,11 @@ class LibParser:
     def __init__(self) -> None:
         """Create a new LibParser instance."""
 
-    def register_config_from_json_str(self, py_json_str: str) -> None:
-        """
-        Register JSON configuration string into the parser database.
-
-        :param py_json_str: JSON string containing the configuration
-        :raises ConfigLoadError: If the configuration cannot be loaded
-        """
-
-    def register_config_from_file(self, py_file_path: str) -> None:
+    def register_config_from_json(self, py_config_json_path: str) -> None:
         """
         Register JSON configuration file into the parser database.
 
-        :param py_file_path: Path to the JSON configuration file
+        :param py_config_json_path: Path to the JSON configuration file
         :raises ConfigLoadError: If the configuration file cannot be loaded
         """
 
@@ -37,39 +29,81 @@ class LibParser:
         object.
 
         :param py_pdf_path: Path to the PDF file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
-    def py_pdf_path_to_layout_py_str(self, py_pdf_path: str) -> str:
+    def py_pdf_path_to_layout(self, py_pdf_path: str, py_layout_path: str) -> None:
         """
         Process a PDF file into layout text str.
 
         :param py_pdf_path: Path to the PDF file
+        :param py_layout_path: Path to the output layout text file
         """
 
-    def py_pdf_path_to_debug_py_str(self, py_pdf_path: str) -> str:
-        """Process a PDF file path from Python caller and return debug information as a
-        string.
+    def py_pdf_path_to_debug(self, py_pdf_path: str, py_debug_path: str) -> None:
+        """Process a PDF file path from Python caller and write debug information to a
+        file.
 
         :param py_pdf_path: Path to the PDF file
+        :param py_debug_path: Path to the output debug text file
         """
 
-    def layout_py_str_py_statement_data(self, py_layout_str: str) -> StatementData:
+    def py_layout_path_to_py_statement_data(self, py_layout_path: str) -> StatementData:
         """
-        Process a layout string and return statement data as a Python object of type
-        StatementData.
+        Process a layout text file from Python caller and return statement data as a
+        Python object of type StatementData.
 
-        :param py_layout_str: Layout string content from text file
-        :raises StatementNotSupported: If no supported statement configuration is found
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :param py_layout_path: Path to the layout text file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
         """
 
-class NoErrorFreeStatementData(Exception):
-    """Raised when no error-free statement data could be found."""
+    def py_layout_path_to_debug(self, py_layout_path: str, py_debug_path: str) -> None:
+        """
+        Process a layout text file from Python caller and write debug information to a
+        text file.
+
+        :param py_layout_path: Path to the layout text file
+        :param py_debug_path: Path to the output debug text file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
+        """
+
+    def py_pdf_path_to_spec(self, py_pdf_path: str, py_spec_path: str) -> None:
+        """
+        Process a PDF file path from Python caller and write a JSON spec string to a
+        file.
+
+        :param py_pdf_path: Path to the PDF file
+        :param py_spec_path: Path to the output JSON spec file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
+        """
+
+    def py_layout_path_to_spec(self, py_layout_path: str, py_spec_path: str) -> None:
+        """
+        Process a layout text file from Python caller and write a JSON spec string to a
+        file.
+
+        :param py_layout_path: Path to the layout text file
+        :param py_spec_path: Path to the output JSON spec file
+        :raises ParseError: If statement is not recognisable or not parsed correctly
+        """
+
+    def py_spec_path_to_validate(self, py_spec_path: str) -> None:
+        """
+        Validate a JSON spec file from Python caller and return any validation errors.
+
+        If invalid, a diff summary will be included in the error message of the raised
+        SpecError.
+
+        :param py_spec_path: Path to the JSON spec file
+        :raises SpecError: If the spec is invalid against the current configuration
+        """
+
+class ParseError(Exception):
+    """Raised when the content of a PDF file cannot be parsed correctly."""
+
+class SpecError(Exception):
+    """Raised when a JSON spec file is invalid against the current configuration
+    database."""
 
 class ConfigLoadError(Exception):
     """Raised when a configuration cannot be loaded."""
-
-class StatementNotSupported(Exception):
-    """Raised when no supported statement configuration is found."""

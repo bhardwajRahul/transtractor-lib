@@ -4,10 +4,9 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from transtractor import StatementNotSupported
+from transtractor import ParseError
 from transtractor.parser import Parser
 from transtractor.structs.statement_data import StatementData
-from transtractor.transtractor import NoErrorFreeStatementData
 
 
 def test_parse_layout_generates_correct_csv():
@@ -22,6 +21,12 @@ def test_parse_layout_generates_correct_csv():
     expected_csv = fixtures_dir / "test1_parsed.csv"
 
     statement_data: StatementData = parser.parse_layout(str(test_layout))
+
+    assert statement_data.key == "au__gtb__fake_account__1"
+    assert statement_data.account_number == "1234 5678 9123 4567"
+    assert statement_data.start_date == 1735689600000
+    assert statement_data.opening_balance == 50000.0
+    assert statement_data.closing_balance == 11663.82
 
     # Generate CSV in a temporary file
     with tempfile.NamedTemporaryFile(
@@ -57,23 +62,23 @@ def test_parse_layout_generates_correct_csv():
         Path(tmp_csv_path).unlink(missing_ok=True)
 
 
-def test_parse_layout_raises_statement_not_supported_without_config():
+def test_parse_layout_parser_error_without_config():
     """Test that parsing a layout file without loading a config raises
-    StatementNotSupported."""
+    ParseError."""
     parser = Parser()
 
     # Parse the test layout file without loading the config file
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     test_layout = fixtures_dir / "test1_layout.txt"
 
-    # Should raise StatementNotSupported since no config is loaded
-    with pytest.raises(StatementNotSupported):
+    # Should raise ParseError since no config is loaded
+    with pytest.raises(ParseError):
         parser.parse_layout(str(test_layout))
 
 
-def test_parse_layout_raises_no_error_free_statement_data_with_misconfigured_config():
+def test_parse_layout_raises_parser_error_with_misconfigured_config():
     """Test that parsing a layout file with a misconfigured config raises
-    NoErrorFreeStatementData."""
+    ParseError."""
     parser = Parser()
 
     # Load the misconfigured config file
@@ -82,6 +87,6 @@ def test_parse_layout_raises_no_error_free_statement_data_with_misconfigured_con
     misconfigured_config = fixtures_dir / "test1_config_misconfigured.json"
     parser.load(str(misconfigured_config))
 
-    # Should raise NoErrorFreeStatementData since the config is misconfigured
-    with pytest.raises(NoErrorFreeStatementData):
+    # Should raise ParseError since the config is misconfigured
+    with pytest.raises(ParseError):
         parser.parse_layout(str(test_layout))

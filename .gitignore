@@ -216,7 +216,10 @@ cov-python.xml
 cov-python-md
 cov-rust.xml
 cov-rust.md
+cov-js.xml
+cov-js.md
 htmlcov-python/
+wasm/coverage/
 
 # Audit reports
 cargo-audit.json
@@ -227,4 +230,15 @@ pip-audit.json
 pip-audit.md
 pip-licenses.json
 pip-licenses.md
+npm-audit.json
+npm-audit.md
+npm-licenses.json
+npm-licenses.md
 requirements-audit.txt
+
+# WASM package build outputs
+wasm/dist/
+wasm/pkg/
+wasm/pkg-web/
+wasm/node_modules/
+wasm/*.tgz

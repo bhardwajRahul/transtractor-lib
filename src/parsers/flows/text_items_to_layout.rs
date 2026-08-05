@@ -26,10 +26,10 @@ pub fn text_items_to_layout(items: &Vec<TextItem>) -> Result<String, String> {
             }
         }
 
-        // Print the item in the format [text, x1, x2, y1, y2]
+        // Print the item in the format [text, x1, x2, y1, y2, y1_bin]
         output.push_str(&format!(
-            "[\"{}\",{},{},{},{}]",
-            item.text, item.x1, item.x2, item.y1, item.y2
+            "[\"{}\",{},{},{},{},{}]",
+            item.text, item.x1, item.x2, item.y1, item.y2, item.y1_bin
         ));
     }
 
