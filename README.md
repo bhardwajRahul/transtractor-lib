@@ -10,9 +10,10 @@
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
 library for extracting transaction data from PDF bank statements. Key features:
 
-* Written in Rust (fast)
+* Written in Rust (fast and portable)
 * Python API (user friendly)
-* AI-free (lightweight)
+* WASM binding (browser-ready)
+* No AI (lightweight and dirt cheap)
 * Rules-based extraction (100% predictable and accurate)
 
 
