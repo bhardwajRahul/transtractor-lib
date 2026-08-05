@@ -12,8 +12,8 @@ library for extracting transaction data from PDF bank statements. Key features:
 
 * Written in Rust (fast and portable)
 * Python API (user friendly)
-* WASM binding (browser-ready)
-* No AI (lightweight and dirt cheap)
+* WASM bindings (browser-ready)
+* No AI (lightweight, self-contained and dirt cheap)
 * Rules-based extraction (100% predictable and accurate)
 
 
