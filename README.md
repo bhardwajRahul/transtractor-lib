@@ -3,8 +3,10 @@
 ![PyPI version](https://img.shields.io/pypi/v/transtractor)
 ![Development Status](https://img.shields.io/pypi/status/transtractor)
 ![Tests](https://github.com/transtractor/transtractor-lib/actions/workflows/ci.yml/badge.svg)
+![Read the Docs](https://readthedocs.org/projects/transtractor-lib/badge/?version=latest)
 ![codecov](https://codecov.io/gh/transtractor/transtractor-lib/branch/main/graph/badge.svg)
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
+
 
 ## Universal PDF Bank Statement Parsing
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
