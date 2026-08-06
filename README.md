@@ -67,6 +67,11 @@ pip install transtractor
 ## User Documentation
 See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs for detailed guidance.
 
+## WASM Implementation
+WASM bindings are also provided for in-browser parsing of PDF bank statements. See [this guide](md/wasm.md) for an introductory guide on how to compile and use them. 
+
+You may also want to checkout [www.transtractor.net] to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/transtractor/transtractor-web) from the source code. 
+
 ## Supported Statements
 See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
 create your own parsing configuration files by following these [instructions](https://transtractor-lib.readthedocs.io/en/latest/configuration.html)
