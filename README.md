@@ -64,8 +64,8 @@ pip install transtractor
    df = pd.DataFrame(data)
    ```
 
-## Advanced Usage
-See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs.
+## User Documentation
+See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs for detailed guidance.
 
 ## Supported Statements
 See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
