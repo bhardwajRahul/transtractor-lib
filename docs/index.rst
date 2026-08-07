@@ -64,6 +64,11 @@ Writes:
    ...
 
 
+Web Interface
+-------------
+An open-source web interface is available at `transtractor.net <https://transtractor.net>` or can be self hosted 
+from the `transtractor-web <https://github.com/transtractor/transtractor-web>`_ repository.
+
 Supported Banks
 ---------------
 See the :doc:`supported statements <supported_statements>` page for a full list of supported banks and statement formats.
