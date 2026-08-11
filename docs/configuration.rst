@@ -152,6 +152,8 @@ formats are supported:
       - "1,234.56 CR" → 1234.56, "-1,234.56 CR" → -1234.56, "1,234.56 DR" → -1234.56
     * - ``format5``
       - "nil" → 0.00, "Nil" → 0.00
+    * - ``format6``
+      - "- $1,234" → -1234.00, "+ $1,234" → 1234.00
 
 Formats are sensitive to spacing and comma separation, but generally not case sensitive.
 
