@@ -14,5 +14,5 @@ The easiest way to install the Transtractor is using pip:
 Installing from Source
 ----------------------
 
-See to the `GitHub repository <https://github.com/transtractor/transtractor-lib>`_ 
+See to the `GitHub repository <https://github.com/weberdak/transtractor-lib>`_ 
 for the latest source code and installation instructions.

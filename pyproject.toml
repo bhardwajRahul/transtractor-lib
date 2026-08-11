@@ -55,10 +55,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/transtractor/transtractor-lib"
+Homepage = "https://github.com/weberdak/transtractor-lib"
 Documentation = "https://transtractor-lib.readthedocs.io"
-Repository = "https://github.com/transtractor/transtractor-lib"
-Issues = "https://github.com/transtractor/transtractor-lib/issues"
+Repository = "https://github.com/weberdak/transtractor-lib"
+Issues = "https://github.com/weberdak/transtractor-lib/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

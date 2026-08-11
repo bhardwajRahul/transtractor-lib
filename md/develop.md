@@ -24,7 +24,7 @@ Before proceeding, ensure the following tools are installed:
 Clone the repository:
 
 ```shell
-git clone https://github.com/transtractor/transtractor-lib.git
+git clone https://github.com/weberdak/transtractor-lib.git
 ```
 
 Then setup the Python virtual environment (*.venv*) and install the Transtractor by:

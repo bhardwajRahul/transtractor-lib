@@ -14,8 +14,8 @@ Built with Rust for speed and wrapped with a Python API for ease of use.
    :target: https://pypi.org/project/transtractor/
    :alt: Development Status
 
-.. image:: https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg
-   :target: https://github.com/transtractor/transtractor-lib/actions
+.. image:: https://github.com/weberdak/transtractor-lib/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/weberdak/transtractor-lib/actions
    :alt: Tests
 
 .. image:: https://codecov.io/gh/transtractor/transtractor-lib/branch/main/graph/badge.svg
@@ -23,7 +23,7 @@ Built with Rust for speed and wrapped with a Python API for ease of use.
    :alt: codecov
 
 .. image:: https://img.shields.io/github/license/transtractor/transtractor-lib
-   :target: https://github.com/transtractor/transtractor-lib/blob/main/LICENSE
+   :target: https://github.com/weberdak/transtractor-lib/blob/main/LICENSE
    :alt: License
 
 
@@ -67,7 +67,7 @@ Writes:
 Web Interface
 -------------
 An open-source web interface is available at `transtractor.net <https://transtractor.net>` or can be self hosted 
-from the `transtractor-web <https://github.com/transtractor/transtractor-web>`_ repository.
+from the `transtractor-web <https://github.com/weberdak/transtractor-web>`_ repository.
 
 Supported Banks
 ---------------
@@ -101,7 +101,7 @@ Community & Support
 -------------------
 
 * **Website**: `transtractor.net <https://transtractor.net>`_
-* **GitHub Repository**: `transtractor/transtractor-lib <https://github.com/transtractor/transtractor-lib>`_
+* **GitHub Repository**: `transtractor/transtractor-lib <https://github.com/weberdak/transtractor-lib>`_
 * **Contributions**: Pull requests with new statement configurations are very welcome!
 
 

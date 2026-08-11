@@ -4,7 +4,7 @@ Supported Statements
 The Transtractor uses rules-based parsing to extract transaction data from bank statements. Each 
 supported statement format is defined by a specific set of parsing rules tailored to the bank 
 and account type. These configuration are defined in Rust modules located in `src/configs/registry` of 
-the `source code <https://github.com/transtractor/transtractor-lib>`_.
+the `source code <https://github.com/weberdak/transtractor-lib>`_.
 
 The following statements will be recognised and parsed automatically. You must create and load 
 your own configuration files if your bank or account type is not listed here.

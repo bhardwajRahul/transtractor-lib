@@ -9,7 +9,7 @@ for unsupported banks or account types.
 Basic Template
 --------------
 The JSON file used to read the
-`test1.pdf <https://github.com/transtractor/transtractor-lib/blob/main/tests/fixtures/test1.pdf>`_ 
+`test1.pdf <https://github.com/weberdak/transtractor-lib/blob/main/tests/fixtures/test1.pdf>`_ 
 example file included in the source code is:
 
 .. code-block:: json
@@ -593,5 +593,5 @@ Contributing Your Configuration
 --------------------------------------
 If you have created a well-tested configuration file for a bank or account type that is not
 currently supported, please consider contributing it to the project. Follow the 
-`Guidance Documentation <https://github.com/transtractor/transtractor-lib/md/contribute.md>`_ 
+`Guidance Documentation <https://github.com/weberdak/transtractor-lib/md/contribute.md>`_ 
 in the GitHub repository.
