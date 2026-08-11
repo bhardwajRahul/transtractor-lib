@@ -1,7 +1,7 @@
 use crate::formats::amount::AmountFormat;
 use regex::Regex;
 
-/// Format6: parses amounts like "- $1,234.56", "+ 1,234.56"
+/// Format6: parses amounts like "- $1,234.56", "+ $1,234.56"
 pub struct Format6;
 
 impl AmountFormat for Format6 {
@@ -10,7 +10,7 @@ impl AmountFormat for Format6 {
     }
 
     fn parse(&self, amount_str: &str) -> Option<f64> {
-        let re = Regex::new(r"^([+-])\s*\$?([\d,]+\.\d{2})$").unwrap();
+        let re = Regex::new(r"^([+-])\s+\$([\d,]+\.\d{2})$").unwrap();
         if !re.is_match(amount_str) {
             return None;
         }
@@ -35,8 +35,9 @@ mod tests {
     fn test_format6() {
         let fmt = Format6;
         assert_eq!(fmt.parse("- $1,234.56"), Some(-1234.56));
-        assert_eq!(fmt.parse("+ 1,234.56"), Some(1234.56));
-        assert_eq!(fmt.parse("-$1,234.56"), Some(-1234.56));
+        assert_eq!(fmt.parse("+ $1,234.56"), Some(1234.56));
+        assert_eq!(fmt.parse("+ 1,234.56"), None);
+        assert_eq!(fmt.parse("-$1,234.56"), None);
         assert_eq!(fmt.parse("+ $1,234.56"), Some(1234.56));
         assert_eq!(fmt.parse("bad input"), None);
         assert_eq!(fmt.parse("$1,234.56"), None);
