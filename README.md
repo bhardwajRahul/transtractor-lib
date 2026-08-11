@@ -72,7 +72,7 @@ See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) main
 ## WASM Implementation
 WASM bindings are also provided for in-browser parsing of PDF bank statements. See [this guide](md/wasm.md) for an introductory guide on how to compile and use them. 
 
-You may also want to checkout [www.transtractor.net] to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/weberdak/transtractor-web) from the source code. 
+You may also want to checkout [www.transtractor.net](https://www.transtractor.net) to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/weberdak/transtractor-web) from the source code. 
 
 ## Supported Statements
 See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
