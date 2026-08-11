@@ -9,6 +9,8 @@ RUN apt-get update \
 		curl \
 		git \
 		gnupg \
+		python3.11-dev \
+		python3.11-venv \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
