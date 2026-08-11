@@ -91,10 +91,10 @@ jobs:
         run: cargo test --verbose
 
       - name: Run ruff check
-        run: uv run ruff check python tests
+        run: uv run ruff check python scripts tests
 
       - name: Run ruff format check
-        run: uv run ruff format --check python tests
+        run: uv run ruff format --check python scripts tests
 
       - name: Run pytest
         run: uv run pytest

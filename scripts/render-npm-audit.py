@@ -100,7 +100,8 @@ def render(data: dict[str, Any] | None) -> tuple[str, int]:
         else:
             fix_state = "no"
         lines.append(
-            f"| `{finding['package']}` | `{severity}` | {advisory} ({title}) | `{range_}` | `{fix_state}` |"
+            f"| `{finding['package']}` | `{severity}` | {advisory} ({title}) | "
+            f"`{range_}` | `{fix_state}` |"
         )
 
     return "\n".join(lines), len(findings)

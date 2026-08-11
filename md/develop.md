@@ -151,13 +151,13 @@ Python linting and formatting are handled by the high‑performance **Ruff** too
 To lint the Python source and test suite:
 
 ```shell
-uv run ruff check python tests
+uv run ruff check python scripts tests
 ```
 
 To verify that all formatting rules are satisfied:
 
 ```shell
-uv run ruff format --check python tests
+uv run ruff format --check python scripts tests
 ```
 
 ### Rust
