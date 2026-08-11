@@ -43,6 +43,12 @@ cd wasm
 npm ci
 ```
 
+## Dev Containers
+This repository includes a VS Code Dev Container configuration, so you can open it in a fully preconfigured development environment without installing all tooling on your host system.
+
+If you have Docker and the VS Code Dev Containers extension installed, use **Dev Containers: Reopen in Container** from the Command Palette.
+
+You will be prompted by `uv` to install Python.
 
 ## CI/CD
 The Transtractor repository implements a set of GitHub Actions workflows that automate testing, validation, security auditing, and release publishing across the Rust, Python and TypeScript/WASM components. 
