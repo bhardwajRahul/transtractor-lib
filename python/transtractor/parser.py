@@ -39,7 +39,7 @@ class Parser:
         sd: StatementData = cast(
             StatementData, self._inner.py_pdf_path_to_py_statement_data(pdf_file_path)
         )
-        sd.set_filename(pdf_file_path)
+        sd.filename = pdf_file_path
         return sd
 
     def parse_layout(self, layout_file_path: str) -> StatementData:

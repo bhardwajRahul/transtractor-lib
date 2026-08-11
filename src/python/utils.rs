@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyAny, PyList};
+use pyo3::types::{PyAny, PyDict, PyList};
 
 /// Convert a Rust StatementData to a Python StatementData object
 pub fn rust_statement_data_to_py_statement_data(
@@ -74,15 +74,16 @@ pub fn rust_statement_data_to_py_statement_data(
         }
 
         // Create Python StatementData object.
-        // filename remains unset here and is attached by the Python parser wrapper.
-        let py_statement_data = statement_data_class.call1((
-            key,
-            account_number,
-            start_date,
-            opening_balance,
-            closing_balance,
-            py_transactions,
-        ))?;
+        // The parser wrapper can overwrite the blank filename later if needed.
+        let kwargs = PyDict::new(py);
+        kwargs.set_item("key", key)?;
+        kwargs.set_item("filename", "")?;
+        kwargs.set_item("account_number", account_number)?;
+        kwargs.set_item("start_date", start_date)?;
+        kwargs.set_item("opening_balance", opening_balance)?;
+        kwargs.set_item("closing_balance", closing_balance)?;
+        kwargs.set_item("transactions", py_transactions)?;
+        let py_statement_data = statement_data_class.call((), Some(&kwargs))?;
 
         Ok(py_statement_data.into())
     })
