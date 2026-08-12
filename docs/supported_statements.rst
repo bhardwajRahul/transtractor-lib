@@ -18,21 +18,29 @@ Australia
 
     * - Key
       - Bank
-      - Types
+      - Example Accounts
       - Introduced
     * - ``au__cba__credit_card__1``
       - Commonwealth Bank
-      - Credit Card
+      - Low Rate MasterCard, Low Fee Mastercard
       - v0.9.0
     * - ``au__cba__debit__1``
       - Commonwealth Bank
-      - Debit/Savings
+      - Streamline, Smart Access, GoalSaver, Everyday Offset
       - v0.9.0
     * - ``au__cba__loan__1``
       - Commonwealth Bank
-      - Loan
+      - Complete Home Loan
       - v0.9.0
     * - ``au__nab__classic_banking__1``
       - National Australia Bank
       - Classic Banking
       - v0.9.0
+    * - ``au__wbc__debit__1``
+      - Westpac Banking Corporation
+      - Choice, Life
+      - v1.0.0
+    * - ``au__ing__debit__1``
+      - ING Bank
+      - Orange Everyday, Savings Maximiser
+      - v1.0.0
