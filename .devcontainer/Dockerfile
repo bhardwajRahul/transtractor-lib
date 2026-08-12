@@ -19,6 +19,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
 
 RUN export RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo \
 	&& curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
+	&& "$CARGO_HOME/bin/rustup" component add clippy rustfmt \
 	&& "$CARGO_HOME/bin/cargo" install wasm-pack cargo-llvm-cov cargo-audit cargo-deny
 
 RUN export UV_INSTALL_DIR=/usr/local/bin \
