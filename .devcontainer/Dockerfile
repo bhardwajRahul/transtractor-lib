@@ -30,6 +30,7 @@ RUN mkdir -p /home/vscode/.cargo \
 
 ENV CARGO_HOME=/home/vscode/.cargo \
 	RUSTUP_HOME=/usr/local/rustup \
-	PATH=/home/vscode/.cargo/bin:/usr/local/cargo/bin:/usr/local/bin:${PATH}
+	PATH=/home/vscode/.cargo/bin:/usr/local/cargo/bin:/usr/local/bin:${PATH} \
+	UV_LINK_MODE=copy
 
 USER vscode
