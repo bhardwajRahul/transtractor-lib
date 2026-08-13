@@ -23,7 +23,7 @@ type WasmParserCtor = {
     specBytes(pdfBytes: Uint8Array): string;
     specLayoutText(layoutText: string): string;
     validateSpec(specFilePath: string): void;
-    validateSpecBytes(specJson: string): void;
+    validateSpecText(specJson: string): void;
   };
 };
 
@@ -124,8 +124,8 @@ export class Parser {
     return this.inner.specLayoutText(layoutText);
   }
 
-  validateSpecBytes(specJson: string): void {
-    this.inner.validateSpecBytes(specJson);
+  validateSpecText(specJson: string): void {
+    this.inner.validateSpecText(specJson);
   }
 }
 

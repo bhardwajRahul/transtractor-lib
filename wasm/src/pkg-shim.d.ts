@@ -18,7 +18,7 @@ declare module "../pkg/transtractor.js" {
     specBytes(pdfBytes: Uint8Array): string;
     specLayoutText(layoutText: string): string;
     validateSpec(specFilePath: string): void;
-    validateSpecBytes(specJson: string): void;
+    validateSpecText(specJson: string): void;
   }
 
   export class Parser implements WasmParser {
@@ -41,7 +41,7 @@ declare module "../pkg/transtractor.js" {
     specBytes(pdfBytes: Uint8Array): string;
     specLayoutText(layoutText: string): string;
     validateSpec(specFilePath: string): void;
-    validateSpecBytes(specJson: string): void;
+    validateSpecText(specJson: string): void;
   }
 
   export default function init(): Promise<void>;

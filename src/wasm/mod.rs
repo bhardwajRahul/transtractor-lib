@@ -176,7 +176,7 @@ impl WasmParser {
         let spec_str = std::fs::read_to_string(&spec_path).map_err(|e| {
             JsValue::from_str(&format!("Failed to read spec file at {}: {}", spec_path, e))
         })?;
-        self.validate_spec_bytes(spec_str)
+        self.validate_spec_text(spec_str)
     }
 
     #[wasm_bindgen(js_name = debugBytes)]
@@ -207,8 +207,8 @@ impl WasmParser {
         text_items_to_spec_json(&self.db, items)
     }
 
-    #[wasm_bindgen(js_name = validateSpecBytes)]
-    pub fn validate_spec_bytes(&self, spec_json: String) -> Result<(), JsValue> {
+    #[wasm_bindgen(js_name = validateSpecText)]
+    pub fn validate_spec_text(&self, spec_json: String) -> Result<(), JsValue> {
         let spec = Spec::from_json(&spec_json)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse spec JSON: {}", e)))?;
         spec.validate(&self.db)
