@@ -9,7 +9,10 @@ pub fn get_config() -> StatementConfig {
         bank_name: "ING Bank Australia".to_string(),
         account_type: "Savings".to_string(),
         account_terms: vec!["Money in".to_string(), "ING Bank (Australia)".to_string()],
-        account_examples: vec!["Savings Maximiser".to_string(), "Orange Everyday".to_string()],
+        account_examples: vec![
+            "Savings Maximiser".to_string(),
+            "Orange Everyday".to_string(),
+        ],
 
         account_number_terms: vec![
             "Savings Maximiser number:".to_string(),
@@ -37,7 +40,10 @@ pub fn get_config() -> StatementConfig {
         start_date_alignment_tol: 5,
 
         transaction_terms: vec!["Transactions".to_string()],
-        transaction_terms_stop: vec!["Interest rate at".to_string(), "Please check all".to_string()],
+        transaction_terms_stop: vec![
+            "Interest rate at".to_string(),
+            "Please check all".to_string(),
+        ],
         transaction_formats: vec![vec![
             "date".to_string(),
             "description".to_string(),

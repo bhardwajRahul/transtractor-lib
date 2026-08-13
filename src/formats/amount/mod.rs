@@ -23,7 +23,9 @@ pub trait AmountFormat {
 
 /// Get a list of valid formats.
 pub fn get_valid_formats() -> Vec<&'static str> {
-    vec!["format1", "format2", "format3", "format4", "format5", "format6"]
+    vec![
+        "format1", "format2", "format3", "format4", "format5", "format6",
+    ]
 }
 
 /// Dispatcher for multiple amount formats.
