@@ -1,8 +1,9 @@
 use crate::configs::db::ConfigDB;
 use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
+use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
 use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
-use crate::structs::{ProtoTransaction, StatementData};
+use crate::structs::{ProtoTransaction, Spec, StatementData, TextItem};
 use pdfsink_rs::PdfDocument;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
@@ -123,6 +124,80 @@ impl WasmParser {
             .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
         statement_data_to_js(&data)
     }
+
+    #[wasm_bindgen(js_name = debug)]
+    pub fn debug(&self, pdf_path: String, output_file: String) -> Result<(), JsValue> {
+        let items = pdf_path_to_text_items(&pdf_path)?;
+        let debug_str = text_items_to_debug(&self.db, &items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))?;
+        write_str_to_file(&debug_str, &output_file)
+    }
+
+    #[wasm_bindgen(js_name = debugLayout)]
+    pub fn debug_layout(&self, layout_path: String, output_file: String) -> Result<(), JsValue> {
+        let items = layout_path_to_text_items(&layout_path)?;
+        let debug_str = text_items_to_debug(&self.db, &items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))?;
+        write_str_to_file(&debug_str, &output_file)
+    }
+
+    #[wasm_bindgen(js_name = spec)]
+    pub fn spec(&self, pdf_path: String, output_file: String) -> Result<(), JsValue> {
+        let items = pdf_path_to_text_items(&pdf_path)?;
+        let spec_str = text_items_to_spec_json(&self.db, items)?;
+        write_str_to_file(&spec_str, &output_file)
+    }
+
+    #[wasm_bindgen(js_name = specLayout)]
+    pub fn spec_layout(&self, layout_path: String, output_file: String) -> Result<(), JsValue> {
+        let items = layout_path_to_text_items(&layout_path)?;
+        let spec_str = text_items_to_spec_json(&self.db, items)?;
+        write_str_to_file(&spec_str, &output_file)
+    }
+
+    #[wasm_bindgen(js_name = validateSpec)]
+    pub fn validate_spec(&self, spec_path: String) -> Result<(), JsValue> {
+        let spec_str = std::fs::read_to_string(&spec_path).map_err(|e| {
+            JsValue::from_str(&format!("Failed to read spec file at {}: {}", spec_path, e))
+        })?;
+        self.validate_spec_bytes(spec_str)
+    }
+
+    #[wasm_bindgen(js_name = debugBytes)]
+    pub fn debug_bytes(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
+        let items = pdf_bytes_to_text_items(pdf_bytes)?;
+        text_items_to_debug(&self.db, &items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))
+    }
+
+    #[wasm_bindgen(js_name = debugLayoutText)]
+    pub fn debug_layout_text(&self, layout_text: String) -> Result<String, JsValue> {
+        let items = layout_to_text_items(&layout_text)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))?;
+        text_items_to_debug(&self.db, &items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))
+    }
+
+    #[wasm_bindgen(js_name = specBytes)]
+    pub fn spec_bytes(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
+        let items = pdf_bytes_to_text_items(pdf_bytes)?;
+        text_items_to_spec_json(&self.db, items)
+    }
+
+    #[wasm_bindgen(js_name = specLayoutText)]
+    pub fn spec_layout_text(&self, layout_text: String) -> Result<String, JsValue> {
+        let items = layout_to_text_items(&layout_text)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))?;
+        text_items_to_spec_json(&self.db, items)
+    }
+
+    #[wasm_bindgen(js_name = validateSpecBytes)]
+    pub fn validate_spec_bytes(&self, spec_json: String) -> Result<(), JsValue> {
+        let spec = Spec::from_json(&spec_json)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse spec JSON: {}", e)))?;
+        spec.validate(&self.db)
+            .map_err(|e| JsValue::from_str(&format!("Spec validation failed: {}", e)))
+    }
 }
 
 impl WasmParser {
@@ -133,6 +208,55 @@ impl WasmParser {
             .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
         statement_data_to_js(&data)
     }
+}
+
+fn pdf_path_to_text_items(pdf_path: &str) -> Result<Vec<TextItem>, JsValue> {
+    let doc = PdfDocument::open(pdf_path).map_err(|e| {
+        JsValue::from_str(&format!(
+            "Failed to open PDF document at {}: {}",
+            pdf_path, e
+        ))
+    })?;
+    pdf_to_text_items(&doc)
+        .map_err(|e| JsValue::from_str(&format!("Failed to extract text items: {}", e)))
+}
+
+fn pdf_bytes_to_text_items(pdf_bytes: &[u8]) -> Result<Vec<TextItem>, JsValue> {
+    let doc = PdfDocument::from_bytes(pdf_bytes).map_err(|e| {
+        JsValue::from_str(&format!(
+            "Failed to open PDF document from byte input: {}",
+            e
+        ))
+    })?;
+    pdf_to_text_items(&doc)
+        .map_err(|e| JsValue::from_str(&format!("Failed to extract text items: {}", e)))
+}
+
+fn layout_path_to_text_items(layout_path: &str) -> Result<Vec<TextItem>, JsValue> {
+    let content = std::fs::read_to_string(layout_path).map_err(|e| {
+        JsValue::from_str(&format!(
+            "Failed to read layout file at {}: {}",
+            layout_path, e
+        ))
+    })?;
+    layout_to_text_items(&content)
+        .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))
+}
+
+fn text_items_to_spec_json(db: &ConfigDB, items: Vec<TextItem>) -> Result<String, JsValue> {
+    let spec = Spec::new(db, items)
+        .map_err(|e| JsValue::from_str(&format!("Failed to build spec: {}", e)))?;
+    spec.to_json()
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize spec to JSON: {}", e)))
+}
+
+fn write_str_to_file(content: &str, output_file: &str) -> Result<(), JsValue> {
+    std::fs::write(output_file, content).map_err(|e| {
+        JsValue::from_str(&format!(
+            "Failed to write to file at {}: {}",
+            output_file, e
+        ))
+    })
 }
 
 fn statement_data_to_js(data: &StatementData) -> Result<JsValue, JsValue> {

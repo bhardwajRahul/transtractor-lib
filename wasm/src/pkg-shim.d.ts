@@ -7,6 +7,16 @@ declare module "../pkg/transtractor.js" {
     load(configJsonPath: string): void;
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
+    debug(pdfFilePath: string, outputFile: string): void;
+    debugLayout(layoutFilePath: string, outputFile: string): void;
+    debugBytes(pdfBytes: Uint8Array): string;
+    debugLayoutText(layoutText: string): string;
+    spec(pdfFilePath: string, outputFile: string): void;
+    specLayout(layoutFilePath: string, outputFile: string): void;
+    specBytes(pdfBytes: Uint8Array): string;
+    specLayoutText(layoutText: string): string;
+    validateSpec(specFilePath: string): void;
+    validateSpecBytes(specJson: string): void;
   }
 
   export class Parser implements WasmParser {
@@ -18,6 +28,16 @@ declare module "../pkg/transtractor.js" {
     load(configJsonPath: string): void;
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
+    debug(pdfFilePath: string, outputFile: string): void;
+    debugLayout(layoutFilePath: string, outputFile: string): void;
+    debugBytes(pdfBytes: Uint8Array): string;
+    debugLayoutText(layoutText: string): string;
+    spec(pdfFilePath: string, outputFile: string): void;
+    specLayout(layoutFilePath: string, outputFile: string): void;
+    specBytes(pdfBytes: Uint8Array): string;
+    specLayoutText(layoutText: string): string;
+    validateSpec(specFilePath: string): void;
+    validateSpecBytes(specJson: string): void;
   }
 
   export default function init(): Promise<void>;

@@ -12,6 +12,16 @@ type WasmParserCtor = {
     load(configJsonPath: string): void;
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
+    debug(pdfFilePath: string, outputFile: string): void;
+    debugLayout(layoutFilePath: string, outputFile: string): void;
+    debugBytes(pdfBytes: Uint8Array): string;
+    debugLayoutText(layoutText: string): string;
+    spec(pdfFilePath: string, outputFile: string): void;
+    specLayout(layoutFilePath: string, outputFile: string): void;
+    specBytes(pdfBytes: Uint8Array): string;
+    specLayoutText(layoutText: string): string;
+    validateSpec(specFilePath: string): void;
+    validateSpecBytes(specJson: string): void;
   };
 };
 
@@ -19,9 +29,11 @@ const WasmParser = wasmModule.Parser as unknown as WasmParserCtor;
 
 async function ensureInitialized(): Promise<void> {
   if (!initPromise) {
-    const maybeInit = (wasmModule as unknown as { default?: () => Promise<void> })
-      .default;
-    initPromise = typeof maybeInit === "function" ? maybeInit() : Promise.resolve();
+    const maybeInit = (
+      wasmModule as unknown as { default?: () => Promise<void> }
+    ).default;
+    initPromise =
+      typeof maybeInit === "function" ? maybeInit() : Promise.resolve();
   }
   await initPromise;
 }
@@ -64,6 +76,46 @@ export class Parser {
 
   getDeprecationWarnings(): string[] {
     return this.inner.getDeprecationWarnings().map(String);
+  }
+
+  debug(pdfFilePath: string, outputFile: string): void {
+    this.inner.debug(pdfFilePath, outputFile);
+  }
+
+  debugLayout(layoutFilePath: string, outputFile: string): void {
+    this.inner.debugLayout(layoutFilePath, outputFile);
+  }
+
+  spec(pdfFilePath: string, outputFile: string): void {
+    this.inner.spec(pdfFilePath, outputFile);
+  }
+
+  specLayout(layoutFilePath: string, outputFile: string): void {
+    this.inner.specLayout(layoutFilePath, outputFile);
+  }
+
+  validateSpec(specFilePath: string): void {
+    this.inner.validateSpec(specFilePath);
+  }
+
+  debugBytes(pdfBytes: Uint8Array): string {
+    return this.inner.debugBytes(pdfBytes);
+  }
+
+  debugLayoutText(layoutText: string): string {
+    return this.inner.debugLayoutText(layoutText);
+  }
+
+  specBytes(pdfBytes: Uint8Array): string {
+    return this.inner.specBytes(pdfBytes);
+  }
+
+  specLayoutText(layoutText: string): string {
+    return this.inner.specLayoutText(layoutText);
+  }
+
+  validateSpecBytes(specJson: string): void {
+    this.inner.validateSpecBytes(specJson);
   }
 }
 
