@@ -2,6 +2,7 @@ use crate::configs::db::ConfigDB;
 use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
 use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
+use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
 use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
 use crate::structs::{ProtoTransaction, Spec, StatementData, TextItem};
 use pdfsink_rs::PdfDocument;
@@ -123,6 +124,21 @@ impl WasmParser {
         let data = text_items_to_statement_data(&self.db, &items)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
         statement_data_to_js(&data)
+    }
+
+    #[wasm_bindgen(js_name = layout)]
+    pub fn layout(&self, pdf_path: String, output_file: String) -> Result<(), JsValue> {
+        let items = pdf_path_to_text_items(&pdf_path)?;
+        let layout_str = text_items_to_layout(&items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate layout output: {}", e)))?;
+        write_str_to_file(&layout_str, &output_file)
+    }
+
+    #[wasm_bindgen(js_name = layoutText)]
+    pub fn layout_text(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
+        let items = pdf_bytes_to_text_items(pdf_bytes)?;
+        text_items_to_layout(&items)
+            .map_err(|e| JsValue::from_str(&format!("Failed to generate layout output: {}", e)))
     }
 
     #[wasm_bindgen(js_name = debug)]

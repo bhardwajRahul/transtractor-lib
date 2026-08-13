@@ -12,6 +12,8 @@ type WasmParserCtor = {
     load(configJsonPath: string): void;
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
+    layout(pdfFilePath: string, outputFile: string): void;
+    layoutText(pdfBytes: Uint8Array): string;
     debug(pdfFilePath: string, outputFile: string): void;
     debugLayout(layoutFilePath: string, outputFile: string): void;
     debugBytes(pdfBytes: Uint8Array): string;
@@ -76,6 +78,14 @@ export class Parser {
 
   getDeprecationWarnings(): string[] {
     return this.inner.getDeprecationWarnings().map(String);
+  }
+
+  layout(pdfFilePath: string, outputFile: string): void {
+    this.inner.layout(pdfFilePath, outputFile);
+  }
+
+  layoutText(pdfBytes: Uint8Array): string {
+    return this.inner.layoutText(pdfBytes);
   }
 
   debug(pdfFilePath: string, outputFile: string): void {
