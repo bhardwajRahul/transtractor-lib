@@ -134,8 +134,8 @@ impl WasmParser {
         write_str_to_file(&layout_str, &output_file)
     }
 
-    #[wasm_bindgen(js_name = layoutText)]
-    pub fn layout_text(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
+    #[wasm_bindgen(js_name = layoutBytes)]
+    pub fn layout_bytes(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
         let items = pdf_bytes_to_text_items(pdf_bytes)?;
         text_items_to_layout(&items)
             .map_err(|e| JsValue::from_str(&format!("Failed to generate layout output: {}", e)))

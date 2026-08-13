@@ -8,7 +8,7 @@ declare module "../pkg/transtractor.js" {
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
     layout(pdfFilePath: string, outputFile: string): void;
-    layoutText(pdfBytes: Uint8Array): string;
+    layoutBytes(pdfBytes: Uint8Array): string;
     debug(pdfFilePath: string, outputFile: string): void;
     debugLayout(layoutFilePath: string, outputFile: string): void;
     debugBytes(pdfBytes: Uint8Array): string;
@@ -31,7 +31,7 @@ declare module "../pkg/transtractor.js" {
     loadConfigFromJson(configJson: string): void;
     getDeprecationWarnings(): unknown[];
     layout(pdfFilePath: string, outputFile: string): void;
-    layoutText(pdfBytes: Uint8Array): string;
+    layoutBytes(pdfBytes: Uint8Array): string;
     debug(pdfFilePath: string, outputFile: string): void;
     debugLayout(layoutFilePath: string, outputFile: string): void;
     debugBytes(pdfBytes: Uint8Array): string;
