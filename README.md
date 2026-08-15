@@ -8,16 +8,16 @@
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
 
 
-## Universal PDF Bank Statement Parsing
+## The Universal PDF Bank Parser
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
 library for extracting transaction data from PDF bank statements. Key features:
 
 * Written in Rust (fast and portable)
 * Python API (user friendly)
 * WASM bindings (browser-ready)
+* A [web-based GUI](https://www.transtractor.net/) (even more user friendly)
 * No AI (lightweight, self-contained and dirt cheap)
 * Rules-based extraction (100% predictable and accurate)
-
 
 ## Installation
 ### Install from PyPI
@@ -46,6 +46,8 @@ pip install transtractor
    ```
 
 ### Basic Usage
+Detailed [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs, but you can get started using the following steps.
+
 1. **Import and initialise the parser**
    ```python
    from transtractor import Parser
@@ -66,17 +68,10 @@ pip install transtractor
    df = pd.DataFrame(data)
    ```
 
-## User Documentation
-See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs for detailed guidance.
-
-## WASM Implementation
-WASM bindings are also provided for in-browser parsing of PDF bank statements. See [this guide](md/wasm.md) for an introductory guide on how to compile and use them. 
-
-You may also want to checkout [www.transtractor.net](https://www.transtractor.net) to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/weberdak/transtractor-web) from the source code. 
+The `parse` method returns a `StatementData` object containing the account number, statement date, opening and closing balances, and transaction table. Transaction dates, descriptions, amounts, and running balances are extracted or derived when they are not explicitly recorded in the statement. Transaction amounts are validated against the opening and closing balances; if validation fails, the method raises a `ParserError`.
 
 ## Supported Statements
-See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
-create your own parsing configuration files by following these [instructions](https://transtractor-lib.readthedocs.io/en/latest/configuration.html)
+See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also create your own parsing configuration files by following these [instructions](https://transtractor-lib.readthedocs.io/en/latest/configuration.html)
 and loading it by:
 
 ```python
@@ -86,6 +81,11 @@ parser = Parser()
 parser.load('my_config.json')
 parser.parse('statement.pdf').to_csv('statement.csv')
 ```
+
+## WASM Implementation
+WASM bindings are also provided for in-browser parsing of PDF bank statements. See [this guide](md/wasm.md) for an introductory guide on how to compile and use them. 
+
+You may also want to checkout [www.transtractor.net](https://www.transtractor.net) to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/weberdak/transtractor-web) from the source code. 
 
 ## Developers
 The following pages provide further information about how this package is built and developed:
