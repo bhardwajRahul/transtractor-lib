@@ -54,6 +54,7 @@ struct StatementConfigPartial {
     start_date_formats: Option<Vec<String>>,
     start_date_alignment: Option<String>,
     start_date_alignment_tol: Option<i32>,
+    start_date_first_match: Option<bool>,
 
     transaction_terms: Option<Vec<String>>,
     transaction_terms_stop: Option<Vec<String>>,
@@ -146,6 +147,7 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     overlay!(start_date_formats);
     overlay!(start_date_alignment);
     overlay!(start_date_alignment_tol);
+    overlay!(start_date_first_match);
 
     overlay!(transaction_terms);
     overlay!(transaction_terms_stop);

@@ -32,6 +32,7 @@ pub fn get_config() -> StatementConfig {
         start_date_formats: vec!["format2".to_string()],
         start_date_alignment: "y1".to_string(),
         start_date_alignment_tol: 20,
+        start_date_first_match: false,
 
         transaction_terms: vec!["Date Transaction description".to_string()],
         transaction_terms_stop: vec!["Closing balance".to_string()],

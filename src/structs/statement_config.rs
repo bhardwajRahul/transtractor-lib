@@ -59,6 +59,10 @@ pub struct StatementConfig {
     pub start_date_alignment: String,
     /// Tolerance for alignment matching of start date
     pub start_date_alignment_tol: i32,
+    /// Collect start date on first encountered format match
+    /// Settings start_date_terms, start_date_alignment and start_date_alignment_tol will
+    /// have no effect if this is set to true.
+    pub start_date_first_match: bool,
 
     // GENERAL TRANSACTION READ PARAMS
     /// Array of terms that can indicate start, or nearing the start of transaction table
@@ -149,6 +153,7 @@ impl Default for StatementConfig {
             start_date_formats: vec![],
             start_date_alignment: "y1".to_string(),
             start_date_alignment_tol: 5,
+            start_date_first_match: false,
 
             transaction_terms: vec![],
             transaction_terms_stop: vec![],

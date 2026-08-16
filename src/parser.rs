@@ -240,6 +240,31 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_generates_expected_statement_data_with_start_date_first_match() {
+        let mut parser = Parser::new();
+        parser
+            .load(&fixture("test1a_config.json"))
+            .expect("Expected config to load");
+
+        let statement_data = parser
+            .parse(&fixture("test1a.pdf"))
+            .expect("Expected parse to succeed");
+
+        assert_eq!(
+            statement_data.key.as_deref(),
+            Some("au__gtb__fake_account__1")
+        );
+        assert_eq!(
+            statement_data.account_number.as_deref(),
+            Some("1234 5678 9123 4567")
+        );
+        assert_eq!(statement_data.start_date, Some(1735689600000));
+        assert_eq!(statement_data.opening_balance, Some(50000.0));
+        assert_eq!(statement_data.closing_balance, Some(11663.82));
+        assert_eq!(statement_data.proto_transactions.len(), 62);
+    }
+
+    #[test]
     fn test_parse_raises_error_without_config() {
         let parser = Parser::new();
         let result = parser.parse(&fixture("test1.pdf"));

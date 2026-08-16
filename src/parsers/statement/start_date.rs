@@ -13,14 +13,16 @@ impl StartDateParser {
             .iter()
             .map(|s| s.as_str())
             .collect();
-        Self {
-            parser: PrimedDateParser::new(
-                primer_terms.as_slice(),
-                date_formats.as_slice(),
-                &config.start_date_alignment,
-                config.start_date_alignment_tol,
-            ),
+        let mut parser = PrimedDateParser::new(
+            primer_terms.as_slice(),
+            date_formats.as_slice(),
+            &config.start_date_alignment,
+            config.start_date_alignment_tol,
+        );
+        if config.start_date_first_match {
+            parser.set_first_match(true);
         }
+        Self { parser }
     }
 
     pub fn parse_items(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {

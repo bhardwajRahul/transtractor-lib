@@ -35,6 +35,7 @@ pub fn get_config() -> StatementConfig {
         start_date_formats: vec!["format2".to_string()],
         start_date_alignment: "y1".to_string(),
         start_date_alignment_tol: 5,
+        start_date_first_match: false,
 
         transaction_terms: vec!["Transactions Date Transaction Details".to_string()],
         transaction_terms_stop: vec!["Please check your".to_string()],

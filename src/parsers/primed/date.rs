@@ -47,17 +47,23 @@ impl PrimedDateParser {
 
         // Both primer and date found, check conditions
         let date_item = self.date_parser.text_item.as_ref().unwrap();
-        let primer_item = self.primer_parser.text_item.as_ref().unwrap();
 
-        let valid_alignment = match self.alignment.as_str() {
-            "x1" => (date_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
-            "x2" => (date_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
-            "y1" => (date_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
-            "y2" => (date_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
-            "" => true, // No alignment check
-            _ => true,  // No alignment check
+        // When primed via set_first_match there is no primer text item to align
+        // against, so skip alignment/page checks in that case.
+        let (valid_alignment, page_ok) = match self.primer_parser.text_item.as_ref() {
+            Some(primer_item) => {
+                let valid_alignment = match self.alignment.as_str() {
+                    "x1" => (date_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
+                    "x2" => (date_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
+                    "y1" => (date_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
+                    "y2" => (date_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
+                    "" => true, // No alignment check
+                    _ => true,  // No alignment check
+                };
+                (valid_alignment, date_item.page == primer_item.page)
+            }
+            None => (true, true),
         };
-        let page_ok = date_item.page == primer_item.page;
 
         // Return 0 if any condition fails
         if !valid_alignment || !page_ok {
@@ -84,6 +90,13 @@ impl PrimedDateParser {
         self.primer_parser
             .max_lookahead
             .max(self.date_parser.max_lookahead)
+    }
+
+    /// Set whether to skip primer check and just look for first date match
+    pub fn set_first_match(&mut self, first_match: bool) {
+        if first_match {
+            self.primer_parser.primed = true;
+        }
     }
 }
 
