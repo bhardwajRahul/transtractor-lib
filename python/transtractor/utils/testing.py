@@ -107,7 +107,7 @@ def run_test_protocol(
     logger = logging.getLogger()
 
     # Get all PDF files in the directory and sub-directories
-    pdf_files: list[str] = [str(p) for p in Path(pdf_dir).rglob("*.pdf")]
+    pdf_files: list[str] = sorted(str(p) for p in Path(pdf_dir).rglob("*.pdf"))
     num_files = len(pdf_files)
     num_passed = 0
     num_failed = 0
