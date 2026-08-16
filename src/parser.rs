@@ -165,6 +165,11 @@ mod tests {
             .unwrap_or_else(|e| panic!("Failed to read fixture {}: {}", name, e))
     }
 
+    /// Strip carriage returns so comparisons are stable across CRLF checkouts (e.g. Windows).
+    fn normalise_line_endings(content: &str) -> String {
+        content.replace("\r\n", "\n")
+    }
+
     fn temp_file_path(suffix: &str) -> PathBuf {
         let mut path = std::env::temp_dir();
         path.push(format!(
@@ -351,7 +356,10 @@ mod tests {
         let expected = read_fixture("test1_debug.txt");
         std::fs::remove_file(&output_path).ok();
 
-        assert_eq!(generated, expected);
+        assert_eq!(
+            normalise_line_endings(&generated),
+            normalise_line_endings(&expected)
+        );
     }
 
     #[test]
@@ -380,7 +388,10 @@ mod tests {
         let expected = read_fixture("test1_debug_layout.txt");
         std::fs::remove_file(&output_path).ok();
 
-        assert_eq!(generated, expected);
+        assert_eq!(
+            normalise_line_endings(&generated),
+            normalise_line_endings(&expected)
+        );
     }
 
     #[test]
@@ -409,7 +420,10 @@ mod tests {
         let expected = read_fixture("test1_layout.txt");
         std::fs::remove_file(&output_path).ok();
 
-        assert_eq!(generated, expected);
+        assert_eq!(
+            normalise_line_endings(&generated),
+            normalise_line_endings(&expected)
+        );
     }
 
     #[test]
@@ -430,7 +444,10 @@ mod tests {
         let expected = read_fixture("test1_spec.json");
         std::fs::remove_file(&output_path).ok();
 
-        assert_eq!(generated, expected);
+        assert_eq!(
+            normalise_line_endings(&generated),
+            normalise_line_endings(&expected)
+        );
     }
 
     #[test]
@@ -474,7 +491,10 @@ mod tests {
         let expected = read_fixture("test1_spec.json");
         std::fs::remove_file(&output_path).ok();
 
-        assert_eq!(generated, expected);
+        assert_eq!(
+            normalise_line_endings(&generated),
+            normalise_line_endings(&expected)
+        );
     }
 
     #[test]
