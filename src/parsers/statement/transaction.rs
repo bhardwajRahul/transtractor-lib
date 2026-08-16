@@ -81,9 +81,11 @@ impl TransactionParser {
         let start_consumed = self.start_primer.parse_items(items);
         if start_consumed > 0 {
             if self.start_date_required && data.start_date().is_none() {
-                panic!(
+                data.add_error(
                     "Statement config requires a start date is set prior to parsing transactions."
+                        .to_string(),
                 );
+                return usize::MAX;
             }
             self.date_parser.set_start_date_year(data);
             self.date_parser_newline.set_start_date_year(data);

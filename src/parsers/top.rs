@@ -55,6 +55,11 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
         if consumed == 0 {
             consumed = transaction_parser.parse_items(&buffer, &mut statement_data);
         }
+        // A parser can signal an unrecoverable config error via usize::MAX, logged
+        // into statement_data.errors; stop parsing early in that case.
+        if consumed == usize::MAX {
+            break;
+        }
         if consumed > 0 {
             i += consumed;
             continue;

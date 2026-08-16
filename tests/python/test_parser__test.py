@@ -51,7 +51,9 @@ def test_test_generates_correct_csv_with_valid_config():
     # Load valid config
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     config = fixtures_dir / "test1_config.json"
+    config_1a = fixtures_dir / "test1a_config.json"
     parser.load(str(config))
+    parser.load(str(config_1a))
     expected_csv = fixtures_dir / "test1_test.csv"
 
     # Generate test output in a temporary file
