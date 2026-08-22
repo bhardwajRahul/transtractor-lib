@@ -39,8 +39,8 @@ Australia
     * - ``au__wbc__debit__1``
       - Westpac Banking Corporation
       - Choice, Life
-      - v1.0.0
+      - v0.12.0
     * - ``au__ing__debit__1``
       - ING Bank
       - Orange Everyday, Savings Maximiser
-      - v1.0.0
+      - v0.12.0
