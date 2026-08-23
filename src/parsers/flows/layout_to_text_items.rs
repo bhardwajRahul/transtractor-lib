@@ -1,33 +1,47 @@
 use crate::structs::TextItem;
 
 fn parse_quoted_text(input: &str) -> Option<(String, usize)> {
-    let bytes = input.as_bytes();
-    if bytes.first() != Some(&b'"') {
+    let mut chars = input.char_indices();
+    if !matches!(chars.next(), Some((0, '"'))) {
         return None;
     }
 
-    let mut cursor = 1;
     let mut escaped = false;
     let mut text = String::new();
 
-    while cursor < bytes.len() {
-        match bytes[cursor] {
-            b'\\' if !escaped => escaped = true,
-            b'"' if !escaped => return Some((text, cursor + 1)),
-            b'\\' => {
-                text.push('\\');
-                escaped = false;
-            }
-            other => {
-                if escaped {
-                    text.push(other as char);
-                    escaped = false;
-                } else {
-                    text.push(other as char);
-                }
-            }
+    for (idx, ch) in chars {
+        if escaped {
+            text.push(ch);
+            escaped = false;
+            continue;
         }
-        cursor += 1;
+
+        match ch {
+            '\\' => escaped = true,
+            '"' => return Some((text, idx + ch.len_utf8())),
+            _ => text.push(ch),
+        }
+    }
+
+    None
+}
+
+fn find_layout_item_end(input: &str) -> Option<usize> {
+    let mut in_quotes = false;
+    let mut escaped = false;
+
+    for (idx, ch) in input.char_indices() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+
+        match ch {
+            '\\' if in_quotes => escaped = true,
+            '"' => in_quotes = !in_quotes,
+            ']' if !in_quotes => return Some(idx),
+            _ => {}
+        }
     }
 
     None
@@ -35,9 +49,17 @@ fn parse_quoted_text(input: &str) -> Option<(String, usize)> {
 
 fn parse_layout_item(input: &str) -> Option<(String, i32, i32, i32, i32, i32, usize)> {
     let input = input.trim_start();
-    let end = input.find(']')?;
+    if !input.starts_with('[') {
+        return None;
+    }
+
+    let end = find_layout_item_end(input)?;
+    if end == 0 {
+        return None;
+    }
+
     let block = &input[..end + 1];
-    let contents = &block[1..block.len() - 1];
+    let contents = block.get(1..block.len() - 1)?;
 
     let trimmed_contents = contents.trim_start();
     let (text, text_len) = parse_quoted_text(trimmed_contents)?;
@@ -134,5 +156,39 @@ mod tests {
         let parsed = layout_to_text_items(&layout).unwrap();
 
         assert_eq!(parsed[0], item);
+    }
+
+    #[test]
+    fn parses_unicode_text_from_layout() {
+        let layout = "[Page 0]\n[\"- Pay Over Time and/or Cash Advance activity ⧫\",1,2,3,4,5]";
+
+        let parsed = layout_to_text_items(layout).unwrap();
+
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(
+            parsed[0].text,
+            "- Pay Over Time and/or Cash Advance activity ⧫"
+        );
+        assert_eq!(parsed[0].x1, 1);
+        assert_eq!(parsed[0].x2, 2);
+        assert_eq!(parsed[0].y1, 3);
+        assert_eq!(parsed[0].y2, 4);
+        assert_eq!(parsed[0].y1_bin, 5);
+    }
+
+    #[test]
+    fn skips_malformed_closing_bracket_without_panicking() {
+        let parsed = layout_to_text_items("] [Page 0] [\"Alpha\",1,2,3,4,5]").unwrap();
+
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].text, "Alpha");
+    }
+
+    #[test]
+    fn parses_text_with_closing_bracket_inside_quotes() {
+        let parsed = layout_to_text_items("[Page 0]\n[\"Label with ] inside\",1,2,3,4,5]").unwrap();
+
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].text, "Label with ] inside");
     }
 }
