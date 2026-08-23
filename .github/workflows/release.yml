@@ -488,24 +488,10 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
       - name: Publish to PyPI
         run: uv publish 'wheels-*/*'
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-
-      - name: Install WASM package dependencies
-        run: cd wasm && npm ci
-
-      - name: Build WASM package for npm publish
-        run: cd wasm && npm run build
-
-      - name: Publish WASM package to npm
-        run: cd wasm && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create draft GitHub release
         env:
