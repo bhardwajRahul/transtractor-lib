@@ -44,7 +44,7 @@ pub fn get_config() -> StatementConfig {
         transaction_start_date_required: false,
         transaction_alignment_tol: 20,
 
-        transaction_date_formats: vec!["format9".to_string()],
+        transaction_date_formats: vec!["format9".to_string(), "format14".to_string()],
         transaction_date_headers: vec!["Detail".to_string()],
         transaction_date_alignment: "x1".to_string(),
 
@@ -52,7 +52,7 @@ pub fn get_config() -> StatementConfig {
         transaction_description_alignment: "x1".to_string(),
         transaction_description_exclude: vec![],
 
-        transaction_amount_formats: vec!["format7".to_string()],
+        transaction_amount_formats: vec!["format7".to_string(), "format8".to_string()],
         transaction_amount_headers: vec!["Amount".to_string()],
         transaction_amount_alignment: "x2".to_string(),
         transaction_amount_invert_headers: vec![],

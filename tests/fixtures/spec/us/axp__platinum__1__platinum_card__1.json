@@ -5,7 +5,7 @@
     "start_date": null,
     "start_date_year": null,
     "opening_balance": -9999.99,
-    "closing_balance": -67999.41,
+    "closing_balance": -47999.43,
     "proto_transactions": [
       {
         "date": 1784332800000,
@@ -108,324 +108,338 @@
       {
         "date": 1785024000000,
         "index": 0,
+        "description": "XXXXXXX XXXXXXX",
+        "amount": 9999.99,
+        "balance": -13999.86000000001
+      },
+      {
+        "date": 1785024000000,
+        "index": 1,
         "description": "XXXXXXX # 2972 2972 XXXXX XX",
         "amount": -999.99,
-        "balance": -24999.84000000001
+        "balance": -14999.85000000001
       },
       {
         "date": 1785196800000,
         "index": 0,
         "description": "XXXXXXX #11309 11309 XXXXX XX",
         "amount": -999.99,
-        "balance": -25999.830000000013
+        "balance": -15999.84000000001
       },
       {
         "date": 1785196800000,
         "index": 1,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -26999.820000000014
+        "balance": -16999.83000000001
       },
       {
         "date": 1785283200000,
         "index": 0,
         "description": "XXXXXXX XXXXX XXXXX",
         "amount": -999.99,
-        "balance": -27999.810000000016
+        "balance": -17999.82000000001
       },
       {
         "date": 1785369600000,
         "index": 0,
         "description": "XXXXXXX #1792 000001792 XXXXX XX",
         "amount": -999.99,
-        "balance": -28999.800000000017
+        "balance": -18999.810000000012
       },
       {
         "date": 1785456000000,
         "index": 0,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -29999.79000000002
+        "balance": -19999.800000000014
       },
       {
         "date": 1785456000000,
         "index": 1,
         "description": "XXXXXXX #0824 000000824 XXXXX XX",
         "amount": -999.99,
-        "balance": -30999.78000000002
+        "balance": -20999.790000000015
       },
       {
         "date": 1785456000000,
         "index": 2,
         "description": "XXXXXXX #1792 000001792 XXXXX XX",
         "amount": -999.99,
-        "balance": -31999.770000000022
+        "balance": -21999.780000000017
       },
       {
         "date": 1785456000000,
         "index": 3,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -32999.760000000024
+        "balance": -22999.77000000002
       },
       {
         "date": 1785456000000,
         "index": 4,
         "description": "XXXXXXX #0091 XX XX",
         "amount": -999.99,
-        "balance": -33999.75000000002
+        "balance": -23999.76000000002
       },
       {
         "date": 1785542400000,
         "index": 0,
         "description": "XXXXXXX XX NH",
         "amount": -999.99,
-        "balance": -34999.74000000002
+        "balance": -24999.750000000022
       },
       {
         "date": 1785542400000,
         "index": 1,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -35999.73000000002
+        "balance": -25999.740000000023
       },
       {
         "date": 1785542400000,
         "index": 2,
         "description": "XXXXXXX 000032572 XX XX",
         "amount": -999.99,
-        "balance": -36999.720000000016
+        "balance": -26999.730000000025
       },
       {
         "date": 1785628800000,
         "index": 0,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -37999.710000000014
+        "balance": -27999.720000000027
       },
       {
         "date": 1785628800000,
         "index": 1,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -38999.70000000001
+        "balance": -28999.71000000003
       },
       {
         "date": 1785628800000,
         "index": 2,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -39999.69000000001
+        "balance": -29999.70000000003
       },
       {
         "date": 1785628800000,
         "index": 3,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -40999.68000000001
+        "balance": -30999.69000000003
       },
       {
         "date": 1785628800000,
         "index": 4,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -41999.670000000006
+        "balance": -31999.680000000033
       },
       {
         "date": 1785715200000,
         "index": 0,
         "description": "XXXXXXX XXXXXXX #0824 000000824",
         "amount": 999.99,
-        "balance": -40999.68000000001
+        "balance": -30999.69000000003
       },
       {
         "date": 1785715200000,
         "index": 1,
         "description": "XXXXXXX # 2972 2972 XXXXX XX",
         "amount": -999.99,
-        "balance": -41999.670000000006
+        "balance": -31999.680000000033
       },
       {
         "date": 1785715200000,
         "index": 2,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -42999.66
+        "balance": -32999.670000000035
       },
       {
         "date": 1785715200000,
         "index": 3,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -43999.65
+        "balance": -33999.66000000003
       },
       {
         "date": 1785974400000,
         "index": 0,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -44999.64
+        "balance": -34999.65000000003
       },
       {
         "date": 1786060800000,
         "index": 0,
         "description": "XXXXXXX #1202 1202 XXXXX XX",
         "amount": -999.99,
-        "balance": -45999.63
+        "balance": -35999.64000000003
       },
       {
         "date": 1786060800000,
         "index": 1,
         "description": "XXXXXXX 5443 XXXXX XX",
         "amount": -999.99,
-        "balance": -46999.619999999995
+        "balance": -36999.63000000003
       },
       {
         "date": 1786147200000,
         "index": 0,
         "description": "XXXXXXX #1792 000001792 XXXXX XX",
         "amount": -999.99,
-        "balance": -47999.60999999999
+        "balance": -37999.620000000024
       },
       {
         "date": 1786147200000,
         "index": 1,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -48999.59999999999
+        "balance": -38999.61000000002
       },
       {
         "date": 1786233600000,
         "index": 0,
         "description": "XXXXXXX #0047 OUTSI/UNBRANDED XX XX",
         "amount": -999.99,
-        "balance": -49999.58999999999
+        "balance": -39999.60000000002
       },
       {
         "date": 1786233600000,
         "index": 1,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -50999.57999999999
+        "balance": -40999.59000000002
       },
       {
         "date": 1786492800000,
         "index": 0,
         "description": "XXXXXXX XXXXXX XX",
         "amount": -999.99,
-        "balance": -51999.569999999985
+        "balance": -41999.580000000016
       },
       {
         "date": 1786492800000,
         "index": 1,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -52999.55999999998
+        "balance": -42999.570000000014
       },
       {
         "date": 1786492800000,
         "index": 2,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -53999.54999999998
+        "balance": -43999.56000000001
       },
       {
         "date": 1786492800000,
         "index": 3,
         "description": "XXXXXXX 877-8144102 XX",
         "amount": -999.99,
-        "balance": -54999.53999999998
+        "balance": -44999.55000000001
       },
       {
         "date": 1786579200000,
         "index": 0,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -55999.52999999998
+        "balance": -45999.54000000001
       },
       {
         "date": 1786579200000,
         "index": 1,
         "description": "XXXXXXX 00994 0994 XXXXXX XX",
         "amount": -999.99,
-        "balance": -56999.519999999975
+        "balance": -46999.530000000006
       },
       {
         "date": 1786579200000,
         "index": 2,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -57999.50999999997
+        "balance": -47999.520000000004
       },
       {
         "date": 1786665600000,
         "index": 0,
-        "description": "XXXXXXX XXXXX XX",
-        "amount": -999.99,
-        "balance": -58999.49999999997
+        "description": "XXXXXXX XXXXXXX",
+        "amount": 9999.99,
+        "balance": -37999.530000000006
       },
       {
         "date": 1786665600000,
         "index": 1,
-        "description": "XXXXXXX XX XX",
+        "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -59999.48999999997
+        "balance": -38999.520000000004
       },
       {
         "date": 1786665600000,
         "index": 2,
-        "description": "XXXXXXX #1792 000001792 XXXXX XX",
+        "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -60999.47999999997
+        "balance": -39999.51
       },
       {
         "date": 1786665600000,
         "index": 3,
-        "description": "XXXXXXX #1406 000001406 XXXXX XX",
+        "description": "XXXXXXX #1792 000001792 XXXXX XX",
         "amount": -999.99,
-        "balance": -61999.469999999965
+        "balance": -40999.5
       },
       {
         "date": 1786665600000,
         "index": 4,
+        "description": "XXXXXXX #1406 000001406 XXXXX XX",
+        "amount": -999.99,
+        "balance": -41999.49
+      },
+      {
+        "date": 1786665600000,
+        "index": 5,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -62999.45999999996
+        "balance": -42999.479999999996
       },
       {
         "date": 1786752000000,
         "index": 0,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -63999.44999999996
+        "balance": -43999.469999999994
       },
       {
         "date": 1786752000000,
         "index": 1,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -64999.43999999996
+        "balance": -44999.45999999999
       },
       {
         "date": 1786752000000,
         "index": 2,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -65999.42999999996
+        "balance": -45999.44999999999
       },
       {
         "date": 1786752000000,
         "index": 3,
         "description": "XXXXXXX XX XX",
         "amount": -999.99,
-        "balance": -66999.41999999997
+        "balance": -46999.43999999999
       },
       {
         "date": 1786838400000,
         "index": 0,
         "description": "XXXXXXX XXXXX XX",
         "amount": -999.99,
-        "balance": -67999.40999999997
+        "balance": -47999.429999999986
       }
     ],
     "errors": []
@@ -540,7 +554,7 @@
       "y1_bin": 101
     },
     {
-      "text": "$67,999.41",
+      "text": "$47,999.43",
       "x1": 303,
       "y1": 101,
       "x2": 357,
