@@ -52,7 +52,7 @@ pub fn get_config() -> StatementConfig {
         transaction_description_alignment: "x1".to_string(),
         transaction_description_exclude: vec![],
 
-        transaction_amount_formats: vec!["format7".to_string(), "format8".to_string()],
+        transaction_amount_formats: vec!["format2".to_string(), "format7".to_string()],
         transaction_amount_headers: vec!["Amount".to_string()],
         transaction_amount_alignment: "x2".to_string(),
         transaction_amount_invert_headers: vec![],
