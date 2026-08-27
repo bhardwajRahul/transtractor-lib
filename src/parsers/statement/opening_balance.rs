@@ -25,6 +25,7 @@ impl OpeningBalanceParser {
                 &config.opening_balance_alignment,
                 config.opening_balance_alignment_tol,
                 config.opening_balance_invert,
+                config.opening_balance_trigger_count,
             ),
         }
     }

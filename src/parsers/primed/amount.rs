@@ -17,9 +17,10 @@ impl PrimedAmountParser {
         alignment: &str,
         alignment_tol: i32,
         invert: bool,
+        trigger_count: usize,
     ) -> Self {
         Self {
-            primer_parser: ParserPrimer::new(primer_terms),
+            primer_parser: ParserPrimer::new(primer_terms, trigger_count),
             amount_parser: AmountParser::new(amount_formats),
             alignment: alignment.to_string(),
             alignment_tol,
@@ -119,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_amount_success() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 102, 202, 1),
@@ -138,7 +139,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_amount_invert() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, true);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, true, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 1),
@@ -151,7 +152,7 @@ mod tests {
 
     #[test]
     fn test_primer_x1_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 1, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 1, false, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 105, 200, 1),
@@ -164,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_primer_y1_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "y1", 1, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "y1", 1, false, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 205, 1),
@@ -177,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_primer_page_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "", 0, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "", 0, false, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 2),
@@ -190,7 +191,7 @@ mod tests {
 
     #[test]
     fn test_no_items() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false, 1);
         let items: Vec<TextItem> = vec![];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
@@ -200,7 +201,7 @@ mod tests {
 
     #[test]
     fn test_amount_already_set() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false, 1);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 1),

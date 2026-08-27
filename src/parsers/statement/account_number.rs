@@ -23,6 +23,7 @@ impl AccountNumberParser {
                 value_patterns.as_slice(),
                 config.account_number_alignment.as_str(),
                 config.account_number_alignment_tol,
+                config.account_number_trigger_count,
             ),
         }
     }

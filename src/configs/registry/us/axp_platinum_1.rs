@@ -40,6 +40,7 @@ pub fn get_config() -> StatementConfig {
         transaction_terms: vec!["Total Payments and Credits".to_string()],
         transaction_trigger_count: 1,
         transaction_terms_stop: vec!["Total Fees for this Period".to_string()],
+        transaction_stop_trigger_count: 1,
         transaction_formats: vec![vec![
             "date".to_string(),
             "description".to_string(),

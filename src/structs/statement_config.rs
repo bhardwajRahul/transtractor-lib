@@ -16,9 +16,12 @@ pub struct StatementConfig {
     pub account_terms: Vec<String>,
     /// Account types that should work with this layout (e.g., "Streamline", "Everyday Offset")
     pub account_examples: Vec<String>,
+
     // ACCOUNT NUMBER READ PARAMS
     /// Array of terms to identify the account number line (e.g., "Account Number", "Acct No")
     pub account_number_terms: Vec<String>,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub account_number_trigger_count: usize,
     /// Array of regex patterns to extract the account number
     pub account_number_patterns: Vec<Regex>,
     /// Alignment of the account number relative to the term ("x1", "x2", "y1", "y2", "")
@@ -29,6 +32,8 @@ pub struct StatementConfig {
     // OPENING BALANCE READ PARAMS
     /// Array of terms to identify the opening balance line (e.g., "Opening Balance", "Previous Balance")
     pub opening_balance_terms: Vec<String>,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub opening_balance_trigger_count: usize,
     /// Array of accepted formats to parse the opening balance amount
     pub opening_balance_formats: Vec<String>,
     /// Alignment of the opening balance relative to the term ("x1", "x2", "y1", "y2", "")
@@ -41,6 +46,8 @@ pub struct StatementConfig {
     // CLOSING BALANCE READ PARAMS
     /// Array of terms to identify the closing balance line (e.g., "Closing Balance", "New Balance")
     pub closing_balance_terms: Vec<String>,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub closing_balance_trigger_count: usize,
     /// Array of accepted formats to parse the closing balance amount
     pub closing_balance_formats: Vec<String>,
     /// Alignment of the closing balance relative to the term ("x1", "x2", "y1", "y2", "")
@@ -53,23 +60,25 @@ pub struct StatementConfig {
     // START DATE READ PARAMS
     /// Array of terms to identify the statement start date line (e.g., "Statement Period", "From")
     pub start_date_terms: Vec<String>,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub start_date_trigger_count: usize,
     /// Array of accepted formats to parse the statement start date
     pub start_date_formats: Vec<String>,
     /// Alignment of the start date relative to the term ("x1", "x2", "y1", "y2", "")
     pub start_date_alignment: String,
     /// Tolerance for alignment matching of start date
     pub start_date_alignment_tol: i32,
-    /// Collect start date on first encountered format match
-    /// Settings start_date_terms, start_date_alignment and start_date_alignment_tol will
-    /// have no effect if this is set to true.
-    pub start_date_first_match: bool,
 
     // GENERAL TRANSACTION READ PARAMS
     /// Array of terms that can indicate start, or nearing the start of transaction table
     /// (e.g., "Transactions").
     pub transaction_terms: Vec<String>,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub transaction_trigger_count: usize,
     /// Array of terms that indicate the end, or close after the end of the transaction table.
     pub transaction_terms_stop: Vec<String>,
+    /// Number of times a stop term must be encountered before the parser is considered primed
+    pub transaction_stop_trigger_count: usize,
     /// Fields expected for a complete transaction line, in order.
     /// E.g., [["date", "description", "amount"], ["description", "amount"]]
     /// Is a common format for credit card statements where the date is only specified
@@ -133,30 +142,35 @@ impl Default for StatementConfig {
             account_examples: vec![],
 
             account_number_terms: vec![],
+            account_number_trigger_count: 1,
             account_number_patterns: vec![],
             account_number_alignment: "y1".to_string(),
             account_number_alignment_tol: 5,
 
             opening_balance_terms: vec![],
+            opening_balance_trigger_count: 1,
             opening_balance_formats: vec![],
             opening_balance_alignment: "y1".to_string(),
             opening_balance_alignment_tol: 5,
             opening_balance_invert: false,
 
             closing_balance_terms: vec![],
+            closing_balance_trigger_count: 1,
             closing_balance_formats: vec![],
             closing_balance_alignment: "y1".to_string(),
             closing_balance_alignment_tol: 5,
             closing_balance_invert: false,
 
             start_date_terms: vec![],
+            start_date_trigger_count: 1,
             start_date_formats: vec![],
             start_date_alignment: "y1".to_string(),
             start_date_alignment_tol: 5,
-            start_date_first_match: false,
 
             transaction_terms: vec![],
+            transaction_trigger_count: 1,
             transaction_terms_stop: vec![],
+            transaction_stop_trigger_count: 1,
             transaction_formats: vec![],
             transaction_start_date_required: false,
             transaction_alignment_tol: 10,

@@ -40,8 +40,8 @@ impl TransactionAmountParser {
         Self {
             primed: false,
             amount_parser: AmountParser::new(amount_formats.as_slice()),
-            header_primer: ParserPrimer::new(primer_terms.as_slice()),
-            invert_header_primer: ParserPrimer::new(invert_primer_terms.as_slice()),
+            header_primer: ParserPrimer::new(primer_terms.as_slice(), 1),
+            invert_header_primer: ParserPrimer::new(invert_primer_terms.as_slice(), 1),
             alignment,
             invert_alignment,
             x_tol,

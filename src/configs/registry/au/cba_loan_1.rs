@@ -12,30 +12,35 @@ pub fn get_config() -> StatementConfig {
         account_examples: vec!["Complete Home Loan".to_string()],
 
         account_number_terms: vec!["Account number".to_string()],
+        account_number_trigger_count: 1,
         account_number_patterns: vec![Regex::new(r"\b\d+\b").unwrap()],
         account_number_alignment: "y1".to_string(),
         account_number_alignment_tol: 5,
 
-        opening_balance_terms: vec!["Opening balance".to_string(), "Opening Balance".to_string()],
+        opening_balance_terms: vec!["Opening balance".to_string()],
+        opening_balance_trigger_count: 2,
         opening_balance_formats: vec!["format3".to_string(), "format5".to_string()],
         opening_balance_alignment: "y1".to_string(),
         opening_balance_alignment_tol: 5,
         opening_balance_invert: false,
 
         closing_balance_terms: vec!["Closing balance".to_string()],
+        closing_balance_trigger_count: 2,
         closing_balance_formats: vec!["format3".to_string(), "format5".to_string()],
         closing_balance_alignment: "y1".to_string(),
         closing_balance_alignment_tol: 5,
         closing_balance_invert: false,
 
         start_date_terms: vec!["Statement period".to_string()],
+        start_date_trigger_count: 1,
         start_date_formats: vec!["format2".to_string()],
         start_date_alignment: "y1".to_string(),
         start_date_alignment_tol: 20,
-        start_date_first_match: false,
 
         transaction_terms: vec!["Date Transaction description".to_string()],
+        transaction_trigger_count: 1,
         transaction_terms_stop: vec!["Closing balance".to_string()],
+        transaction_stop_trigger_count: 1,
         transaction_formats: vec![vec![
             "date".to_string(),
             "description".to_string(),

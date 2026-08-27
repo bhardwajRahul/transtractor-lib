@@ -10,23 +10,30 @@ pub struct ParserPrimer {
     pub terms: Vec<String>,
     /// Number of space-delimited items in the longest term
     pub max_lookahead: usize,
+    /// Number of times a term must be encountered before the parser is considered primed
+    pub trigger_count: usize,
 }
 
 impl ParserPrimer {
     /// Create a new ParserPrimer with specified terms
-    pub fn new(terms: &[&str]) -> Self {
+    pub fn new(terms: &[&str], trigger_count: usize) -> Self {
         let terms_vec: Vec<String> = terms.iter().map(|t| t.to_string()).collect();
         let max_lookahead = terms_vec
             .iter()
             .map(|t| t.split(' ').count())
             .max()
             .unwrap_or(0);
-        ParserPrimer {
+        let mut parser = ParserPrimer {
             primed: false,
             text_item: None,
             terms: terms_vec,
             max_lookahead,
+            trigger_count,
+        };
+        if trigger_count == 0 {
+            parser.primed = true;
         }
+        parser
     }
 
     /// Get text item, raise error if none
@@ -40,6 +47,9 @@ impl ParserPrimer {
         if items.is_empty() {
             return 0;
         }
+        if self.primed {
+            return 0; // Already primed
+        }
         // Try longest first, then shorter
         let max = usize::min(self.max_lookahead, items.len());
         for i in (1..=max).rev() {
@@ -47,7 +57,10 @@ impl ParserPrimer {
                 let curr_text = &curr_item.text;
                 if self.terms.iter().any(|t| t == curr_text) {
                     self.text_item = Some(curr_item);
-                    self.primed = true;
+                    self.trigger_count -= 1;
+                    if self.trigger_count == 0 {
+                        self.primed = true;
+                    }
                     return i;
                 }
             }
@@ -81,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_single_term_match() {
-        let mut parser = ParserPrimer::new(&["hello"]);
+        let mut parser = ParserPrimer::new(&["hello"], 1);
         let items = vec![make_text_item("hello")];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 1);
@@ -91,7 +104,7 @@ mod tests {
 
     #[test]
     fn test_multi_word_term_match() {
-        let mut parser = ParserPrimer::new(&["hello world"]);
+        let mut parser = ParserPrimer::new(&["hello world"], 1);
         let items = vec![make_text_item("hello"), make_text_item("world")];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 2);
@@ -101,7 +114,7 @@ mod tests {
 
     #[test]
     fn test_no_match() {
-        let mut parser = ParserPrimer::new(&["foo"]);
+        let mut parser = ParserPrimer::new(&["foo"], 1);
         let items = vec![make_text_item("bar")];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
@@ -111,7 +124,7 @@ mod tests {
 
     #[test]
     fn test_reset() {
-        let mut parser = ParserPrimer::new(&["hello"]);
+        let mut parser = ParserPrimer::new(&["hello"], 1);
         let items = vec![make_text_item("hello")];
         parser.parse_items(&items);
         assert!(parser.primed);
@@ -123,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_empty_items() {
-        let mut parser = ParserPrimer::new(&["hello"]);
+        let mut parser = ParserPrimer::new(&["hello"], 1);
         let items: Vec<TextItem> = vec![];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);

@@ -21,7 +21,7 @@ impl TransactionDescriptionParser {
         let x_tol = config.transaction_alignment_tol;
         Self {
             primed: false,
-            header_primer: ParserPrimer::new(primer_terms.as_slice()),
+            header_primer: ParserPrimer::new(primer_terms.as_slice(), 1),
             alignment,
             x_tol,
             x1_range: vec![0, 10000],

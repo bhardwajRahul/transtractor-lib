@@ -34,30 +34,35 @@ struct StatementConfigPartial {
     account_examples: Option<Vec<String>>,
 
     account_number_terms: Option<Vec<String>>,
+    account_number_trigger_count: Option<usize>,
     account_number_patterns: Option<Vec<String>>,
     account_number_alignment: Option<String>,
     account_number_alignment_tol: Option<i32>,
 
     opening_balance_terms: Option<Vec<String>>,
+    opening_balance_trigger_count: Option<usize>,
     opening_balance_formats: Option<Vec<String>>,
     opening_balance_alignment: Option<String>,
     opening_balance_alignment_tol: Option<i32>,
     opening_balance_invert: Option<bool>,
 
     closing_balance_terms: Option<Vec<String>>,
+    closing_balance_trigger_count: Option<usize>,
     closing_balance_formats: Option<Vec<String>>,
     closing_balance_alignment: Option<String>,
     closing_balance_alignment_tol: Option<i32>,
     closing_balance_invert: Option<bool>,
 
     start_date_terms: Option<Vec<String>>,
+    start_date_trigger_count: Option<usize>,
     start_date_formats: Option<Vec<String>>,
     start_date_alignment: Option<String>,
     start_date_alignment_tol: Option<i32>,
-    start_date_first_match: Option<bool>,
 
     transaction_terms: Option<Vec<String>>,
+    transaction_trigger_count: Option<usize>,
     transaction_terms_stop: Option<Vec<String>>,
+    transaction_stop_trigger_count: Option<usize>,
     transaction_formats: Option<Vec<Vec<String>>>,
     transaction_start_date_required: Option<bool>,
     transaction_alignment_tol: Option<i32>,
@@ -85,6 +90,7 @@ struct StatementConfigPartial {
     // Deprecated fields (kept for v0.10.0 compatibility)
     fix_text_order: Option<serde_json::Value>,
     transaction_new_line_tol: Option<serde_json::Value>,
+    start_date_first_match: Option<serde_json::Value>,
 }
 
 pub fn from_json_file<P: AsRef<Path>>(path: P) -> Result<StatementConfig, String> {
@@ -117,6 +123,9 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     if partial.transaction_new_line_tol.is_some() {
         deprecated_fields.push("transaction_new_line_tol (deprecated since v0.10.0)".to_string());
     }
+    if partial.start_date_first_match.is_some() {
+        deprecated_fields.push("start_date_first_match (deprecated since v0.13.0)".to_string());
+    }
 
     overlay!(key);
     overlay!(bank_name);
@@ -125,6 +134,7 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     overlay!(account_examples);
 
     overlay!(account_number_terms);
+    overlay!(account_number_trigger_count);
     if let Some(patterns) = partial.account_number_patterns {
         cfg.account_number_patterns = compile_regex_vec(patterns)?;
     }
@@ -132,25 +142,29 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     overlay!(account_number_alignment_tol);
 
     overlay!(opening_balance_terms);
+    overlay!(opening_balance_trigger_count);
     overlay!(opening_balance_formats);
     overlay!(opening_balance_alignment);
     overlay!(opening_balance_alignment_tol);
     overlay!(opening_balance_invert);
 
     overlay!(closing_balance_terms);
+    overlay!(closing_balance_trigger_count);
     overlay!(closing_balance_formats);
     overlay!(closing_balance_alignment);
     overlay!(closing_balance_alignment_tol);
     overlay!(closing_balance_invert);
 
     overlay!(start_date_terms);
+    overlay!(start_date_trigger_count);
     overlay!(start_date_formats);
     overlay!(start_date_alignment);
     overlay!(start_date_alignment_tol);
-    overlay!(start_date_first_match);
 
     overlay!(transaction_terms);
+    overlay!(transaction_trigger_count);
     overlay!(transaction_terms_stop);
+    overlay!(transaction_stop_trigger_count);
     overlay!(transaction_formats);
     overlay!(transaction_start_date_required);
     overlay!(transaction_alignment_tol);

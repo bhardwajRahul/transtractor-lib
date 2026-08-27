@@ -24,6 +24,7 @@ impl ClosingBalanceParser {
                 &config.closing_balance_alignment,
                 config.closing_balance_alignment_tol,
                 config.closing_balance_invert,
+                config.closing_balance_trigger_count,
             ),
         }
     }

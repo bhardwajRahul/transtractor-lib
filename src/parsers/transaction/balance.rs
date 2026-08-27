@@ -30,7 +30,7 @@ impl TransactionBalanceParser {
         Self {
             primed: false,
             balance_parser: AmountParser::new(balance_formats.as_slice()),
-            header_primer: ParserPrimer::new(primer_terms.as_slice()),
+            header_primer: ParserPrimer::new(primer_terms.as_slice(), 1),
             alignment,
             x_tol,
             x1_range: vec![0, 10000],
