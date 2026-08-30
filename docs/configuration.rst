@@ -280,9 +280,16 @@ These parameters are used to identify and extract the account number from the st
 *******************************
 List of text terms that appear before or above the account number. This will prime
 the parser to start scanning for an account number satisfying one of the 
-*account_number_patterns*. The parser ill stop trying to find the account number once
+*account_number_patterns*. The parser will stop trying to find the account number once
 it is set. The parser only requires one of these terms to be present to start searching
 for the account number.
+
+*account_number_trigger_count*
+**********************************************
+Integer value specifying the number of times a term from *account_number_terms* must be found
+before the parser will start searching for an account number. Specifying zero will cause the 
+parser to start searching for an account number without requiring any of the 
+*account_number_terms* to be present.
 
 *account_number_patterns*
 ****************************************
@@ -316,6 +323,13 @@ List of text terms that appear before or above the opening balance. This will pr
 the parser to start scanning for the opening balance. The parser will stop trying to find
 the opening balance once it is set. The parser only requires one of these terms to be present
 to start searching for the opening balance.
+
+*opening_balance_trigger_count*
+**********************************************
+Integer value specifying the number of times a term from *opening_balance_terms* must be found
+before the parser will start searching for an opening balance. Specifying zero will cause the 
+parser to start searching for an opening balance without requiring any of the *opening_balance_terms* 
+to be present.
 
 *opening_balance_formats*
 ****************************************
@@ -354,6 +368,13 @@ List of text terms that appear before or above the closing balance. This will pr
 the parser to start scanning for the closing balance. The parser will stop trying to find
 the closing balance once it is set. The parser only requires one of these terms to be present
 to start searching for the closing balance.
+
+*closing_balance_trigger_count*
+**********************************************
+Integer value specifying the number of times a term from *closing_balance_terms* must be found
+before the parser will start searching for a closing balance. Specifying zero will cause the
+parser to start searching for a closing balance without requiring any of the *closing_balance_terms*
+to be present.
 
 *closing_balance_formats*
 ****************************************
@@ -394,6 +415,13 @@ the parser to start scanning for the start date. The parser will stop trying to 
 the start date once it is set. The parser only requires one of these terms to be present
 to start searching for the start date.
 
+*start_date_trigger_count*
+**********************************************
+Integer value specifying the number of times a term from *start_date_terms* must be found
+before the parser will start searching for a start date. Specifying zero will cause the
+parser to start searching for a start date without requiring any of the *start_date_terms*
+to be present.
+
 *start_date_formats*
 ****************************************
 List of date formats (see above) that the start date may be in. The parser will try to
@@ -424,11 +452,25 @@ List of text terms that indicate the start of the transaction table. The parser 
 looking for transactions after these terms are found. The parser only requires one of these
 terms to be present to start searching for transactions.
 
+*transaction_trigger_count*
+**********************************************
+Integer value specifying the number of times a term from *transaction_terms* must be found
+before the parser will start searching for transactions. Specifying zero will cause the
+parser to start searching for transactions without requiring any of the *transaction_terms*
+to be present.
+
 *transaction_terms_stop*
 *************************************
 List of text terms that indicate the end of the transaction table. The parser will stop
 looking for transactions once these terms are found. The parser only requires one of these
 terms to be present to stop searching for transactions.
+
+*transaction_trigger_stop_count*
+**********************************************
+Integer value specifying the number of times a term from *transaction_terms_stop* must be found
+before the parser will stop searching for transactions. Specifying zero will cause the
+parser to stop searching for transactions without requiring any of the *transaction_terms_stop*
+to be present.
 
 *transaction_formats*
 ****************************************
