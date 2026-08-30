@@ -155,6 +155,8 @@ formats are supported:
       - "nil" → 0.00, "Nil" → 0.00
     * - ``format6``
       - "- $1,234" → -1234.00, "+ $1,234" → 1234.00
+    * - ``format7``
+      - "-$1,234.56⧫" → -1234.56, "$1,234.56⧫" → 1234.56, "$1,234.56-⧫" → -1234.56
 
 Formats are sensitive to spacing and comma separation, but generally not case sensitive.
 
@@ -196,6 +198,8 @@ formats are supported:
       - "2023/03/24" → 2023-03-24, "2023/3/24" → 2023-03-24
     * - ``format13``
       - "2023-03-24" → 2023-03-24, "2023-3-24" → 2023-03-24
+    * - ``format14``
+      - "03/24/2023*" → 2023-03-24, "3/24/2023*" → 2023-03-24, "03/24/23*" → 2023-03-24, "3/24/23*" → 2023-03-24
 
 Formats with a "XXXX" year will infer the year based on the statement start date.
 
