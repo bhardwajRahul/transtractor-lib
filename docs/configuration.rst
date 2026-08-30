@@ -414,12 +414,6 @@ start date. For example, if *start_date_alignment* is "y1" and this value is 5,
 then the *y1* position of the start date must be within 5 points of the *y1* position
 of the *start_date_terms*.
 
-*start_date_first_match*
-******************************************
-Boolean value specifying whether to just use the first matching date found. If set to true,
-the *start_date_terms*, *start_date_alignment*, and *start_date_alignment_tol* parameters 
-will have no effect.
-
 Transaction Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 These parameters are used to identify and extract the transaction table from the statement.
