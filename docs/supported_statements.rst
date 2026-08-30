@@ -44,3 +44,19 @@ Australia
       - ING Bank
       - Orange Everyday, Savings Maximiser
       - v0.12.0
+
+United States
+-------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 15 40 30 15
+
+    * - Key
+      - Bank
+      - Example Accounts
+      - Introduced
+    * - ``us__axp__platinum__1``
+      - American Express
+      - Platinum Card
+      - v0.13.0
