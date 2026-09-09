@@ -68,5 +68,13 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
         // No parser matched, move to next item
         i += 1;
     }
+
+    // Wipe transaction balances if ignored
+    if config.transaction_balance_ignore {
+        for transaction in &mut statement_data.proto_transactions {
+            transaction.balance = None;
+        }
+    }
+
     statement_data
 }
