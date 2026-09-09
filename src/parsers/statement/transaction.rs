@@ -16,6 +16,7 @@ pub struct TransactionParser {
     date_parser_newline: TransactionDateParser,
     start_date_required: bool,
     description_parser: TransactionDescriptionParser,
+    description_parser_stray: TransactionDescriptionParser,
     amount_parser: TransactionAmountParser,
     amount_parser_newline: TransactionAmountParser,
     balance_parser: TransactionBalanceParser,
@@ -58,6 +59,7 @@ impl TransactionParser {
             date_parser_newline: TransactionDateParser::new(config),
             start_date_required: config.transaction_start_date_required,
             description_parser: TransactionDescriptionParser::new(config),
+            description_parser_stray: TransactionDescriptionParser::new(config),
             amount_parser: TransactionAmountParser::new(config),
             amount_parser_newline: TransactionAmountParser::new(config),
             balance_parser: TransactionBalanceParser::new(config),
@@ -93,11 +95,15 @@ impl TransactionParser {
 
         self.stop_primer.parse_items(items);
         if !self.start_primer.primed || self.stop_primer.primed {
+            if self.stop_primer.primed {
+                self.merge_stray_into_last(data);
+            }
             return 0;
         }
 
         // Adjust description parser x_bounds if needed
         self.adjust_description_x_bounds();
+        self.sync_description_stray_bounds();
 
         // Handle new line, if one
         let is_new_line = self.is_new_line(items);
@@ -148,6 +154,14 @@ impl TransactionParser {
             .parse_items(items, &mut self.current_transaction);
         if description_consumed > 0 {
             return description_consumed;
+        }
+
+        // Try capturing stray description text (e.g. from vertically centered
+        // transactions) that falls within description bounds but was missed
+        // because no field parser was primed to accept it on this line
+        let stray_consumed = self.description_parser_stray.parse_stray(items);
+        if stray_consumed > 0 {
+            return stray_consumed;
         }
         0
     }
@@ -204,7 +218,35 @@ impl TransactionParser {
             }
             let (x_lower, x_upper) = self.get_parser_x_bounds(field);
             self.description_parser.adjust_bounds(x_lower, x_upper);
+            self.description_parser_stray
+                .adjust_bounds(x_lower, x_upper);
         }
+    }
+
+    /// Mirror the description parser's header-derived x1/x2 bounds onto the
+    /// stray parser, since the stray parser never sees header items directly
+    fn sync_description_stray_bounds(&mut self) {
+        if self.description_parser.is_header_set() {
+            let (x1_range, x2_range) = self.description_parser.bounds();
+            self.description_parser_stray.set_bounds(x1_range, x2_range);
+        }
+    }
+
+    /// Merge any buffered stray description text into the last completed
+    /// transaction. Called when a new transaction starts or the transaction
+    /// table ends, since the stray text most likely belongs to the previous
+    /// (vertically centered) transaction.
+    fn merge_stray_into_last(&mut self, data: &mut StatementData) {
+        let Some(text) = self.description_parser_stray.take_stray() else {
+            return;
+        };
+        let Some(last) = data.proto_transactions.last_mut() else {
+            return;
+        };
+        if !last.description.is_empty() {
+            last.description.push(' ');
+        }
+        last.description.push_str(&text);
     }
 
     /// Check if the current items indicate a new line
@@ -269,6 +311,7 @@ impl TransactionParser {
             return;
         }
         self.append_current_transaction(data);
+        self.merge_stray_into_last(data);
         self.current_transaction = ProtoTransaction::new();
         // Needed if previous field was description
         self.description_parser.reset();
@@ -304,6 +347,7 @@ impl TransactionParser {
                 .parse_items(items, &mut next_transaction);
             if date_consumed > 0 {
                 self.append_current_transaction(data);
+                self.merge_stray_into_last(data);
                 self.current_transaction = next_transaction;
                 self.description_parser.reset();
                 self.post_parse_prime("date".to_string());
@@ -322,6 +366,7 @@ impl TransactionParser {
                 .parse_items(items, &mut next_transaction);
             if amount_consumed > 0 {
                 self.append_current_transaction(data);
+                self.merge_stray_into_last(data);
                 self.current_transaction = next_transaction;
                 self.description_parser.reset();
                 self.post_parse_prime("amount".to_string());
@@ -340,6 +385,7 @@ impl TransactionParser {
                 .parse_items(items, &mut next_transaction);
             if balance_consumed > 0 {
                 self.append_current_transaction(data);
+                self.merge_stray_into_last(data);
                 self.current_transaction = next_transaction;
                 self.description_parser.reset();
                 self.post_parse_prime("balance".to_string());

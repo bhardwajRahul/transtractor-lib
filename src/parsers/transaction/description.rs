@@ -8,6 +8,7 @@ pub struct TransactionDescriptionParser {
     x1_range: Vec<i32>,
     x2_range: Vec<i32>,
     x_tol: i32,
+    stray_description: String,
 }
 
 impl TransactionDescriptionParser {
@@ -26,6 +27,7 @@ impl TransactionDescriptionParser {
             x_tol,
             x1_range: vec![0, 10000],
             x2_range: vec![0, 10000],
+            stray_description: String::new(),
         }
     }
 
@@ -76,6 +78,39 @@ impl TransactionDescriptionParser {
         let mut max_lookahead = 0;
         max_lookahead = max_lookahead.max(self.header_primer.max_lookahead);
         max_lookahead
+    }
+
+    /// Get the current x1/x2 bounds (e.g. to mirror onto another instance)
+    pub fn bounds(&self) -> (Vec<i32>, Vec<i32>) {
+        (self.x1_range.clone(), self.x2_range.clone())
+    }
+
+    /// Set the x1/x2 bounds directly (e.g. to mirror from another instance)
+    pub fn set_bounds(&mut self, x1_range: Vec<i32>, x2_range: Vec<i32>) {
+        self.x1_range = x1_range;
+        self.x2_range = x2_range;
+    }
+
+    /// Try parsing a stray description fragment that falls within description
+    /// bounds without requiring the parser to be primed. Used to catch
+    /// out-of-band description text in vertically centered transactions.
+    pub fn parse_stray(&mut self, items: &[TextItem]) -> usize {
+        let consumed = self.try_parse_description(items);
+        if consumed > 0 {
+            if !self.stray_description.is_empty() {
+                self.stray_description.push(' ');
+            }
+            self.stray_description.push_str(&items[0].text);
+        }
+        consumed
+    }
+
+    /// Take and clear the buffered stray description text
+    pub fn take_stray(&mut self) -> Option<String> {
+        if self.stray_description.is_empty() {
+            return None;
+        }
+        Some(std::mem::take(&mut self.stray_description))
     }
 
     /// Adjust x1 or x2 bounds based on lowest/highest x positions
