@@ -67,6 +67,7 @@ pub fn get_config() -> StatementConfig {
         transaction_description_exclude: vec![
             Regex::new(r" -$").unwrap(),
             Regex::new(r" \$$").unwrap(),
+            Regex::new(r" Statement \d+ \(Page \d+ of \d+\).*$").unwrap(),
         ],
 
         transaction_amount_formats: vec!["format1".to_string(), "format2".to_string()],

@@ -62,7 +62,9 @@ pub fn get_config() -> StatementConfig {
 
         transaction_description_headers: vec!["TRANSACTION DESCRIPTION".to_string()],
         transaction_description_alignment: "x1".to_string(),
-        transaction_description_exclude: vec![],
+        transaction_description_exclude: vec![
+            Regex::new(r" Statement No\. \d+ Page \d+ of \d+.*$").unwrap(),
+        ],
 
         transaction_amount_formats: vec!["format1".to_string()],
         transaction_amount_headers: vec!["CREDIT".to_string()],
