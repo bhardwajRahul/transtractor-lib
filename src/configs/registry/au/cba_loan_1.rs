@@ -72,5 +72,6 @@ pub fn get_config() -> StatementConfig {
         transaction_balance_headers: vec!["Balance".to_string()],
         transaction_balance_alignment: "x2".to_string(),
         transaction_balance_invert: false,
+        transaction_balance_ignore: false,
     }
 }

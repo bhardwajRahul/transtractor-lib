@@ -86,6 +86,7 @@ struct StatementConfigPartial {
     transaction_balance_headers: Option<Vec<String>>,
     transaction_balance_alignment: Option<String>,
     transaction_balance_invert: Option<bool>,
+    transaction_balance_ignore: Option<bool>,
 
     // Deprecated fields (kept for v0.10.0 compatibility)
     fix_text_order: Option<serde_json::Value>,
@@ -191,6 +192,7 @@ pub fn from_json_str_with_deprecations(src: &str) -> Result<ConfigParseResult, S
     overlay!(transaction_balance_headers);
     overlay!(transaction_balance_alignment);
     overlay!(transaction_balance_invert);
+    overlay!(transaction_balance_ignore);
 
     validate_config(&cfg).map_err(|e| format!("Config validation error: {}", e))?;
     Ok(ConfigParseResult {

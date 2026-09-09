@@ -130,6 +130,8 @@ pub struct StatementConfig {
     pub transaction_balance_alignment: String,
     /// Invert the sign of all transaction balance amounts.
     pub transaction_balance_invert: bool,
+    /// Ignore statement balance column if present. Balances will be filled from transaction amounts.
+    pub transaction_balance_ignore: bool,
 }
 
 impl Default for StatementConfig {
@@ -194,6 +196,7 @@ impl Default for StatementConfig {
             transaction_balance_headers: vec![],
             transaction_balance_alignment: "x1".to_string(),
             transaction_balance_invert: false,
+            transaction_balance_ignore: false,
         }
     }
 }
