@@ -156,12 +156,16 @@ impl TransactionParser {
             return description_consumed;
         }
 
-        // Try capturing stray description text (e.g. from vertically centered
+        // Try capturing stray description text (e.g. from vertically centred
         // transactions) that falls within description bounds but was missed
-        // because no field parser was primed to accept it on this line
-        let stray_consumed = self.description_parser_stray.parse_stray(items);
-        if stray_consumed > 0 {
-            return stray_consumed;
+        // because no field parser was primed to accept it on this line.
+        // Skip this if amount/balance are primed: a failed match there means
+        // genuinely malformed field data, not out-of-band description text.
+        if !self.amount_parser.primed && !self.balance_parser.primed {
+            let stray_consumed = self.description_parser_stray.parse_stray(items);
+            if stray_consumed > 0 {
+                return stray_consumed;
+            }
         }
         0
     }
@@ -247,6 +251,8 @@ impl TransactionParser {
             last.description.push(' ');
         }
         last.description.push_str(&text);
+        // Stray text bypasses the normal push-time cleanup, so re-apply it here
+        last.clean_description(&self.description_exclude_patterns);
     }
 
     /// Check if the current items indicate a new line
