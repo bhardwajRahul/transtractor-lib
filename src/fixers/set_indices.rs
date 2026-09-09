@@ -1,4 +1,5 @@
 use crate::structs::StatementData;
+use std::collections::HashMap;
 
 /// Reset prototransaction indices based on their order within each day.
 /// This fixer should be applied after implicit_balance to lock the order
@@ -11,9 +12,7 @@ pub fn fix_set_indices(sd: &mut StatementData) {
         return;
     }
 
-    let mut prev_date: Option<i64> = None;
-    let mut current_day: Option<i64> = None;
-    let mut day_index = 0;
+    let mut index_for_date = HashMap::new();
 
     for (i, proto_transaction) in sd.proto_transactions.iter_mut().enumerate() {
         // Validate that transaction has a date (should be guaranteed by earlier fixers)
@@ -25,26 +24,13 @@ pub fn fix_set_indices(sd: &mut StatementData) {
             ),
         };
 
-        // Check that dates are in chronological order (panic if not)
-        if let Some(prev) = prev_date
-            && current_date < prev
-        {
-            panic!(
-                "Transaction dates are out of order at position {}: current date {} < previous date {}. The transtractor isn't set up to deal with this.",
-                i, current_date, prev
-            );
-        }
-        prev_date = Some(current_date);
-
-        // Check if we've moved to a new day and reset indices
-        if current_day != Some(current_date) {
-            current_day = Some(current_date);
-            day_index = 0; // Reset index for new day
-        }
+        // If date not encountered before, initialize its index to 0 otherwise increment the existing index.
+        let day_index = index_for_date.entry(current_date).or_insert(0);
+        let day_index = *day_index;
 
         // Set the index for this transaction
         proto_transaction.index = day_index;
-        day_index += 1;
+        *index_for_date.get_mut(&current_date).unwrap() += 1;
     }
 }
 
@@ -168,26 +154,6 @@ mod tests {
                     amount: Some(100.0),
                     balance: None,
                 },
-            ],
-            account_number: None,
-            opening_balance: None,
-            closing_balance: None,
-            start_date: None,
-            start_date_year: None,
-            key: None,
-            errors: Vec::new(),
-        };
-
-        fix_set_indices(&mut sd);
-    }
-
-    #[test]
-    #[should_panic(expected = "Transaction dates are out of order at position 1")]
-    fn test_fix_set_indices_panics_on_out_of_order_dates() {
-        let mut sd = StatementData {
-            proto_transactions: vec![
-                create_proto_transaction(2000, 0), // Later date first
-                create_proto_transaction(1000, 1), // Earlier date second - should panic
             ],
             account_number: None,
             opening_balance: None,
