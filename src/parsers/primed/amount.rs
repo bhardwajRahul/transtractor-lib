@@ -39,10 +39,9 @@ impl PrimedAmountParser {
             return 0;
         }
 
-        // Primer not primed, or re-prime if term found again
-        let consumed_primer = self.primer_parser.parse_items(items);
-        if consumed_primer > 0 {
-            return consumed_primer;
+        // Try to prime (if not already primed)
+        if !self.primer_parser.primed {
+            return self.primer_parser.parse_items(items);
         }
 
         // Must be primed to look for amount
@@ -56,19 +55,25 @@ impl PrimedAmountParser {
             return 0; // No amount found
         }
 
-        // Both primer and amount found, check conditions
-        let amount_item = self.amount_parser.text_item();
-        let primer_item = self.primer_parser.text_item();
+        // Both primer and date found, check conditions
+        let amount_item = self.amount_parser.text_item.as_ref().unwrap();
 
-        let valid_alignment = match self.alignment.as_str() {
-            "x1" => (amount_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
-            "x2" => (amount_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
-            "y1" => (amount_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
-            "y2" => (amount_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
-            "" => true, // No alignment check
-            _ => true,  // No alignment check
+        // When primed via set_first_match there is no primer text item to align
+        // against, so skip alignment/page checks in that case.
+        let (valid_alignment, page_ok) = match self.primer_parser.text_item.as_ref() {
+            Some(primer_item) => {
+                let valid_alignment = match self.alignment.as_str() {
+                    "x1" => (amount_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
+                    "x2" => (amount_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
+                    "y1" => (amount_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
+                    "y2" => (amount_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
+                    "" => true, // No alignment check
+                    _ => true,  // No alignment check
+                };
+                (valid_alignment, amount_item.page == primer_item.page)
+            }
+            None => (true, true),
         };
-        let page_ok = amount_item.page == primer_item.page;
 
         // Return 0 if any condition fails
         if !valid_alignment || !page_ok {
