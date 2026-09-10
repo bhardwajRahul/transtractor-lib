@@ -575,6 +575,11 @@ Boolean value specifying whether to invert the sign of the extracted transaction
 often useful for loan or credit card statements where balances are presented as positive values
 despite being liabilities.
 
+*transaction_balance_ignore*
+*************************************
+Boolean value specifying whether to ignore and regenerate extracted transaction balances. 
+This is useful when reordering transactions by date will cause errors to surface due from running
+balance validation checks.
 
 Testing Your Configuration
 --------------------------------------
