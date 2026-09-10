@@ -47,3 +47,34 @@ def test_timestamp_conversion_is_timezone_independent():
         assert result.stdout.strip() == "2025-01-01", (
             f"Date shifted in timezone {tz}: got {result.stdout.strip()}"
         )
+
+
+def test_transactions_are_unique_by_transaction_identity_fields():
+    first = Transaction(
+        date=Date(2025, 1, 1),
+        date_index=0,
+        description="Original description",
+        amount=10.004,
+        balance=100.0,
+        account_number="1234",
+    )
+    duplicate = Transaction(
+        date=Date(2025, 1, 1),
+        date_index=0,
+        description="Different description",
+        amount=10.0,
+        balance=999.0,
+        account_number="1234",
+    )
+    different_account = Transaction(
+        date=Date(2025, 1, 1),
+        date_index=0,
+        description="Different description",
+        amount=10.0,
+        balance=999.0,
+        account_number="5678",
+    )
+
+    assert first == duplicate
+    assert hash(first) == hash(duplicate)
+    assert len({first, duplicate, different_account}) == 2

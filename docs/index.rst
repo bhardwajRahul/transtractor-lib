@@ -48,7 +48,7 @@ To parse a bank statement PDF and convert it to CSV:
    # Convert PDF to CSV
    parser.parse('statement.pdf').to_csv('statement.csv')
 
-Writes:
+Writes a CSV of the following standard format regardless of the original statement layout:
 
 .. code-block:: text
 
@@ -63,10 +63,66 @@ Writes:
    2025-01-04,Transaction 8,-23.56,90759.99
    ...
 
+All columns are included in the CSV output, with the date in ISO format (YYYY-MM-DD), 
+the description as text, and the amount and balance as decimal numbers. Negative amounts 
+indicate debits and positive amounts indicate credits.
+
+Pooling Across Multiple PDFs and Accounts
+-----------------------------------------
+
+The following snippet demonstrates how to batch-extract information from all your PDF 
+statements in a single directory:
+
+.. code-block:: python
+
+   import csv
+   from pathlib import Path
+
+   from transtractor import Parser
+
+   # Paths to the PDF directory and output CSV file
+   pdf_directory = Path("path/to/your/pdf/directory")
+   output_csv = Path("output.csv")
+
+   parser = Parser()
+   transactions = set()
+
+   # Find and extract PDFs in directory and subdirectories
+   for pdf_path in sorted(pdf_directory.rglob("*.pdf")):
+      print(f"Parsing PDF: {pdf_path}")
+      statement_data = parser.parse(str(pdf_path))
+      transactions.update(statement_data.transactions)
+
+   # Arrange newest to oldest
+   ordered_transactions = sorted(
+      transactions,
+      key=lambda transaction: (
+         transaction.date,
+         transaction.date_index,
+         transaction.account_number,
+      ),
+      reverse=True,
+   )
+
+   # Write the ordered transactions to the output CSV file
+   with output_csv.open("w", newline="", encoding="utf-8") as csv_file:
+      writer = csv.writer(csv_file)
+      writer.writerow(("date", "description", "amount", "balance", "account_number"))
+      for transaction in ordered_transactions:
+         writer.writerow(
+               (
+                  transaction.date,
+                  transaction.description,
+                  transaction.amount,
+                  transaction.balance,
+                  transaction.account_number,
+               )
+         )
 
 Web Interface
 -------------
-An open-source web interface is available at `transtractor.net <https://transtractor.net>` or can be self hosted 
+A user-friendly web interface for bulk extraction is available at 
+`transtractor.net <https://transtractor.net>`_. The web interface can also be self hosted 
 from the `transtractor-web <https://github.com/weberdak/transtractor-web>`_ repository.
 
 Supported Banks

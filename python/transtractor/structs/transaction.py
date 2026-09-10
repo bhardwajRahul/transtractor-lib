@@ -5,7 +5,7 @@ from datetime import date as Date
 from datetime import datetime, timezone
 
 
-@dataclass
+@dataclass(eq=False)
 class Transaction:
     """Class representing a bank transaction."""
 
@@ -14,6 +14,7 @@ class Transaction:
     description: str
     amount: float
     balance: float
+    account_number: str
 
     def __init__(
         self,
@@ -22,6 +23,7 @@ class Transaction:
         description: str,
         amount: float,
         balance: float,
+        account_number: str = "",
     ):
         """Initialize a Transaction.
 
@@ -30,6 +32,7 @@ class Transaction:
         :param description: Transaction description
         :param amount: Transaction amount (will be rounded to 2 decimal places)
         :param balance: Account balance (will be rounded to 2 decimal places)
+        :param account_number: Account number associated with the transaction
         """
         if isinstance(date, int):
             # Convert milliseconds since epoch to date
@@ -42,3 +45,15 @@ class Transaction:
         self.description = description
         self.amount = round(amount, 2)
         self.balance = round(balance, 2)
+        self.account_number = account_number
+
+    def _identity(self) -> tuple[Date, int, float, str]:
+        return self.date, self.date_index, self.amount, self.account_number
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Transaction):
+            return NotImplemented
+        return self._identity() == other._identity()
+
+    def __hash__(self) -> int:
+        return hash(self._identity())

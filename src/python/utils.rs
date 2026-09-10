@@ -61,13 +61,13 @@ pub fn rust_statement_data_to_py_statement_data(
             }
 
             // Create Python Transaction object
-            // Transaction.__init__(date: int, description: str, amount: float, balance: float)
             let py_transaction = transaction_class.call1((
                 proto_tx.date.unwrap(),
                 proto_tx.index,
                 proto_tx.description.clone(),
                 proto_tx.amount.unwrap(),
                 proto_tx.balance.unwrap(),
+                account_number,
             ))?;
 
             py_transactions.append(py_transaction)?;
