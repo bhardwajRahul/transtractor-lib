@@ -60,3 +60,11 @@ United States
       - American Express
       - Platinum Card
       - v0.13.0
+    * - ``us__cof__360_combo__1``\*
+      - Capital One
+      - 360 Checking, 360 Performance Savings
+      - v0.14.0
+
+\* Capital One 360 statements bundle transactions from multiple account types into a 
+single PDF. The Transtractor merges these transactions into a single table and assigns 
+them against the first account number found in the statement.
