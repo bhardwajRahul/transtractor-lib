@@ -8,16 +8,20 @@
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
 
 
-## The Universal PDF Bank Parser
-The Transaction Extractor, or 'Transtractor', aspires to be a universal 
-library for extracting transaction data from PDF bank statements. Key features:
+## The Universal Bank Statement PDF Extractor
+The Transtractor is a rules-based PDF bank statement parser for extracting structured transaction data from statements issued by different banks and financial institutions. It combines a fast Rust parsing engine with an installable Python API, WebAssembly bindings, and a [web-based GUI](https://www.transtractor.net/).
 
-* Written in Rust (fast and portable)
-* Python API (user friendly)
-* WASM bindings (browser-ready)
-* A [web-based GUI](https://www.transtractor.net/) (even more user friendly)
-* No AI (lightweight, self-contained and dirt cheap)
-* Rules-based extraction (100% predictable and accurate)
+### Key features
+
+* Parse bank statement PDFs with deterministic, configuration-driven rules
+* Normalise extracted data into consistent dates, descriptions, amounts, balances, and account details
+* Infer missing transaction dates and running balances
+* Normalise transaction signs so debits are negative and credits are positive
+* Validate transaction totals against opening and closing balances
+* Run locally without sending financial documents to an external AI service
+* Use the same core parser in Python applications or browser-based WebAssembly integrations
+
+Each supported statement format is implemented as a lightweight configuration module. This design keeps the parser portable and extensible while making its output predictable and suitable for downstream processing, reporting, and financial analysis.
 
 ## Installation
 ### Install from PyPI
