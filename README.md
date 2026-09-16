@@ -92,7 +92,7 @@ The following pages provide further information about how this package is built 
 
 * [Architecture Guide](md/architecture.md): Overview of key application components and design principles.
 * [Developer Guide](md/develop.md): Reference page for core development and maintenance.
-* [Contributor Guide](md/contribute.md): Extending the package to parse additional bank statements.
+* [Contributor Guide](CONTRIBUTING.md): Extending the package to parse additional bank statements.
 * [WASM Guide](md/wasm.md): Build and usage notes for the TypeScript/WASM package.
 
 Please get involved or email gravytoast@pm.me if you have any questions.

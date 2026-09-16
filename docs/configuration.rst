@@ -648,5 +648,5 @@ Contributing Your Configuration
 --------------------------------------
 If you have created a well-tested configuration file for a bank or account type that is not
 currently supported, please consider contributing it to the project. Follow the 
-`Guidance Documentation <https://github.com/weberdak/transtractor-lib/md/contribute.md>`_ 
+`Contributor Guide <https://github.com/weberdak/transtractor-lib/blob/main/CONTRIBUTING.md>`_
 in the GitHub repository.
