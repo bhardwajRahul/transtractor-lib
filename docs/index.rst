@@ -157,8 +157,9 @@ Community & Support
 -------------------
 
 * **Website**: `transtractor.net <https://transtractor.net>`_
-* **GitHub Repository**: `transtractor/transtractor-lib <https://github.com/weberdak/transtractor-lib>`_
-* **Contributions**: Pull requests with new statement configurations are very welcome!
+* **PyPI**: `transtractor <https://pypi.org/project/transtractor/>`_
+* **GitHub Repository**: `weberdak/transtractor-lib <https://github.com/weberdak/transtractor-lib>`_
+* **Contributions**: `weberdak/transtractor-lib/CONTRIBUTING.md <https://github.com/weberdak/transtractor-lib/blob/main/CONTRIBUTING.md>`_
 
 
 License
