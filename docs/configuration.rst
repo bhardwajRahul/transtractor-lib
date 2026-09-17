@@ -5,6 +5,19 @@ Configuration files specify the parsing parameters that the Transtractor uses to
 data from bank statements. This guide explains how to create your own configuration files 
 for unsupported banks or account types.
 
+Online Tools
+------------
+You can use the `Transtractor online developer tools <https://www.transtractor.net/develop>`_ to develop 
+a configuration file without installing Python. The page embeds the Transtractor as WebAssembly (WASM), 
+so all processing takes place locally in your browser. This page is sufficient unless you need to modify 
+the Transtractor source code.
+
+If you prefer an easier process, follow Method 2 on the
+`add support for your statements page <https://www.transtractor.net/add-support-for-your-statements>`_.
+This provides a developer with the information needed to create your configuration and add permanent support
+for reading your statements.
+
+
 
 Basic Template
 --------------
