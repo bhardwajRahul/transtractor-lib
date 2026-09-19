@@ -127,8 +127,7 @@ statements in a single directory:
 Web Interface
 -------------
 A user-friendly web interface for bulk extraction is available at 
-`transtractor.net <https://transtractor.net>`_. The web interface can also be self hosted 
-from the `transtractor-web <https://github.com/weberdak/transtractor-web>`_ repository.
+`transtractor.net <https://transtractor.net>`_.
 
 Supported Banks
 ---------------

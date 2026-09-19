@@ -89,7 +89,7 @@ parser.parse('statement.pdf').to_csv('statement.csv')
 ## WASM Implementation
 WASM bindings are also provided for in-browser parsing of PDF bank statements. See [this guide](md/wasm.md) for an introductory guide on how to compile and use them. 
 
-You may also want to checkout [www.transtractor.net](https://www.transtractor.net) to see these bindings in action, or self-host the [Transtractor Web Interface](https://github.com/weberdak/transtractor-web) from the source code. 
+You may also want to checkout [www.transtractor.net](https://www.transtractor.net) to see these bindings in action.
 
 ## Developers
 The following pages provide further information about how this package is built and developed:
