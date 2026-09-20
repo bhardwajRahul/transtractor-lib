@@ -98,7 +98,12 @@ def run_test_protocol(
     :param log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
     Note: Set log_level to "WARNING" or higher to suppress terminal output.
+
+    :raises NotADirectoryError: If pdf_dir does not exist or is not a directory
     """
+    if not Path(pdf_dir).is_dir():
+        raise NotADirectoryError(f"Input directory does not exist: {pdf_dir}")
+
     # Set up logging
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
