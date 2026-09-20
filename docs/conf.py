@@ -33,3 +33,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
+
+# Umami analytics (loaded on every page via <script defer ...>)
+html_js_files = [
+    (
+        "https://analytics.transtractor.net/script.js",
+        {"defer": "defer", "data-website-id": "57c20295-d7fb-49a2-afb7-401710cd148b"},
+    ),
+]
