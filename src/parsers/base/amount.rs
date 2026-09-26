@@ -46,7 +46,7 @@ impl AmountParser {
         let max = usize::min(self.max_lookahead, items.len());
         for i in (1..=max).rev() {
             if let Some(curr_item) = TextItem::from_items(&items[0..i])
-                && let Some(val) = self.parser.parse(&curr_item.text)
+                && let Some(val) = self.parser.parse(&curr_item.text, i)
             {
                 self.value = Some(val);
                 self.text_item = Some(curr_item);

@@ -10,7 +10,10 @@ impl DateFormat for Format6 {
     }
 
     /// Parses a date string and returns the UTC timestamp if valid.
-    fn parse(&self, date_str: &str, year_str: &str) -> Option<i64> {
+    fn parse(&self, date_str: &str, year_str: &str, num_items: usize) -> Option<i64> {
+        if num_items != self.num_items() {
+            return None;
+        }
         let re = regex::Regex::new(r"^\d{1,2}/\d{1,2}$").unwrap();
         if !re.is_match(date_str) {
             return None;
@@ -36,34 +39,34 @@ mod tests {
     fn test_format6_parse() {
         let fmt = Format6;
         // "03/12" (March 12)
-        let ts = fmt.parse("03/12", "2023");
+        let ts = fmt.parse("03/12", "2023", 1);
         assert!(ts.is_some());
         // "3/12" (March 12, single-digit month)
-        let ts2 = fmt.parse("3/12", "2023");
+        let ts2 = fmt.parse("3/12", "2023", 1);
         assert!(ts2.is_some());
         // "3/2" (March 2, both single-digit)
-        let ts3 = fmt.parse("3/2", "2023");
+        let ts3 = fmt.parse("3/2", "2023", 1);
         assert!(ts3.is_some());
         // "12/25" (December 25)
-        let ts4 = fmt.parse("12/25", "2023");
+        let ts4 = fmt.parse("12/25", "2023", 1);
         assert!(ts4.is_some());
         // "01/01" (January 1)
-        let ts5 = fmt.parse("01/01", "2023");
+        let ts5 = fmt.parse("01/01", "2023", 1);
         assert!(ts5.is_some());
         // Invalid date (February 30)
-        let ts6 = fmt.parse("02/30", "2023");
+        let ts6 = fmt.parse("02/30", "2023", 1);
         assert!(ts6.is_none());
         // Invalid format - wrong separator
-        assert_eq!(fmt.parse("03-12", "2023"), None);
+        assert_eq!(fmt.parse("03-12", "2023", 1), None);
         // Invalid format - includes year
-        assert_eq!(fmt.parse("03/12/23", "2023"), None);
+        assert_eq!(fmt.parse("03/12/23", "2023", 1), None);
         // Invalid format - too many digits
-        assert_eq!(fmt.parse("003/12", "2023"), None);
+        assert_eq!(fmt.parse("003/12", "2023", 1), None);
         // Invalid format - empty string
-        assert_eq!(fmt.parse("", "2023"), None);
+        assert_eq!(fmt.parse("", "2023", 1), None);
         // Invalid format - month only
-        assert_eq!(fmt.parse("03", "2023"), None);
+        assert_eq!(fmt.parse("03", "2023", 1), None);
         // Invalid format - month out of range
-        assert_eq!(fmt.parse("13/01", "2023"), None);
+        assert_eq!(fmt.parse("13/01", "2023", 1), None);
     }
 }

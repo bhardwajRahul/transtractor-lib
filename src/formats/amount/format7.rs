@@ -9,7 +9,10 @@ impl AmountFormat for Format7 {
         1
     }
 
-    fn parse(&self, currency_str: &str) -> Option<f64> {
+    fn parse(&self, currency_str: &str, num_items: usize) -> Option<f64> {
+        if num_items != self.num_items() {
+            return None;
+        }
         let trimmed = currency_str.trim();
         if !trimmed.ends_with('⧫') {
             return None;
@@ -43,13 +46,13 @@ mod tests {
     #[test]
     fn test_format7() {
         let fmt = Format7;
-        assert_eq!(fmt.parse("$1,234.56⧫"), Some(1234.56));
-        assert_eq!(fmt.parse("-$1,234.56⧫"), Some(-1234.56));
-        assert_eq!(fmt.parse("$1,234.56-⧫"), Some(-1234.56));
-        assert_eq!(fmt.parse("bad input"), None);
-        assert_eq!(fmt.parse("$1,234.5⧫"), None);
-        assert_eq!(fmt.parse("$1,234.567⧫"), None);
-        assert_eq!(fmt.parse("$1,000,234.56⧫"), Some(1000234.56));
-        assert_eq!(fmt.parse("$1,234.56"), None);
+        assert_eq!(fmt.parse("$1,234.56⧫", 1), Some(1234.56));
+        assert_eq!(fmt.parse("-$1,234.56⧫", 1), Some(-1234.56));
+        assert_eq!(fmt.parse("$1,234.56-⧫", 1), Some(-1234.56));
+        assert_eq!(fmt.parse("bad input", 1), None);
+        assert_eq!(fmt.parse("$1,234.5⧫", 1), None);
+        assert_eq!(fmt.parse("$1,234.567⧫", 1), None);
+        assert_eq!(fmt.parse("$1,000,234.56⧫", 1), Some(1000234.56));
+        assert_eq!(fmt.parse("$1,234.56", 1), None);
     }
 }

@@ -11,7 +11,10 @@ impl DateFormat for Format1 {
 
     /// Parses a date string and returns the UTC timestamp if valid.
     /// Requires a year_str argument.
-    fn parse(&self, date_str: &str, year_str: &str) -> Option<i64> {
+    fn parse(&self, date_str: &str, year_str: &str, num_items: usize) -> Option<i64> {
+        if num_items != self.num_items() {
+            return None;
+        }
         let re = regex::Regex::new(r"^\d{1,2} \w+$").unwrap();
         if !re.is_match(date_str) {
             return None;
@@ -37,20 +40,20 @@ mod tests {
     fn test_format1_parse() {
         let fmt = Format1;
         // 24 Mar 2023
-        let ts = fmt.parse("24 mar", "2023");
+        let ts = fmt.parse("24 mar", "2023", 2);
         assert!(ts.is_some());
         // 01 Mar 2023
-        let ts2 = fmt.parse("01 mar", "2023");
+        let ts2 = fmt.parse("01 mar", "2023", 2);
         assert!(ts2.is_some());
         // 9 Mar 2023
-        let ts3 = fmt.parse("9 mar", "2023");
+        let ts3 = fmt.parse("9 mar", "2023", 2);
         assert!(ts3.is_some());
         // 30 Feb 2023 (invalid date)
-        let ts4 = fmt.parse("30 feb", "2023");
+        let ts4 = fmt.parse("30 feb", "2023", 2);
         assert!(ts4.is_none());
         // Invalid
-        assert_eq!(fmt.parse("mar 24", "2023"), None);
-        assert_eq!(fmt.parse("", "2023"), None);
-        assert_eq!(fmt.parse("24", "2023"), None);
+        assert_eq!(fmt.parse("mar 24", "2023", 2), None);
+        assert_eq!(fmt.parse("", "2023", 2), None);
+        assert_eq!(fmt.parse("24", "2023", 2), None);
     }
 }

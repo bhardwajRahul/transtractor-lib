@@ -9,7 +9,10 @@ impl AmountFormat for Format1 {
         1
     }
 
-    fn parse(&self, amount_str: &str) -> Option<f64> {
+    fn parse(&self, amount_str: &str, num_items: usize) -> Option<f64> {
+        if num_items != self.num_items() {
+            return None;
+        }
         let re = Regex::new(r"^-?\d{1,3}(,\d{3})*\.\d{2}(-|\s)?$").unwrap();
         if !re.is_match(amount_str) {
             return None;
@@ -38,15 +41,15 @@ mod tests {
     #[test]
     fn test_format1() {
         let fmt = Format1;
-        assert_eq!(fmt.parse("1,234.56"), Some(1234.56));
-        assert_eq!(fmt.parse("-1,234.56"), Some(-1234.56));
-        assert_eq!(fmt.parse("1,234.56-"), Some(-1234.56));
-        assert_eq!(fmt.parse("bad input"), None);
-        assert_eq!(fmt.parse("$1234.56"), None);
-        assert_eq!(fmt.parse("1234.5"), None);
-        assert_eq!(fmt.parse("1234.567"), None);
-        assert_eq!(fmt.parse("1234"), None);
-        assert_eq!(fmt.parse("1234.56"), None);
-        assert_eq!(fmt.parse("1,000,234.56"), Some(1000234.56));
+        assert_eq!(fmt.parse("1,234.56", 1), Some(1234.56));
+        assert_eq!(fmt.parse("-1,234.56", 1), Some(-1234.56));
+        assert_eq!(fmt.parse("1,234.56-", 1), Some(-1234.56));
+        assert_eq!(fmt.parse("bad input", 1), None);
+        assert_eq!(fmt.parse("$1234.56", 1), None);
+        assert_eq!(fmt.parse("1234.5", 1), None);
+        assert_eq!(fmt.parse("1234.567", 1), None);
+        assert_eq!(fmt.parse("1234", 1), None);
+        assert_eq!(fmt.parse("1234.56", 1), None);
+        assert_eq!(fmt.parse("1,000,234.56", 1), Some(1000234.56));
     }
 }

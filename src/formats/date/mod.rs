@@ -29,7 +29,7 @@ pub trait DateFormat {
     fn num_items(&self) -> usize;
 
     /// Parse the input string and return a UTC timestamp (milliseconds since epoch) if valid.
-    fn parse(&self, input: &str, year_str: &str) -> Option<i64>;
+    fn parse(&self, input: &str, year_str: &str, num_items: usize) -> Option<i64>;
 }
 
 /// Get a list of valid formats.
@@ -158,9 +158,9 @@ impl MultiDateFormatParser {
     }
 
     /// Try parsing with each format in order, returning the first successful result.
-    pub fn parse(&self, input: &str, year_str: &str) -> Option<i64> {
+    pub fn parse(&self, input: &str, year_str: &str, num_items: usize) -> Option<i64> {
         for parser in &self.parsers {
-            if let Some(val) = parser.parse(input, year_str) {
+            if let Some(val) = parser.parse(input, year_str, num_items) {
                 return Some(val);
             }
         }
@@ -249,45 +249,49 @@ mod tests {
             "format9", "format10", "format11", "format12", "format13",
         ]);
         // Should parse using format1
-        assert!(multi_fmt.parse("24 mar", "2023").is_some());
+        assert!(multi_fmt.parse("24 mar", "2023", 2).is_some());
         // Should parse using format2
-        assert!(multi_fmt.parse("24 march 2020", "").is_some());
+        assert!(multi_fmt.parse("24 march 2020", "", 3).is_some());
         // Should parse using format3
-        assert!(multi_fmt.parse("march 24, 2020", "").is_some());
+        assert!(multi_fmt.parse("march 24, 2020", "", 3).is_some());
         // Should parse using format4
-        assert!(multi_fmt.parse("24/3/2020", "").is_some());
+        assert!(multi_fmt.parse("24/3/2020", "", 1).is_some());
         // Should parse using format5
-        assert!(multi_fmt.parse("24/3/20", "").is_some());
+        assert!(multi_fmt.parse("24/3/20", "", 1).is_some());
         // Should parse using format6
-        assert!(multi_fmt.parse("3/24", "2020").is_some());
+        assert!(multi_fmt.parse("3/24", "2020", 1).is_some());
         // Should parse using format7
-        assert!(multi_fmt.parse("24-03-2020", "").is_some());
-        assert!(multi_fmt.parse("24-3-20", "").is_some());
+        assert!(multi_fmt.parse("24-03-2020", "", 1).is_some());
+        assert!(multi_fmt.parse("24-3-20", "", 1).is_some());
         // Should parse using format8
-        assert!(multi_fmt.parse("03-24-2020", "").is_some());
-        assert!(multi_fmt.parse("3-24-20", "").is_some());
+        assert!(multi_fmt.parse("03-24-2020", "", 1).is_some());
+        assert!(multi_fmt.parse("3-24-20", "", 1).is_some());
         // Should parse using format9
-        assert!(multi_fmt.parse("03/24/2020", "").is_some());
-        assert!(multi_fmt.parse("3/24/20", "").is_some());
+        assert!(multi_fmt.parse("03/24/2020", "", 1).is_some());
+        assert!(multi_fmt.parse("3/24/20", "", 1).is_some());
         // Should parse using format10
-        assert!(multi_fmt.parse("Mar 24", "2023").is_some());
-        assert!(multi_fmt.parse("March 24", "2023").is_some());
-        assert!(multi_fmt.parse("March 4", "2023").is_some());
+        assert!(multi_fmt.parse("Mar 24", "2023", 2).is_some());
+        assert!(multi_fmt.parse("March 24", "2023", 2).is_some());
+        assert!(multi_fmt.parse("March 4", "2023", 2).is_some());
         // Should parse using format11
-        assert!(multi_fmt.parse("Mar 24, 2023-Apr 24, 2023", "").is_some());
         assert!(
             multi_fmt
-                .parse("March 1, 2020-March 31, 2020", "")
+                .parse("Mar 24, 2023-Apr 24, 2023", "", 5)
+                .is_some()
+        );
+        assert!(
+            multi_fmt
+                .parse("March 1, 2020-March 31, 2020", "", 5)
                 .is_some()
         );
         // Should parse using format12
-        assert!(multi_fmt.parse("2023/03/24", "").is_some());
-        assert!(multi_fmt.parse("2023/3/24", "").is_some());
+        assert!(multi_fmt.parse("2023/03/24", "", 1).is_some());
+        assert!(multi_fmt.parse("2023/3/24", "", 1).is_some());
         // Should parse using format13
-        assert!(multi_fmt.parse("2023-03-24", "").is_some());
-        assert!(multi_fmt.parse("2023-3-24", "").is_some());
+        assert!(multi_fmt.parse("2023-03-24", "", 1).is_some());
+        assert!(multi_fmt.parse("2023-3-24", "", 1).is_some());
         // Should not parse invalid
-        assert_eq!(multi_fmt.parse("foo", "2023"), None);
+        assert_eq!(multi_fmt.parse("foo", "2023", 1), None);
     }
 
     #[test]

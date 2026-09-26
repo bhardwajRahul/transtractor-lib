@@ -46,7 +46,8 @@ impl DateParser {
                 .map(|t| t.text.as_str())
                 .collect::<Vec<_>>()
                 .join(" ");
-            if let Some(val) = self.parser.parse(&merged, year_str) {
+            let num_items = merged.split_whitespace().count();
+            if let Some(val) = self.parser.parse(&merged, year_str, num_items) {
                 self.value = Some(val);
                 self.text_item = Some(TextItem {
                     text: merged,

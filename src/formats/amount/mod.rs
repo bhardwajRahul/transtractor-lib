@@ -20,7 +20,7 @@ pub trait AmountFormat {
     fn num_items(&self) -> usize;
 
     /// Parse the input string and return a float if valid.
-    fn parse(&self, input: &str) -> Option<f64>;
+    fn parse(&self, input: &str, num_items: usize) -> Option<f64>;
 }
 
 /// Get a list of valid formats.
@@ -77,9 +77,9 @@ impl MultiAmountFormatParser {
     }
 
     /// Try parsing with each format in order, returning the first successful result.
-    pub fn parse(&self, input: &str) -> Option<f64> {
+    pub fn parse(&self, input: &str, num_items: usize) -> Option<f64> {
         for parser in &self.parsers {
-            if let Some(val) = parser.parse(input) {
+            if let Some(val) = parser.parse(input, num_items) {
                 return Some(val);
             }
         }
@@ -103,9 +103,9 @@ mod tests {
     #[test]
     fn test_multi_amount_format_parser() {
         let multi_fmt1 = MultiAmountFormatParser::new(&["format1", "format2"]);
-        assert_eq!(multi_fmt1.parse("1,234.56"), Some(1234.56));
-        assert_eq!(multi_fmt1.parse("-$1,234.56"), Some(-1234.56)); // format2
-        assert_eq!(multi_fmt1.parse("$1,234.56 DR"), None); // format3 not included
+        assert_eq!(multi_fmt1.parse("1,234.56", 1), Some(1234.56));
+        assert_eq!(multi_fmt1.parse("-$1,234.56", 1), Some(-1234.56)); // format2
+        assert_eq!(multi_fmt1.parse("$1,234.56 DR", 2), None); // format3 not included
     }
 
     #[test]

@@ -9,7 +9,10 @@ impl AmountFormat for Format4 {
         2
     }
 
-    fn parse(&self, currency_str: &str) -> Option<f64> {
+    fn parse(&self, currency_str: &str, num_items: usize) -> Option<f64> {
+        if num_items != self.num_items() {
+            return None;
+        }
         let currency_str = currency_str.to_lowercase();
         let re = Regex::new(r"^-?\d{1,3}(,\d{3})*\.\d{2} (cr|dr)$").unwrap();
         if !re.is_match(&currency_str) {
@@ -43,14 +46,14 @@ mod tests {
     #[test]
     fn test_format4() {
         let fmt = Format4;
-        assert_eq!(fmt.parse("1,234.56 DR"), Some(-1234.56));
-        assert_eq!(fmt.parse("-1,234.56 DR"), Some(1234.56));
-        assert_eq!(fmt.parse("1,234.56 CR"), Some(1234.56));
-        assert_eq!(fmt.parse("bad input"), None);
-        assert_eq!(fmt.parse("1234.56 DR"), None);
-        assert_eq!(fmt.parse("1234.56 CR"), None);
-        assert_eq!(fmt.parse("1,234.5 DR"), None);
-        assert_eq!(fmt.parse("1,234.567 DR"), None);
-        assert_eq!(fmt.parse("1,000,234.56 CR"), Some(100_0234.56));
+        assert_eq!(fmt.parse("1,234.56 DR", 2), Some(-1234.56));
+        assert_eq!(fmt.parse("-1,234.56 DR", 2), Some(1234.56));
+        assert_eq!(fmt.parse("1,234.56 CR", 2), Some(1234.56));
+        assert_eq!(fmt.parse("bad input", 2), None);
+        assert_eq!(fmt.parse("1234.56 DR", 2), None);
+        assert_eq!(fmt.parse("1234.56 CR", 2), None);
+        assert_eq!(fmt.parse("1,234.5 DR", 2), None);
+        assert_eq!(fmt.parse("1,234.567 DR", 2), None);
+        assert_eq!(fmt.parse("1,000,234.56 CR", 2), Some(100_0234.56));
     }
 }
