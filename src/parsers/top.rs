@@ -5,7 +5,6 @@ use crate::parsers::statement::{
 use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItem;
-use crate::structs::text_items::get_text_item_buffer;
 
 /// Top-level function that converts a list of TextItems into structured StatementData
 pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> StatementData {
@@ -37,23 +36,23 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
     let mut i: usize = 0;
     while i < len {
         let buffer_size = max_lookahead.min(len - i);
-        let buffer = get_text_item_buffer(text_items, i, buffer_size);
+        let buffer = &text_items[i..i + buffer_size];
         let mut consumed = 0usize;
         // Try parsers in a stable order: account number -> start date -> opening balance -> closing balance
         if consumed == 0 {
-            consumed = account_number_parser.parse_items(&buffer, &mut statement_data);
+            consumed = account_number_parser.parse_items(buffer, &mut statement_data);
         }
         if consumed == 0 {
-            consumed = start_date_parser.parse_items(&buffer, &mut statement_data);
+            consumed = start_date_parser.parse_items(buffer, &mut statement_data);
         }
         if consumed == 0 {
-            consumed = opening_balance_parser.parse_items(&buffer, &mut statement_data);
+            consumed = opening_balance_parser.parse_items(buffer, &mut statement_data);
         }
         if consumed == 0 {
-            consumed = closing_balance_parser.parse_items(&buffer, &mut statement_data);
+            consumed = closing_balance_parser.parse_items(buffer, &mut statement_data);
         }
         if consumed == 0 {
-            consumed = transaction_parser.parse_items(&buffer, &mut statement_data);
+            consumed = transaction_parser.parse_items(buffer, &mut statement_data);
         }
         // A parser can signal an unrecoverable config error via usize::MAX, logged
         // into statement_data.errors; stop parsing early in that case.

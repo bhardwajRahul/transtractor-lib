@@ -1,5 +1,4 @@
 use crate::structs::TextItem;
-use crate::structs::text_items::get_text_item_buffer;
 use crate::structs::text_items::tokenise_items;
 use std::collections::{HashMap, HashSet};
 
@@ -67,10 +66,10 @@ impl StatementTyper {
         let mut i: usize = 0;
         while i < len {
             let buffer_size = self.max_lookahead.min(len - i);
-            let buffer = get_text_item_buffer(&tokenised_items, i, buffer_size);
-            if buffer.is_empty() {
+            if buffer_size == 0 {
                 break;
             }
+            let buffer = &tokenised_items[i..i + buffer_size];
             let phrase = buffer
                 .iter()
                 .map(|ti| ti.text.as_str())
