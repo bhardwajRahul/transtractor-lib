@@ -1,10 +1,10 @@
 use crate::configs::db::ConfigDB;
 use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
-use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
+use crate::parsers::flows::text_items_to_debug::text_items_to_debug_with_benchmark;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
-use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
-use crate::structs::{ProtoTransaction, Spec, StatementData, TextItem};
+use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data_with_benchmark;
+use crate::structs::{Benchmark, BenchmarkMicros, ProtoTransaction, Spec, StatementData, TextItem};
 use pdfsink_rs::PdfDocument;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
@@ -27,6 +27,7 @@ struct JsStatementData {
     opening_balance: f64,
     closing_balance: f64,
     transactions: Vec<JsTransaction>,
+    benchmark: BenchmarkMicros,
 }
 
 #[wasm_bindgen(js_name = Parser)]
@@ -86,42 +87,70 @@ impl WasmParser {
 
     #[wasm_bindgen(js_name = parse)]
     pub fn parse(&self, pdf_path: String) -> Result<JsValue, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let doc = PdfDocument::open(&pdf_path).map_err(|e| {
             JsValue::from_str(&format!(
                 "Failed to open PDF document at {}: {}",
                 pdf_path, e
             ))
         })?;
-        self.parse_from_pdf_document(&doc)
+        let items = pdf_to_text_items(&doc)
+            .map_err(|e| JsValue::from_str(&format!("Failed to extract text items: {}", e)))?;
+        benchmark.pdf_extractor.pause();
+        let data = text_items_to_statement_data_with_benchmark(&self.db, &items, &mut benchmark)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
+        statement_data_to_js(&data)
     }
 
     #[wasm_bindgen(js_name = parseBytes)]
     pub fn parse_bytes(&self, pdf_bytes: &[u8]) -> Result<JsValue, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let doc = PdfDocument::from_bytes(pdf_bytes).map_err(|e| {
             JsValue::from_str(&format!(
                 "Failed to open PDF document from byte input: {}",
                 e
             ))
         })?;
-        self.parse_from_pdf_document(&doc)
+        let items = pdf_to_text_items(&doc)
+            .map_err(|e| JsValue::from_str(&format!("Failed to extract text items: {}", e)))?;
+        benchmark.pdf_extractor.pause();
+        let data = text_items_to_statement_data_with_benchmark(&self.db, &items, &mut benchmark)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
+        statement_data_to_js(&data)
     }
 
     #[wasm_bindgen(js_name = parseLayout)]
     pub fn parse_layout(&self, layout_path: String) -> Result<JsValue, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let content = std::fs::read_to_string(&layout_path).map_err(|e| {
             JsValue::from_str(&format!(
                 "Failed to read layout file at {}: {}",
                 layout_path, e
             ))
         })?;
-        self.parse_layout_text(content)
+        let items = layout_to_text_items(&content)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))?;
+        benchmark.pdf_extractor.pause();
+        let data = text_items_to_statement_data_with_benchmark(&self.db, &items, &mut benchmark)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
+        statement_data_to_js(&data)
     }
 
     #[wasm_bindgen(js_name = parseLayoutText)]
     pub fn parse_layout_text(&self, layout_text: String) -> Result<JsValue, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let items = layout_to_text_items(&layout_text)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))?;
-        let data = text_items_to_statement_data(&self.db, &items)
+        benchmark.pdf_extractor.pause();
+        let data = text_items_to_statement_data_with_benchmark(&self.db, &items, &mut benchmark)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
         statement_data_to_js(&data)
     }
@@ -143,16 +172,24 @@ impl WasmParser {
 
     #[wasm_bindgen(js_name = debug)]
     pub fn debug(&self, pdf_path: String, output_file: String) -> Result<(), JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let items = pdf_path_to_text_items(&pdf_path)?;
-        let debug_str = text_items_to_debug(&self.db, &items)
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &items, &mut benchmark)
             .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))?;
         write_str_to_file(&debug_str, &output_file)
     }
 
     #[wasm_bindgen(js_name = debugLayout)]
     pub fn debug_layout(&self, layout_path: String, output_file: String) -> Result<(), JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let items = layout_path_to_text_items(&layout_path)?;
-        let debug_str = text_items_to_debug(&self.db, &items)
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &items, &mut benchmark)
             .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))?;
         write_str_to_file(&debug_str, &output_file)
     }
@@ -181,16 +218,24 @@ impl WasmParser {
 
     #[wasm_bindgen(js_name = debugBytes)]
     pub fn debug_bytes(&self, pdf_bytes: &[u8]) -> Result<String, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let items = pdf_bytes_to_text_items(pdf_bytes)?;
-        text_items_to_debug(&self.db, &items)
+        benchmark.pdf_extractor.pause();
+        text_items_to_debug_with_benchmark(&self.db, &items, &mut benchmark)
             .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))
     }
 
     #[wasm_bindgen(js_name = debugLayoutText)]
     pub fn debug_layout_text(&self, layout_text: String) -> Result<String, JsValue> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let items = layout_to_text_items(&layout_text)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse layout text: {}", e)))?;
-        text_items_to_debug(&self.db, &items)
+        benchmark.pdf_extractor.pause();
+        text_items_to_debug_with_benchmark(&self.db, &items, &mut benchmark)
             .map_err(|e| JsValue::from_str(&format!("Failed to generate debug output: {}", e)))
     }
 
@@ -213,16 +258,6 @@ impl WasmParser {
             .map_err(|e| JsValue::from_str(&format!("Failed to parse spec JSON: {}", e)))?;
         spec.validate(&self.db)
             .map_err(|e| JsValue::from_str(&format!("Spec validation failed: {}", e)))
-    }
-}
-
-impl WasmParser {
-    fn parse_from_pdf_document(&self, doc: &PdfDocument) -> Result<JsValue, JsValue> {
-        let items = pdf_to_text_items(doc)
-            .map_err(|e| JsValue::from_str(&format!("Failed to extract text items: {}", e)))?;
-        let data = text_items_to_statement_data(&self.db, &items)
-            .map_err(|e| JsValue::from_str(&format!("Failed to parse statement data: {}", e)))?;
-        statement_data_to_js(&data)
     }
 }
 
@@ -342,6 +377,7 @@ impl TryFrom<&StatementData> for JsStatementData {
                 )
             })?,
             transactions,
+            benchmark: value.benchmark.as_micros(),
         })
     }
 }

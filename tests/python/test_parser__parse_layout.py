@@ -21,6 +21,29 @@ def test_parse_layout_generates_correct_csv():
     expected_csv = fixtures_dir / "test1_parsed.csv"
 
     statement_data: StatementData = parser.parse_layout(str(test_layout))
+    assert all(
+        isinstance(getattr(statement_data.benchmark, stage), int)
+        for stage in (
+            "pdf_extractor",
+            "total",
+            "tokeniser",
+            "typer",
+            "parsers",
+            "parsers_account_number_parser_prime",
+            "parsers_account_number_parser_parse",
+            "parsers_start_date_parser_prime",
+            "parsers_start_date_parser_parse",
+            "parsers_opening_balance_parser_prime",
+            "parsers_opening_balance_parser_parse",
+            "parsers_closing_balance_parser_prime",
+            "parsers_closing_balance_parser_parse",
+            "parsers_transaction_parser_start_prime",
+            "parsers_transaction_parser_parse",
+            "parsers_transaction_parser_stop_prime",
+            "fixers",
+            "checkers",
+        )
+    )
 
     assert statement_data.key == "au__gtb__fake_account__1"
     assert statement_data.account_number == "1234 5678 9123 4567"

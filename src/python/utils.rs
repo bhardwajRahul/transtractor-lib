@@ -13,6 +13,8 @@ pub fn rust_statement_data_to_py_statement_data(
 
         let transaction_module = py.import("transtractor.structs.transaction")?;
         let transaction_class = transaction_module.getattr("Transaction")?;
+        let benchmark_module = py.import("transtractor.structs.benchmark")?;
+        let benchmark_class = benchmark_module.getattr("Benchmark")?;
 
         // Get key (required field)
         let key = rust_statement_data.key.as_ref().ok_or_else(|| {
@@ -83,6 +85,63 @@ pub fn rust_statement_data_to_py_statement_data(
         kwargs.set_item("opening_balance", opening_balance)?;
         kwargs.set_item("closing_balance", closing_balance)?;
         kwargs.set_item("transactions", py_transactions)?;
+        let benchmark = rust_statement_data.benchmark.as_micros();
+        let benchmark_kwargs = PyDict::new(py);
+        benchmark_kwargs.set_item("total", benchmark.total)?;
+        benchmark_kwargs.set_item("pdf_extractor", benchmark.pdf_extractor)?;
+        benchmark_kwargs.set_item("tokeniser", benchmark.tokeniser)?;
+        benchmark_kwargs.set_item("typer", benchmark.typer)?;
+        benchmark_kwargs.set_item("parsers", benchmark.parsers)?;
+        benchmark_kwargs.set_item(
+            "parsers_account_number_parser_prime",
+            benchmark.parsers_account_number_parser_prime,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_account_number_parser_parse",
+            benchmark.parsers_account_number_parser_parse,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_start_date_parser_prime",
+            benchmark.parsers_start_date_parser_prime,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_start_date_parser_parse",
+            benchmark.parsers_start_date_parser_parse,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_opening_balance_parser_prime",
+            benchmark.parsers_opening_balance_parser_prime,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_opening_balance_parser_parse",
+            benchmark.parsers_opening_balance_parser_parse,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_closing_balance_parser_prime",
+            benchmark.parsers_closing_balance_parser_prime,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_closing_balance_parser_parse",
+            benchmark.parsers_closing_balance_parser_parse,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_transaction_parser_start_prime",
+            benchmark.parsers_transaction_parser_start_prime,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_transaction_parser_parse",
+            benchmark.parsers_transaction_parser_parse,
+        )?;
+        benchmark_kwargs.set_item(
+            "parsers_transaction_parser_stop_prime",
+            benchmark.parsers_transaction_parser_stop_prime,
+        )?;
+        benchmark_kwargs.set_item("fixers", benchmark.fixers)?;
+        benchmark_kwargs.set_item("checkers", benchmark.checkers)?;
+        kwargs.set_item(
+            "benchmark",
+            benchmark_class.call((), Some(&benchmark_kwargs))?,
+        )?;
         let py_statement_data = statement_data_class.call((), Some(&kwargs))?;
 
         Ok(py_statement_data.into())

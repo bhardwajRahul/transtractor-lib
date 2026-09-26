@@ -36,6 +36,27 @@ describe("Parser", () => {
 
     const actual = parser.parseLayoutText(layoutText);
 
+    expect(actual.benchmark).toMatchObject({
+      total: expect.any(BigInt),
+      pdf_extractor: expect.any(BigInt),
+      tokeniser: expect.any(BigInt),
+      typer: expect.any(BigInt),
+      parsers: expect.any(BigInt),
+      parsers_account_number_parser_prime: expect.any(BigInt),
+      parsers_account_number_parser_parse: expect.any(BigInt),
+      parsers_start_date_parser_prime: expect.any(BigInt),
+      parsers_start_date_parser_parse: expect.any(BigInt),
+      parsers_opening_balance_parser_prime: expect.any(BigInt),
+      parsers_opening_balance_parser_parse: expect.any(BigInt),
+      parsers_closing_balance_parser_prime: expect.any(BigInt),
+      parsers_closing_balance_parser_parse: expect.any(BigInt),
+      parsers_transaction_parser_start_prime: expect.any(BigInt),
+      parsers_transaction_parser_parse: expect.any(BigInt),
+      parsers_transaction_parser_stop_prime: expect.any(BigInt),
+      fixers: expect.any(BigInt),
+      checkers: expect.any(BigInt),
+    });
+
     expect(actual.key).toBe(expected.statement_data.key);
     expect(actual.account_number).toBe(expected.statement_data.account_number);
     expect(actual.start_date).toBe(expected.statement_data.start_date);
@@ -74,6 +95,27 @@ describe("Parser", () => {
     };
 
     const actual = parser.parseBytes(pdfBytes);
+
+    expect(actual.benchmark).toMatchObject({
+      total: expect.any(BigInt),
+      pdf_extractor: expect.any(BigInt),
+      tokeniser: expect.any(BigInt),
+      typer: expect.any(BigInt),
+      parsers: expect.any(BigInt),
+      parsers_account_number_parser_prime: expect.any(BigInt),
+      parsers_account_number_parser_parse: expect.any(BigInt),
+      parsers_start_date_parser_prime: expect.any(BigInt),
+      parsers_start_date_parser_parse: expect.any(BigInt),
+      parsers_opening_balance_parser_prime: expect.any(BigInt),
+      parsers_opening_balance_parser_parse: expect.any(BigInt),
+      parsers_closing_balance_parser_prime: expect.any(BigInt),
+      parsers_closing_balance_parser_parse: expect.any(BigInt),
+      parsers_transaction_parser_start_prime: expect.any(BigInt),
+      parsers_transaction_parser_parse: expect.any(BigInt),
+      parsers_transaction_parser_stop_prime: expect.any(BigInt),
+      fixers: expect.any(BigInt),
+      checkers: expect.any(BigInt),
+    });
 
     expect(actual.key).toBe(expected.statement_data.key);
     expect(actual.account_number).toBe(expected.statement_data.account_number);

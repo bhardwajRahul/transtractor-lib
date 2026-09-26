@@ -3,10 +3,10 @@
 use crate::configs::db::ConfigDB;
 use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
-use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
+use crate::parsers::flows::text_items_to_debug::text_items_to_debug_with_benchmark;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
-use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
-use crate::structs::{Spec, StatementData, TextItem};
+use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data_with_benchmark;
+use crate::structs::{Benchmark, Spec, StatementData, TextItem};
 use pdfsink_rs::PdfDocument;
 
 /// Read a PDF file from disk and extract its text items.
@@ -78,29 +78,45 @@ impl Parser {
 
     /// Parse the bank statement PDF and return a `StatementData`.
     pub fn parse(&self, pdf_file_path: &str) -> Result<StatementData, String> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = pdf_path_to_text_items(pdf_file_path)?;
-        text_items_to_statement_data(&self.db, &text_items)
+        benchmark.pdf_extractor.pause();
+        text_items_to_statement_data_with_benchmark(&self.db, &text_items, &mut benchmark)
     }
 
     /// Parse the bank statement layout file and return a `StatementData`.
     pub fn parse_layout(&self, layout_file_path: &str) -> Result<StatementData, String> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = layout_path_to_text_items(layout_file_path)?;
-        text_items_to_statement_data(&self.db, &text_items)
+        benchmark.pdf_extractor.pause();
+        text_items_to_statement_data_with_benchmark(&self.db, &text_items, &mut benchmark)
     }
 
     /// Write a summary of the statement data and quality checks for each
     /// statement extraction configuration applied to the PDF.
     pub fn debug(&self, pdf_file_path: &str, output_file: &str) -> Result<(), String> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = pdf_path_to_text_items(pdf_file_path)?;
-        let debug_str = text_items_to_debug(&self.db, &text_items)?;
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &text_items, &mut benchmark)?;
         write_file(output_file, &debug_str)
     }
 
     /// Write a summary of the statement data and quality checks for each
     /// statement extraction configuration applied to the layout file.
     pub fn debug_layout(&self, layout_file_path: &str, output_file: &str) -> Result<(), String> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = layout_path_to_text_items(layout_file_path)?;
-        let debug_str = text_items_to_debug(&self.db, &text_items)?;
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &text_items, &mut benchmark)?;
         write_file(output_file, &debug_str)
     }
 
@@ -167,7 +183,27 @@ mod tests {
 
     /// Strip carriage returns so comparisons are stable across CRLF checkouts (e.g. Windows).
     fn normalise_line_endings(content: &str) -> String {
-        content.replace("\r\n", "\n")
+        let mut in_benchmark = false;
+        content
+            .replace("\r\n", "\n")
+            .lines()
+            .map(|line| {
+                if line == "  Benchmark (microseconds):" {
+                    in_benchmark = true;
+                    return line.to_string();
+                }
+                if in_benchmark && line.starts_with("    ") {
+                    if let Some((label, _)) = line.split_once(": ") {
+                        return format!("{}: <timing>", label);
+                    }
+                } else {
+                    in_benchmark = false;
+                }
+                line.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n"
     }
 
     fn temp_file_path(suffix: &str) -> PathBuf {
@@ -242,6 +278,78 @@ mod tests {
         assert_eq!(statement_data.opening_balance, Some(50000.0));
         assert_eq!(statement_data.closing_balance, Some(11663.82));
         assert_eq!(statement_data.proto_transactions.len(), 62);
+        let timings = statement_data.benchmark.as_micros();
+        assert!(timings.total > 0, "total benchmark time was not recorded");
+        for (stage, elapsed) in [
+            (
+                "account-number prime",
+                timings.parsers_account_number_parser_prime,
+            ),
+            (
+                "account-number parse",
+                timings.parsers_account_number_parser_parse,
+            ),
+            ("start-date prime", timings.parsers_start_date_parser_prime),
+            ("start-date parse", timings.parsers_start_date_parser_parse),
+            (
+                "opening-balance prime",
+                timings.parsers_opening_balance_parser_prime,
+            ),
+            (
+                "opening-balance parse",
+                timings.parsers_opening_balance_parser_parse,
+            ),
+            (
+                "closing-balance prime",
+                timings.parsers_closing_balance_parser_prime,
+            ),
+            (
+                "closing-balance parse",
+                timings.parsers_closing_balance_parser_parse,
+            ),
+            (
+                "transaction start prime",
+                timings.parsers_transaction_parser_start_prime,
+            ),
+            (
+                "transaction parse",
+                timings.parsers_transaction_parser_parse,
+            ),
+            (
+                "transaction stop prime",
+                timings.parsers_transaction_parser_stop_prime,
+            ),
+        ] {
+            assert!(elapsed > 0, "{stage} timing was not recorded");
+        }
+        let display = statement_data.to_string();
+        assert!(display.contains("Benchmark (microseconds):"));
+        for stage in [
+            "Total time",
+            "PDF extractor",
+            "Tokeniser",
+            "Typer",
+            "Parsers",
+            "Fixers",
+            "Checkers",
+        ] {
+            assert!(display.contains(&format!("    {stage}: ")));
+        }
+        for stage in [
+            "Account number (prime)",
+            "Account number (parse)",
+            "Start date (prime)",
+            "Start date (parse)",
+            "Opening balance (prime)",
+            "Opening balance (parse)",
+            "Closing balance (prime)",
+            "Closing balance (parse)",
+            "Transaction (prime start)",
+            "Transaction (parse)",
+            "Transaction (prime stop)",
+        ] {
+            assert!(display.contains(&format!("        {stage}: ")));
+        }
     }
 
     #[test]

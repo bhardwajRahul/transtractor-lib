@@ -1,4 +1,5 @@
 use crate::structs::TextItem;
+use crate::structs::benchmark::Timer;
 
 /// A parser that is primed by matching terms from text items.
 pub struct ParserPrimer {
@@ -78,6 +79,13 @@ impl ParserPrimer {
             }
         }
         0
+    }
+
+    pub fn parse_items_timed(&mut self, items: &[TextItem], timer: &mut Timer) -> usize {
+        timer.start();
+        let consumed = self.parse_items(items);
+        timer.pause();
+        consumed
     }
 
     /// Reset the parser

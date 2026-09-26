@@ -1,4 +1,5 @@
 use crate::parsers::primed::PrimedAmountParser;
+use crate::structs::benchmark::Timer;
 use crate::structs::{StatementConfig, StatementData, TextItem};
 
 pub struct OpeningBalanceParser {
@@ -32,13 +33,28 @@ impl OpeningBalanceParser {
 
     pub fn parse_items(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {
         let consumed = self.parser.parse_items(items);
+        self.update_data(consumed, data);
+        consumed
+    }
+
+    pub fn parse_items_timed(
+        &mut self,
+        items: &[TextItem],
+        data: &mut StatementData,
+        prime_timer: &mut Timer,
+    ) -> usize {
+        let consumed = self.parser.parse_items_timed(items, prime_timer);
+        self.update_data(consumed, data);
+        consumed
+    }
+
+    fn update_data(&self, consumed: usize, data: &mut StatementData) {
         if consumed > 0 && self.parser.value().is_some() && data.opening_balance().is_none() {
             // Only set if not already set to avoid overwriting a prior successful parse
             if let Some(value) = self.parser.value() {
                 data.set_opening_balance(value);
             }
         }
-        consumed
     }
 
     pub fn get_max_lookahead(&self) -> usize {

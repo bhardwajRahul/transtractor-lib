@@ -1,4 +1,4 @@
-use crate::structs::ProtoTransaction;
+use crate::structs::{Benchmark, ProtoTransaction};
 use chrono::{DateTime, Datelike, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -13,6 +13,8 @@ pub struct StatementData {
     pub closing_balance: Option<f64>,
     pub proto_transactions: Vec<ProtoTransaction>,
     pub errors: Vec<String>,
+    #[serde(skip)]
+    pub benchmark: Benchmark,
 }
 
 impl StatementData {
@@ -26,6 +28,7 @@ impl StatementData {
             closing_balance: None,
             proto_transactions: Vec::new(),
             errors: Vec::new(),
+            benchmark: Benchmark::new(),
         }
     }
 
@@ -145,6 +148,59 @@ impl fmt::Display for StatementData {
         } else {
             result.push_str("  Errors: None\n");
         }
+        let benchmark = self.benchmark.as_micros();
+        result.push_str("  Benchmark (microseconds):\n");
+        result.push_str(&format!("    Total time: {}\n", benchmark.total));
+        result.push_str(&format!("    PDF extractor: {}\n", benchmark.pdf_extractor));
+        result.push_str(&format!("    Tokeniser: {}\n", benchmark.tokeniser));
+        result.push_str(&format!("    Typer: {}\n", benchmark.typer));
+        result.push_str(&format!("    Parsers: {}\n", benchmark.parsers));
+        result.push_str(&format!(
+            "        Account number (prime): {}\n",
+            benchmark.parsers_account_number_parser_prime
+        ));
+        result.push_str(&format!(
+            "        Account number (parse): {}\n",
+            benchmark.parsers_account_number_parser_parse
+        ));
+        result.push_str(&format!(
+            "        Start date (prime): {}\n",
+            benchmark.parsers_start_date_parser_prime
+        ));
+        result.push_str(&format!(
+            "        Start date (parse): {}\n",
+            benchmark.parsers_start_date_parser_parse
+        ));
+        result.push_str(&format!(
+            "        Opening balance (prime): {}\n",
+            benchmark.parsers_opening_balance_parser_prime
+        ));
+        result.push_str(&format!(
+            "        Opening balance (parse): {}\n",
+            benchmark.parsers_opening_balance_parser_parse
+        ));
+        result.push_str(&format!(
+            "        Closing balance (prime): {}\n",
+            benchmark.parsers_closing_balance_parser_prime
+        ));
+        result.push_str(&format!(
+            "        Closing balance (parse): {}\n",
+            benchmark.parsers_closing_balance_parser_parse
+        ));
+        result.push_str(&format!(
+            "        Transaction (prime start): {}\n",
+            benchmark.parsers_transaction_parser_start_prime
+        ));
+        result.push_str(&format!(
+            "        Transaction (parse): {}\n",
+            benchmark.parsers_transaction_parser_parse
+        ));
+        result.push_str(&format!(
+            "        Transaction (prime stop): {}\n",
+            benchmark.parsers_transaction_parser_stop_prime
+        ));
+        result.push_str(&format!("    Fixers: {}\n", benchmark.fixers));
+        result.push_str(&format!("    Checkers: {}\n", benchmark.checkers));
         write!(f, "{}", result)
     }
 }

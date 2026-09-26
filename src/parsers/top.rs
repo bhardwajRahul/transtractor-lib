@@ -2,12 +2,26 @@ use crate::parsers::statement::{
     AccountNumberParser, ClosingBalanceParser, OpeningBalanceParser, StartDateParser,
     TransactionParser,
 };
-use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItem;
+use crate::structs::{Benchmark, StatementConfig};
 
 /// Top-level function that converts a list of TextItems into structured StatementData
 pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> StatementData {
+    let mut benchmark = Benchmark::new();
+    benchmark.total.start();
+    let data = parse_text_items_with_benchmark(config, text_items, &mut benchmark);
+    benchmark.total.pause();
+    let mut data = data;
+    data.benchmark = benchmark;
+    data
+}
+
+pub fn parse_text_items_with_benchmark(
+    config: &StatementConfig,
+    text_items: &[TextItem],
+    benchmark: &mut Benchmark,
+) -> StatementData {
     let mut statement_data = StatementData::new();
 
     // Initialize parsers
@@ -31,6 +45,7 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
     // Iterate through text items, attempting to match account_terms
     let len = text_items.len();
     if len == 0 {
+        statement_data.benchmark = benchmark.clone();
         return statement_data;
     }
     let mut i: usize = 0;
@@ -40,19 +55,50 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
         let mut consumed = 0usize;
         // Try parsers in a stable order: account number -> start date -> opening balance -> closing balance
         if consumed == 0 {
-            consumed = account_number_parser.parse_items(buffer, &mut statement_data);
+            benchmark.parsers_account_number_parser_parse.start();
+            consumed = account_number_parser.parse_items_timed(
+                buffer,
+                &mut statement_data,
+                &mut benchmark.parsers_account_number_parser_prime,
+            );
+            benchmark.parsers_account_number_parser_parse.pause();
         }
         if consumed == 0 {
-            consumed = start_date_parser.parse_items(buffer, &mut statement_data);
+            benchmark.parsers_start_date_parser_parse.start();
+            consumed = start_date_parser.parse_items_timed(
+                buffer,
+                &mut statement_data,
+                &mut benchmark.parsers_start_date_parser_prime,
+            );
+            benchmark.parsers_start_date_parser_parse.pause();
         }
         if consumed == 0 {
-            consumed = opening_balance_parser.parse_items(buffer, &mut statement_data);
+            benchmark.parsers_opening_balance_parser_parse.start();
+            consumed = opening_balance_parser.parse_items_timed(
+                buffer,
+                &mut statement_data,
+                &mut benchmark.parsers_opening_balance_parser_prime,
+            );
+            benchmark.parsers_opening_balance_parser_parse.pause();
         }
         if consumed == 0 {
-            consumed = closing_balance_parser.parse_items(buffer, &mut statement_data);
+            benchmark.parsers_closing_balance_parser_parse.start();
+            consumed = closing_balance_parser.parse_items_timed(
+                buffer,
+                &mut statement_data,
+                &mut benchmark.parsers_closing_balance_parser_prime,
+            );
+            benchmark.parsers_closing_balance_parser_parse.pause();
         }
         if consumed == 0 {
-            consumed = transaction_parser.parse_items(buffer, &mut statement_data);
+            benchmark.parsers_transaction_parser_parse.start();
+            consumed = transaction_parser.parse_items_timed(
+                buffer,
+                &mut statement_data,
+                &mut benchmark.parsers_transaction_parser_start_prime,
+                &mut benchmark.parsers_transaction_parser_stop_prime,
+            );
+            benchmark.parsers_transaction_parser_parse.pause();
         }
         // A parser can signal an unrecoverable config error via usize::MAX, logged
         // into statement_data.errors; stop parsing early in that case.
@@ -75,5 +121,6 @@ pub fn parse_text_items(config: &StatementConfig, text_items: &[TextItem]) -> St
         }
     }
 
+    statement_data.benchmark = benchmark.clone();
     statement_data
 }

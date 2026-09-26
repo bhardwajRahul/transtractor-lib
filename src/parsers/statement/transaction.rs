@@ -8,6 +8,7 @@ use crate::structs::ProtoTransaction;
 use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItem;
+use crate::structs::benchmark::Timer;
 use regex::Regex;
 use std::collections::HashMap;
 
@@ -79,8 +80,31 @@ impl TransactionParser {
     }
 
     pub fn parse_items(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {
+        self.parse_items_inner(items, data, None, None)
+    }
+
+    pub fn parse_items_timed(
+        &mut self,
+        items: &[TextItem],
+        data: &mut StatementData,
+        start_prime_timer: &mut Timer,
+        stop_prime_timer: &mut Timer,
+    ) -> usize {
+        self.parse_items_inner(items, data, Some(start_prime_timer), Some(stop_prime_timer))
+    }
+
+    fn parse_items_inner(
+        &mut self,
+        items: &[TextItem],
+        data: &mut StatementData,
+        start_prime_timer: Option<&mut Timer>,
+        stop_prime_timer: Option<&mut Timer>,
+    ) -> usize {
         // Handle/check for start/stop primers - these are not consumed
-        let start_consumed = self.start_primer.parse_items(items);
+        let start_consumed = match start_prime_timer {
+            Some(timer) => self.start_primer.parse_items_timed(items, timer),
+            None => self.start_primer.parse_items(items),
+        };
         if start_consumed > 0 {
             if self.start_date_required && data.start_date().is_none() {
                 data.add_error(
@@ -93,7 +117,10 @@ impl TransactionParser {
             self.date_parser_newline.set_start_date_year(data);
         }
 
-        self.stop_primer.parse_items(items);
+        match stop_prime_timer {
+            Some(timer) => self.stop_primer.parse_items_timed(items, timer),
+            None => self.stop_primer.parse_items(items),
+        };
         if !self.start_primer.primed || self.stop_primer.primed {
             if self.stop_primer.primed {
                 self.merge_stray_into_last(data);

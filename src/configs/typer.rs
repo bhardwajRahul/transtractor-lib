@@ -1,3 +1,4 @@
+use crate::structs::Benchmark;
 use crate::structs::TextItem;
 use crate::structs::text_items::tokenise_items;
 use std::collections::{HashMap, HashSet};
@@ -53,6 +54,24 @@ impl StatementTyper {
     /// Return a list of config keys whose account_terms are all found in the provided text items.
     pub fn identify(&self, text_items: &Vec<TextItem>) -> Vec<String> {
         let tokenised_items = tokenise_items(text_items);
+        self.identify_tokenised(&tokenised_items)
+    }
+
+    pub fn identify_with_benchmark(
+        &self,
+        text_items: &Vec<TextItem>,
+        benchmark: &mut Benchmark,
+    ) -> Vec<String> {
+        benchmark.tokeniser.start();
+        let tokenised_items = tokenise_items(text_items);
+        benchmark.tokeniser.pause();
+        benchmark.typer.start();
+        let keys = self.identify_tokenised(&tokenised_items);
+        benchmark.typer.pause();
+        keys
+    }
+
+    fn identify_tokenised(&self, tokenised_items: &[TextItem]) -> Vec<String> {
         // Incremented for each found term found for a key
         let mut matches_by_key: HashMap<String, usize> = HashMap::new();
         // Lookup set of account_terms already encountered, to prevent double counting

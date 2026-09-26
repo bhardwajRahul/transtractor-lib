@@ -1,4 +1,5 @@
 use crate::parsers::primed::PrimedDateParser;
+use crate::structs::benchmark::Timer;
 use crate::structs::{StatementConfig, StatementData, TextItem};
 
 pub struct StartDateParser {
@@ -26,13 +27,28 @@ impl StartDateParser {
 
     pub fn parse_items(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {
         let consumed = self.parser.parse_items(items);
+        self.update_data(consumed, data);
+        consumed
+    }
+
+    pub fn parse_items_timed(
+        &mut self,
+        items: &[TextItem],
+        data: &mut StatementData,
+        prime_timer: &mut Timer,
+    ) -> usize {
+        let consumed = self.parser.parse_items_timed(items, prime_timer);
+        self.update_data(consumed, data);
+        consumed
+    }
+
+    fn update_data(&self, consumed: usize, data: &mut StatementData) {
         if consumed > 0
             && let Some(value) = self.parser.value()
             && data.start_date().is_none()
         {
             data.set_start_date(value);
         }
-        consumed
     }
 
     pub fn get_max_lookahead(&self) -> usize {

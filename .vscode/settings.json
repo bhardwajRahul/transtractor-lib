@@ -67,6 +67,7 @@
         "transtractorjs",
         "tokenise",
         "tokenised",
+        "tokeniser",
         "transtractor",
         "vitest",
         "wasmbindgen",

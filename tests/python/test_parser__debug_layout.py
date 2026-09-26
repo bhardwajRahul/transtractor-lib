@@ -8,6 +8,22 @@ from transtractor import ParseError
 from transtractor.parser import Parser
 
 
+def normalise_benchmark_timings(content: str) -> str:
+    in_benchmark = False
+    normalized = []
+    for line in content.replace("\r\n", "\n").splitlines():
+        if line == "  Benchmark (microseconds):":
+            in_benchmark = True
+            normalized.append(line)
+        elif in_benchmark and line.startswith("    ") and ": " in line:
+            label, _ = line.split(": ", maxsplit=1)
+            normalized.append(f"{label}: <TIMING>")
+        else:
+            in_benchmark = False
+            normalized.append(line)
+    return "\n".join(normalized) + "\n"
+
+
 def test_debug_layout_generates_correct_output():
     """Test that debug_layout for test1_layout.txt generates output matching
     test1_debug_layout.txt."""
@@ -35,7 +51,9 @@ def test_debug_layout_generates_correct_output():
             expected_content = expected.read()
 
         # Compare content
-        assert generated_content == expected_content, (
+        assert normalise_benchmark_timings(
+            generated_content
+        ) == normalise_benchmark_timings(expected_content), (
             "Debug output mismatch:\n"
             f"Generated length: {len(generated_content)}\n"
             f"Expected length: {len(expected_content)}"

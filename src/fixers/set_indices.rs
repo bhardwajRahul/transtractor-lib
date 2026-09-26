@@ -60,6 +60,7 @@ mod tests {
             start_date_year: None,
             key: None,
             errors: Vec::new(),
+            benchmark: Default::default(),
         };
 
         fix_set_indices(&mut sd);
@@ -77,6 +78,7 @@ mod tests {
             start_date_year: None,
             key: None,
             errors: Vec::new(),
+            benchmark: Default::default(),
         };
 
         fix_set_indices(&mut sd);
@@ -98,6 +100,7 @@ mod tests {
             start_date_year: None,
             key: None,
             errors: Vec::new(),
+            benchmark: Default::default(),
         };
 
         fix_set_indices(&mut sd);
@@ -125,6 +128,7 @@ mod tests {
             start_date_year: None,
             key: None,
             errors: Vec::new(),
+            benchmark: Default::default(),
         };
 
         fix_set_indices(&mut sd);
@@ -162,6 +166,7 @@ mod tests {
             start_date_year: None,
             key: None,
             errors: Vec::new(),
+            benchmark: Default::default(),
         };
 
         fix_set_indices(&mut sd);

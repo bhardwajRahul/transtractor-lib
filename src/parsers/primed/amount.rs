@@ -1,6 +1,7 @@
 use crate::parsers::base::AmountParser;
 use crate::parsers::base::ParserPrimer;
 use crate::structs::TextItem;
+use crate::structs::benchmark::Timer;
 
 pub struct PrimedAmountParser {
     primer_parser: ParserPrimer,
@@ -29,6 +30,14 @@ impl PrimedAmountParser {
     }
 
     pub fn parse_items(&mut self, items: &[TextItem]) -> usize {
+        self.parse_items_inner(items, None)
+    }
+
+    pub fn parse_items_timed(&mut self, items: &[TextItem], prime_timer: &mut Timer) -> usize {
+        self.parse_items_inner(items, Some(prime_timer))
+    }
+
+    fn parse_items_inner(&mut self, items: &[TextItem], prime_timer: Option<&mut Timer>) -> usize {
         // No items to parse
         if items.is_empty() {
             return 0;
@@ -41,7 +50,10 @@ impl PrimedAmountParser {
 
         // Try to prime (if not already primed)
         if !self.primer_parser.primed {
-            return self.primer_parser.parse_items(items);
+            return match prime_timer {
+                Some(timer) => self.primer_parser.parse_items_timed(items, timer),
+                None => self.primer_parser.parse_items(items),
+            };
         }
 
         // Must be primed to look for amount

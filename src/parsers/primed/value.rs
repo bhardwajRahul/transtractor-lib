@@ -1,6 +1,7 @@
 use crate::parsers::base::ParserPrimer;
 use crate::parsers::base::ValueParser;
 use crate::structs::TextItem;
+use crate::structs::benchmark::Timer;
 use regex::Regex;
 
 pub struct PrimedValueParser {
@@ -27,6 +28,14 @@ impl PrimedValueParser {
     }
 
     pub fn parse_items(&mut self, items: &[TextItem]) -> usize {
+        self.parse_items_inner(items, None)
+    }
+
+    pub fn parse_items_timed(&mut self, items: &[TextItem], prime_timer: &mut Timer) -> usize {
+        self.parse_items_inner(items, Some(prime_timer))
+    }
+
+    fn parse_items_inner(&mut self, items: &[TextItem], prime_timer: Option<&mut Timer>) -> usize {
         // No items to parse
         if items.is_empty() {
             return 0;
@@ -38,7 +47,10 @@ impl PrimedValueParser {
         }
 
         // Primer not primed, or re-prime if term found again
-        let consumed_primer = self.primer_parser.parse_items(items);
+        let consumed_primer = match prime_timer {
+            Some(timer) => self.primer_parser.parse_items_timed(items, timer),
+            None => self.primer_parser.parse_items(items),
+        };
         if consumed_primer > 0 {
             return consumed_primer;
         }

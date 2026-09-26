@@ -1,12 +1,12 @@
 use crate::configs::db::ConfigDB;
 use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
-use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
+use crate::parsers::flows::text_items_to_debug::text_items_to_debug_with_benchmark;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
-use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data;
+use crate::parsers::flows::text_items_to_statement_data::text_items_to_statement_data_with_benchmark;
 use crate::python::exceptions::{ConfigLoadError, ParseError, SpecError};
 use crate::python::utils;
-use crate::structs::{Spec, TextItem};
+use crate::structs::{Benchmark, Spec, TextItem};
 use pdfsink_rs::PdfDocument;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
@@ -98,10 +98,15 @@ impl LibParser {
         &self,
         py_layout_path: &Bound<'_, PyAny>,
     ) -> PyResult<Py<PyAny>> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let py_layout_str = file_to_str(py_layout_path)?;
         let text_items = layout_to_text_items(&py_layout_str).map_err(PyRuntimeError::new_err)?;
+        benchmark.pdf_extractor.pause();
         let data =
-            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
+            text_items_to_statement_data_with_benchmark(&self.db, &text_items, &mut benchmark)
+                .map_err(ParseError::new_err)?;
         utils::rust_statement_data_to_py_statement_data(&data)
     }
 
@@ -122,8 +127,13 @@ impl LibParser {
         py_pdf_path: &Bound<'_, PyAny>,
         py_debug_path: &Bound<'_, PyAny>,
     ) -> PyResult<()> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
-        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &text_items, &mut benchmark)
+            .map_err(ParseError::new_err)?;
         str_to_file(debug_str, py_debug_path)
     }
 
@@ -133,9 +143,14 @@ impl LibParser {
         py_layout_path: &Bound<'_, PyAny>,
         py_debug_path: &Bound<'_, PyAny>,
     ) -> PyResult<()> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let py_layout_str = file_to_str(py_layout_path)?;
         let text_items = layout_to_text_items(&py_layout_str).map_err(PyRuntimeError::new_err)?;
-        let debug_str = text_items_to_debug(&self.db, &text_items).map_err(ParseError::new_err)?;
+        benchmark.pdf_extractor.pause();
+        let debug_str = text_items_to_debug_with_benchmark(&self.db, &text_items, &mut benchmark)
+            .map_err(ParseError::new_err)?;
         str_to_file(debug_str, py_debug_path)
     }
 
@@ -144,9 +159,14 @@ impl LibParser {
         &self,
         py_pdf_path: &Bound<'_, PyAny>,
     ) -> PyResult<Py<PyAny>> {
+        let mut benchmark = Benchmark::new();
+        benchmark.total.start();
+        benchmark.pdf_extractor.start();
         let text_items = py_pdf_path_to_text_items(py_pdf_path)?;
+        benchmark.pdf_extractor.pause();
         let data =
-            text_items_to_statement_data(&self.db, &text_items).map_err(ParseError::new_err)?;
+            text_items_to_statement_data_with_benchmark(&self.db, &text_items, &mut benchmark)
+                .map_err(ParseError::new_err)?;
         utils::rust_statement_data_to_py_statement_data(&data)
     }
 

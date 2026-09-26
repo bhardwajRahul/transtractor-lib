@@ -3,6 +3,7 @@ use crate::configs::typer::StatementTyper;
 use crate::parsers::flows::config_json_file_to_config::from_json_file;
 use crate::parsers::flows::config_json_file_to_config::from_json_str;
 use crate::parsers::flows::config_json_file_to_config::from_json_str_with_deprecations;
+use crate::structs::Benchmark;
 use crate::structs::StatementConfig;
 use crate::structs::TextItem;
 use std::collections::HashMap;
@@ -70,6 +71,19 @@ impl ConfigDB {
     /// of StatementConfig instances.
     pub fn identify(&self, text_items: &Vec<TextItem>) -> Vec<StatementConfig> {
         let keys = self.typer.identify(text_items);
+        self.configs_for_keys(keys)
+    }
+
+    pub fn identify_with_benchmark(
+        &self,
+        text_items: &Vec<TextItem>,
+        benchmark: &mut Benchmark,
+    ) -> Vec<StatementConfig> {
+        let keys = self.typer.identify_with_benchmark(text_items, benchmark);
+        self.configs_for_keys(keys)
+    }
+
+    fn configs_for_keys(&self, keys: Vec<String>) -> Vec<StatementConfig> {
         let mut applicable_configs = Vec::new();
         for key in keys {
             if let Some(cfg) = self.configs.get(&key) {
