@@ -33,6 +33,7 @@ pub fn get_valid_formats() -> Vec<&'static str> {
 /// Dispatcher for multiple amount formats.
 pub struct MultiAmountFormatParser {
     parsers: Vec<Box<dyn AmountFormat>>,
+    item_counts: Vec<usize>,
 }
 
 impl MultiAmountFormatParser {
@@ -73,7 +74,16 @@ impl MultiAmountFormatParser {
                 _ => {}
             }
         }
-        MultiAmountFormatParser { parsers }
+        let mut item_counts = parsers
+            .iter()
+            .map(|parser| parser.num_items())
+            .collect::<Vec<_>>();
+        item_counts.sort_unstable_by(|left, right| right.cmp(left));
+        item_counts.dedup();
+        MultiAmountFormatParser {
+            parsers,
+            item_counts,
+        }
     }
 
     /// Try parsing with each format in order, returning the first successful result.
@@ -88,11 +98,12 @@ impl MultiAmountFormatParser {
 
     /// Get the maximum number of items among the included formats.
     pub fn max_items(&self) -> usize {
-        self.parsers
-            .iter()
-            .map(|p| p.num_items())
-            .max()
-            .unwrap_or(0)
+        self.item_counts.first().copied().unwrap_or(0)
+    }
+
+    /// Return distinct supported item counts, largest first.
+    pub fn item_counts(&self) -> &[usize] {
+        &self.item_counts
     }
 }
 

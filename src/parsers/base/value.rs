@@ -9,6 +9,8 @@ pub struct ValueParser {
     pub text_item: Option<TextItem>,
     /// TRegex patterns to match against
     pub patterns: Vec<Regex>,
+    /// Supported candidate item counts, largest first
+    item_counts: Vec<usize>,
     /// Number of space-delimited items in the longest regex pattern
     pub max_lookahead: usize,
 }
@@ -18,19 +20,21 @@ impl ValueParser {
     /// The max_lookahead is automatically calculated from the patterns by counting
     /// the number of whitespace-separated terms each pattern expects.
     pub fn new(patterns: &[Regex]) -> Self {
-        let max_lookahead = Self::calculate_max_lookahead(patterns);
+        let item_counts = Self::calculate_item_counts(patterns);
+        let max_lookahead = item_counts.first().copied().unwrap_or(1);
         ValueParser {
             value: None,
             text_item: None,
             patterns: patterns.to_vec(),
+            item_counts,
             max_lookahead,
         }
     }
 
     /// Calculate the maximum lookahead from regex patterns by estimating
     /// the number of whitespace-separated terms expected.
-    fn calculate_max_lookahead(patterns: &[Regex]) -> usize {
-        patterns
+    fn calculate_item_counts(patterns: &[Regex]) -> Vec<usize> {
+        let mut item_counts = patterns
             .iter()
             .map(|p| {
                 let pattern_str = p.as_str();
@@ -41,8 +45,13 @@ impl ValueParser {
                 // Use at least 1 as minimum lookahead
                 (separator_count + 1).max(1)
             })
-            .max()
-            .unwrap_or(1)
+            .collect::<Vec<_>>();
+        item_counts.sort_unstable_by(|left, right| right.cmp(left));
+        item_counts.dedup();
+        if item_counts.is_empty() {
+            item_counts.push(1);
+        }
+        item_counts
     }
 
     /// Get text item, raise error if none
@@ -57,8 +66,12 @@ impl ValueParser {
             return 0;
         }
         // Try longest first, then shorter
-        let max = usize::min(self.max_lookahead, items.len());
-        for i in (1..=max).rev() {
+        for i in self
+            .item_counts
+            .iter()
+            .copied()
+            .filter(|count| *count <= items.len())
+        {
             if let Some(curr_item) = TextItem::from_items(&items[0..i]) {
                 let curr_text = &curr_item.text;
                 if self.patterns.iter().any(|p| p.is_match(curr_text)) {
@@ -93,6 +106,17 @@ mod tests {
         assert!(parser.value.is_none());
         assert!(parser.text_item.is_none());
         assert_eq!(parser.max_lookahead, 1); // Single token pattern
+    }
+
+    #[test]
+    fn test_item_counts_are_distinct_and_descending() {
+        let patterns = vec![
+            Regex::new(r"\d+\s+\d+\s+\d+").unwrap(),
+            Regex::new(r"\d+\s+\d+").unwrap(),
+            Regex::new(r"\d+").unwrap(),
+        ];
+        let parser = ValueParser::new(&patterns);
+        assert_eq!(parser.item_counts, vec![3, 2, 1]);
     }
 
     #[test]

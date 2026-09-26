@@ -8,6 +8,8 @@ pub struct ParserPrimer {
     pub text_item: Option<TextItem>,
     /// The set of terms to match against (lowercase)
     pub terms: Vec<String>,
+    /// Distinct supported whitespace-term counts, largest first
+    item_counts: Vec<usize>,
     /// Number of space-delimited items in the longest term
     pub max_lookahead: usize,
     /// Number of times a term must be encountered before the parser is considered primed
@@ -18,15 +20,23 @@ impl ParserPrimer {
     /// Create a new ParserPrimer with specified terms
     pub fn new(terms: &[&str], trigger_count: usize) -> Self {
         let terms_vec: Vec<String> = terms.iter().map(|t| t.to_string()).collect();
+        let mut item_counts = terms_vec
+            .iter()
+            .map(|term| term.split_whitespace().count())
+            .filter(|count| *count > 0)
+            .collect::<Vec<_>>();
+        item_counts.sort_unstable_by(|left, right| right.cmp(left));
+        item_counts.dedup();
         let max_lookahead = terms_vec
             .iter()
-            .map(|t| t.split(' ').count())
+            .map(|term| term.split_whitespace().count())
             .max()
             .unwrap_or(0);
         let mut parser = ParserPrimer {
             primed: false,
             text_item: None,
             terms: terms_vec,
+            item_counts,
             max_lookahead,
             trigger_count,
         };
@@ -51,8 +61,10 @@ impl ParserPrimer {
             return 0; // Already primed
         }
         // Try longest first, then shorter
-        let max = usize::min(self.max_lookahead, items.len());
-        for i in (1..=max).rev() {
+        for term_count in &self.item_counts {
+            let Some(i) = items_for_term_count(items, *term_count) else {
+                continue;
+            };
             if let Some(curr_item) = TextItem::from_items(&items[0..i]) {
                 let curr_text = &curr_item.text;
                 if self.terms.iter().any(|t| t == curr_text) {
@@ -73,6 +85,20 @@ impl ParserPrimer {
         self.primed = false;
         self.text_item = None;
     }
+}
+
+fn items_for_term_count(items: &[TextItem], term_count: usize) -> Option<usize> {
+    let mut accumulated_terms = 0;
+    for (index, item) in items.iter().enumerate() {
+        accumulated_terms += item.text.split_whitespace().count();
+        if accumulated_terms == term_count {
+            return Some(index + 1);
+        }
+        if accumulated_terms > term_count {
+            return None;
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -100,6 +126,12 @@ mod tests {
         assert_eq!(consumed, 1);
         assert!(parser.primed);
         assert_eq!(parser.text_item.as_ref().unwrap().text, "hello");
+    }
+
+    #[test]
+    fn test_item_counts_are_distinct_and_descending() {
+        let parser = ParserPrimer::new(&["hello", "good morning", "very good morning"], 1);
+        assert_eq!(parser.item_counts, vec![3, 2, 1]);
     }
 
     #[test]

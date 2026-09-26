@@ -98,6 +98,7 @@ impl DateParts {
 /// Dispatcher for multiple date formats.
 pub struct MultiDateFormatParser {
     parsers: Vec<Box<dyn DateFormat>>,
+    item_counts: Vec<usize>,
 }
 
 impl MultiDateFormatParser {
@@ -154,7 +155,16 @@ impl MultiDateFormatParser {
                 _ => {}
             }
         }
-        MultiDateFormatParser { parsers }
+        let mut item_counts = parsers
+            .iter()
+            .map(|parser| parser.num_items())
+            .collect::<Vec<_>>();
+        item_counts.sort_unstable_by(|left, right| right.cmp(left));
+        item_counts.dedup();
+        MultiDateFormatParser {
+            parsers,
+            item_counts,
+        }
     }
 
     /// Try parsing with each format in order, returning the first successful result.
@@ -169,11 +179,12 @@ impl MultiDateFormatParser {
 
     /// Returns the maximum number of items among all formats.
     pub fn max_items(&self) -> usize {
-        self.parsers
-            .iter()
-            .map(|p| p.num_items())
-            .max()
-            .unwrap_or(0)
+        self.item_counts.first().copied().unwrap_or(0)
+    }
+
+    /// Return distinct supported item counts, largest first.
+    pub fn item_counts(&self) -> &[usize] {
+        &self.item_counts
     }
 }
 

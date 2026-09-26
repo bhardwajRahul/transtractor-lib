@@ -7,6 +7,8 @@ pub struct DateParser {
     pub value: Option<i64>,
     /// Dispatcher for multiple date formats
     pub parser: MultiDateFormatParser,
+    /// Supported candidate whitespace-term counts, largest first
+    item_counts: Vec<usize>,
     /// Maximum number of space-delimited items in the selected formats
     pub max_lookahead: usize,
     /// A copy of the last successfully parsed text item (merged text)
@@ -18,9 +20,11 @@ impl DateParser {
     pub fn new(format_names: &[&str]) -> Self {
         let parser = MultiDateFormatParser::new(format_names);
         let max_lookahead = parser.max_items();
+        let item_counts = parser.item_counts().to_vec();
         DateParser {
             value: None,
             parser,
+            item_counts,
             max_lookahead,
             text_item: None,
         }
@@ -39,15 +43,16 @@ impl DateParser {
             return 0;
         }
         // Try longest first, then shorter
-        let max = usize::min(self.max_lookahead, items.len());
-        for i in (1..=max).rev() {
+        for term_count in &self.item_counts {
+            let Some(i) = Self::items_for_term_count(items, *term_count) else {
+                continue;
+            };
             let merged = items[0..i]
                 .iter()
                 .map(|t| t.text.as_str())
                 .collect::<Vec<_>>()
                 .join(" ");
-            let num_items = merged.split_whitespace().count();
-            if let Some(val) = self.parser.parse(&merged, year_str, num_items) {
+            if let Some(val) = self.parser.parse(&merged, year_str, *term_count) {
                 self.value = Some(val);
                 self.text_item = Some(TextItem {
                     text: merged,
@@ -57,6 +62,20 @@ impl DateParser {
             }
         }
         0
+    }
+
+    fn items_for_term_count(items: &[TextItem], term_count: usize) -> Option<usize> {
+        let mut accumulated_terms = 0;
+        for (index, item) in items.iter().enumerate() {
+            accumulated_terms += item.text.split_whitespace().count();
+            if accumulated_terms == term_count {
+                return Some(index + 1);
+            }
+            if accumulated_terms > term_count {
+                return None;
+            }
+        }
+        None
     }
 }
 
@@ -83,6 +102,12 @@ mod tests {
         assert_eq!(consumed, 1);
         assert!(parser.value.is_some());
         assert_eq!(parser.text_item.as_ref().unwrap().text, "24 mar");
+    }
+
+    #[test]
+    fn test_item_counts_are_distinct_and_descending() {
+        let parser = DateParser::new(&["format1", "format2", "format10"]);
+        assert_eq!(parser.item_counts, vec![3, 2]);
     }
 
     #[test]

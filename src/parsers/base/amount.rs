@@ -6,6 +6,8 @@ pub struct AmountParser {
     pub value: Option<f64>,
     /// Dispatcher for multiple amount formats
     pub parser: MultiAmountFormatParser,
+    /// Supported candidate item counts, largest first
+    item_counts: Vec<usize>,
     /// Maximum number of space-delimited items in the selected formats
     pub max_lookahead: usize,
     /// A copy of the last successfully parsed text item
@@ -17,9 +19,11 @@ impl AmountParser {
     pub fn new(format_names: &[&str]) -> Self {
         let parser = MultiAmountFormatParser::new(format_names);
         let max_lookahead = parser.max_items();
+        let item_counts = parser.item_counts().to_vec();
         AmountParser {
             value: None,
             parser,
+            item_counts,
             max_lookahead,
             text_item: None,
         }
@@ -43,8 +47,12 @@ impl AmountParser {
             return 0;
         }
         // Try longest first, then shorter
-        let max = usize::min(self.max_lookahead, items.len());
-        for i in (1..=max).rev() {
+        for i in self
+            .item_counts
+            .iter()
+            .copied()
+            .filter(|count| *count <= items.len())
+        {
             if let Some(curr_item) = TextItem::from_items(&items[0..i])
                 && let Some(val) = self.parser.parse(&curr_item.text, i)
             {
@@ -91,6 +99,12 @@ mod tests {
         assert_eq!(consumed, 1);
         assert_eq!(parser.value, Some(1234.56));
         assert_eq!(parser.text_item.as_ref().unwrap().text, "1,234.56");
+    }
+
+    #[test]
+    fn test_item_counts_are_distinct_and_descending() {
+        let parser = AmountParser::new(&["format1", "format3", "format5"]);
+        assert_eq!(parser.item_counts, vec![2, 1]);
     }
 
     #[test]
