@@ -137,55 +137,23 @@ fn validate_spec_file_name(spec_path: &Path, spec: &Spec) -> Result<(), String> 
     Ok(())
 }
 
-#[test]
-fn all_spec_files_valid() {
-    let spec_files = collect_spec_files();
-
+fn validate_spec_file(spec_path: &str) {
+    let spec_path = Path::new(spec_path);
     let config_db = ConfigDB::new();
-    let mut failures = Vec::new();
-
-    for spec_path in spec_files {
-        let spec_content = match fs::read_to_string(&spec_path) {
-            Ok(content) => content,
-            Err(error) => {
-                failures.push(format!(
-                    "{}: failed to read file: {}",
-                    spec_path.display(),
-                    error
-                ));
-                continue;
-            }
-        };
-
-        let spec = match Spec::from_json(&spec_content) {
-            Ok(spec) => spec,
-            Err(error) => {
-                failures.push(format!(
-                    "{}: failed to parse JSON spec: {}",
-                    spec_path.display(),
-                    error
-                ));
-                continue;
-            }
-        };
-
-        if let Err(error) = validate_spec_file_name(&spec_path, &spec) {
-            failures.push(error);
-            continue;
-        }
-
-        if let Err(error) = spec.validate(&config_db) {
-            failures.push(format!("{}:\n{}", spec_path.display(), error));
-        }
-    }
-
-    assert!(
-        failures.is_empty(),
-        "{} spec validation failure(s):\n\n{}",
-        failures.len(),
-        failures.join("\n\n")
-    );
+    let spec_content = fs::read_to_string(spec_path)
+        .unwrap_or_else(|error| panic!("{}: failed to read file: {error}", spec_path.display()));
+    let spec = Spec::from_json(&spec_content).unwrap_or_else(|error| {
+        panic!(
+            "{}: failed to parse JSON spec: {error}",
+            spec_path.display()
+        )
+    });
+    validate_spec_file_name(spec_path, &spec).unwrap_or_else(|error| panic!("{error}"));
+    spec.validate(&config_db)
+        .unwrap_or_else(|error| panic!("{}:\n{error}", spec_path.display()));
 }
+
+include!(concat!(env!("OUT_DIR"), "/spec_tests.rs"));
 
 #[test]
 fn every_registered_config_has_a_spec_file() {
